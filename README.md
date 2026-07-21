@@ -107,7 +107,7 @@ bass.getChordNotes(chordName)
 /*
 	Return notes for a musical chord
 	
-	Example: bass.getChordNotes('B/F') returns [['E','G#','B'],"F"]
+	Example: bass.getChordNotes('G/F') returns [['G','B','D'],"F"]
 */
 ```
 
@@ -125,6 +125,6 @@ audiosynth.js library for playback from keithwhor (https://github.com/keithwhor/
 Contact
 -------
 
-Feel free to email me at: (listed in manual section V in demo website)
+Feel free to email me at: (listed in manual section V, demo website)
 
 Or X/Twitter: @soccer8746 (The Music)
