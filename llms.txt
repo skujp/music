@@ -1,0 +1,7 @@
+# PROJECT: BASS
+
+A music sequencer library to help learn rhythms, chords, and basic compositions. 
+
+## Documentation
+- [Getting Started](https://skujp.github.io/music)
+- [API Reference](https://github.com/skujp/music)

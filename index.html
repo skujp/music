@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Exploring BASS : a musical language to learn chords, rythms, and compositions">
+    <meta http-equiv="Cache-Control" content="must-revalidate, max-age=43200">
+    <title>BASS | learns | to | chord |</title>
+    <style>.oops-container{position:fixed;top:20px;right:20px;z-index:9999}.oops{padding:12px 20px;margin-bottom:10px;border-radius:4px;color:#fff;font-weight:500;opacity:0;transition:opacity .3s ease}.oops-show{opacity:1}.oops-success{background-color:#1e7e34}.oops-info{background-color:#0c3658}.oops-warning{background-color:#b17214}.oops-error{background-color:#9c809c}</style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="container">
+
+        <h2>| BASS :|</h2>
+        <h3>is the musical language</h3>
+
+        <textarea class="sheet-area" 
+                placeholder="| Use the BASS notation system to compose your music here |" 
+                id="sheetMusic">
+        </textarea>
+
+        <div class="controls">
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="stopBtn">Stop</button>
+            <button class="control-btn" id="readBtn">Read</button>
+        </div>
+
+        <div class="piano-container" id="piano">
+            <div class="white-key-wrapper">
+                <div class="white-key" id="cNote">C</div>
+                <div class="black-key" id="cSNote"></div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="dNote">D</div>
+                <div class="black-key" id="dSNote"></div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="eNote">E</div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="fNote">F</div>
+                <div class="black-key" id="fSNote"></div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="gNote">G</div>
+                <div class="black-key" id="gSNote"></div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="aNote">A</div>
+                <div class="black-key" id="aSNote"></div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="bNote">B</div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="cNote1">C</div>
+                <div class="black-key" id="cSNote1"></div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="dNote1">D</div>
+                <div class="black-key" id="dSNote1"></div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="eNote1">E</div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="fNote1">F</div>
+                <div class="black-key" id="fSNote1"></div>
+            </div>
+
+            <div class="white-key-wrapper">
+                <div class="white-key" id="gNote1">G</div>
+            </div>
+        </div>
+        
+        <div class="guitar-container" id="acoustic">
+            <div class="guitar">
+                <div class="neck-system">
+                    <div class="neck">
+                        <div class="fret"></div>
+                        <div class="fret" id="f1">1</div>
+                        <div class="fret" id="f2">2</div>
+                        <div class="fret" id="f3">3</div>
+                        <div class="fret" id="f4">4</div>
+                        <div class="fret" id="f5">5</div>
+                        <div class="fret"></div>
+                    </div>
+
+                    <div class="strings-overlay">
+                        <div class="string string-6" id="s6">E</div> <!-- lower E -->
+                        <div class="string string-5" id="s5">A</div> <!-- A -->
+                        <div class="string string-4" id="s4">D</div> <!-- D -->
+                        <div class="string string-3" id="s3">G</div> <!-- G -->
+                        <div class="string string-2" id="s2">B</div> <!-- B -->
+                        <div class="string string-1" id="s1">E</div> <!-- higher E -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="piano-controls emoticon-font">
+            <button class="piano-btn piano-btn-override" id="minusBtn" aria-label="Multipurpose Minus Button">➖</button>
+            <button class="piano-btn piano-btn-override" id="rotateBtn" aria-label="Rotate Musical Instrument Button">🎹</button>
+            <button class="piano-btn piano-btn-override" id="plusBtn"  aria-label="Multipurpose Plus Button">➕</button>
+        </div>
+
+        <div class="database-section" id="bassboard">
+            <h3>BASSBOARD TOP 100</h3>
+            <input type="text" class="song-search" placeholder="Search sheet music or contributors" aria-label="Search sheet music or contributors" name="song-search"/>
+            <ul class="song-list" id="songList">
+                <li class="song-item">
+                </li>
+            </ul>
+        </div> 
+    </main>
+    
+    <script src="audiosynth.js"></script>
+    <script src="bass.js"></script>
+    <script src="events.js"></script>
+</body>
+</html>
