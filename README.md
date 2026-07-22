@@ -79,7 +79,7 @@ var the_bass = bass.rename();
 To play a chord...
 
 ```javascript
-bass.playChord(chordName)
+bass.playChord(chordName, octave, duration)
 
 /*
 	Play a musical chord
@@ -88,7 +88,16 @@ bass.playChord(chordName)
 		any of the following chords are supported:
 		m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 /
 	
-	Example: bass.playChord('Gmaj7')
+	octave
+		an integer number between 0 - 8,
+		by default it is set to 4 like middle C in a standard piano
+	
+	duration
+		in seconds,
+		by default it is set to 1
+
+	Example: bass.playChord('Gmaj7') or bass.playChord('Gmaj7',4,1)
+ 
 */
 ```
 
@@ -107,7 +116,7 @@ bass.getChordNotes(chordName)
 To play a note...
 
 ```javascript
-bass.playNote(noteName)
+bass.playNote(noteName, octave, duration, volume)
 
 /*
 	Play a musical note
@@ -116,7 +125,18 @@ bass.playNote(noteName)
 		one of the following 12 notes in a standard musical scale:
 		C C#/Db D D#/Eb E F F#/Gb G G#/Ab A A#/Bb B 
 	
-	Example: bass.playNote('Gb')
+	octave
+		see above
+
+	duration
+		see above
+
+	volume
+		a float number between 0.001 and 1
+		1 is maximum volume (100%)
+		0.001 is minimum volume (~0%)
+
+	Example: bass.playNote('Gb') or bass.playNote('Gb', 4, 1, 1);
 */
 ```
 
