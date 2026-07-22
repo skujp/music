@@ -1,5 +1,5 @@
-BASS.js
-====
+bass.js
+=======
 
 A music sequencer library, written in javascript.
 
@@ -13,16 +13,9 @@ https://skujp.github.io/music
 Installation
 ------------
 
-For processing, `bass.js` only is sufficient.
-
-For playback, an external library is required, such as the *modified* `audiosynth.js` library.
-
-Playback is currently limited to playing chords in the bass clef.
-
-After downloading both files from this repository, include the following in your html document...
+Download `bass.js` file from this repository, then include the following in your html document...
 
 ```html
-<script src="audiosynth.js"></script>
 <script src="bass.js"></script>
 ```
 
@@ -111,16 +104,27 @@ bass.getChordNotes(chordName)
 */
 ```
 
+To play a note...
+
+```javascript
+bass.playNote(noteName)
+
+/*
+	Play a musical note
+
+	noteName
+		one of the following 12 notes in a standard musical scale:
+		C C#/Db D D#/Eb E F F#/Gb G G#/Ab A A#/Bb B 
+	
+	Example: bass.playNote('Gb')
+*/
+```
+
 To turn on debugging...
 
 ```javascript
 bass.setDebug(true)
 ```
-
-Acknowledgement
----------------
-
-audiosynth.js library for playback from keithwhor (https://github.com/keithwhor/audiosynth)
 
 Contact
 -------

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const VERSION = "1.0.0";
+    const VERSION = "2.0.0";
 
     // check if bass has been loaded
     if (typeof bass === "undefined") {
@@ -12,9 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const oops = bass.oops;
 
     // treble clef raise octave compared to bass clef
-    var UP1 = 1;
+    var UP1 = 0;
     const MAXUP = 9;
     const MINUP = -9;
+
+    // sustain pedal for treble clef
+    var PED = 0.3;
+
+    // volume for treble clef
+    var TREB_VOL = 0.5;
 
     // literals
     const SHEETMUSIC = 'sheetMusic';
@@ -82,11 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const SONGLIST = 'songList';
     const PAGE_SIZE = 11;
 
-    // external library
-    const SYNTHPROFILE = {};
-    SYNTHPROFILE[PIANO] = 0;
-    SYNTHPROFILE[GUITAR] = 2;
-
     // get id of all the html components
 
     // piano
@@ -140,15 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Initialize sheetMusic
-    try {
-        sheetMusic.value = bass.getSampleTestCase();
-    } catch (exp) {
-        oops(`[EXCEPTION] Make sure to load audiosynth.js before bass.js. Exception: ${exp}`, 'error');
-        return;
-    }    
-
-    // Get instrument
-    var instrument = bass.getInstrument();
+    sheetMusic.value = bass.getSampleTestCase();
+    
 
     // Pointer to the last note of the piano for - + adjustment
     adjustPtr = gNote1;
@@ -212,40 +206,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // PIANO (treble clef) click event listener
-    cNote.addEventListener('click', () => {instrument.play('C',bass.getOctave()+UP1,bass.getDuration())});
-    dNote.addEventListener('click', () => {instrument.play('D',bass.getOctave()+UP1,bass.getDuration())});
-    eNote.addEventListener('click', () => {instrument.play('E',bass.getOctave()+UP1,bass.getDuration())});
-    fNote.addEventListener('click', () => {instrument.play('F',bass.getOctave()+UP1,bass.getDuration())});
-    gNote.addEventListener('click', () => {instrument.play('G',bass.getOctave()+UP1,bass.getDuration())});
-    aNote.addEventListener('click', () => {instrument.play('A',bass.getOctave()+UP1,bass.getDuration())});
-    bNote.addEventListener('click', () => {instrument.play('B',bass.getOctave()+UP1,bass.getDuration())});
+    cNote.addEventListener('click', () => {bass.playNote('C',bass.getOctave()+UP1,PED,TREB_VOL)});
+    dNote.addEventListener('click', () => {bass.playNote('D',bass.getOctave()+UP1,PED,TREB_VOL)});
+    eNote.addEventListener('click', () => {bass.playNote('E',bass.getOctave()+UP1,PED,TREB_VOL)});
+    fNote.addEventListener('click', () => {bass.playNote('F',bass.getOctave()+UP1,PED,TREB_VOL)});
+    gNote.addEventListener('click', () => {bass.playNote('G',bass.getOctave()+UP1,PED,TREB_VOL)});
+    aNote.addEventListener('click', () => {bass.playNote('A',bass.getOctave()+UP1,PED,TREB_VOL)});
+    bNote.addEventListener('click', () => {bass.playNote('B',bass.getOctave()+UP1,PED,TREB_VOL)});
 
-    cSNote.addEventListener('click', () => {instrument.play('C#',bass.getOctave()+UP1,bass.getDuration())});
-    dSNote.addEventListener('click', () => {instrument.play('D#',bass.getOctave()+UP1,bass.getDuration())});
-    fSNote.addEventListener('click', () => {instrument.play('F#',bass.getOctave()+UP1,bass.getDuration())});
-    gSNote.addEventListener('click', () => {instrument.play('G#',bass.getOctave()+UP1,bass.getDuration())});
-    aSNote.addEventListener('click', () => {instrument.play('A#',bass.getOctave()+UP1,bass.getDuration())});
+    cSNote.addEventListener('click', () => {bass.playNote('C#',bass.getOctave()+UP1,PED,TREB_VOL)});
+    dSNote.addEventListener('click', () => {bass.playNote('D#',bass.getOctave()+UP1,PED,TREB_VOL)});
+    fSNote.addEventListener('click', () => {bass.playNote('F#',bass.getOctave()+UP1,PED,TREB_VOL)});
+    gSNote.addEventListener('click', () => {bass.playNote('G#',bass.getOctave()+UP1,PED,TREB_VOL)});
+    aSNote.addEventListener('click', () => {bass.playNote('A#',bass.getOctave()+UP1,PED,TREB_VOL)});
 
-    cNote1.addEventListener('click', () => {instrument.play('C',bass.getOctave()+UP1+1,bass.getDuration())});
-    dNote1.addEventListener('click', () => {instrument.play('D',bass.getOctave()+UP1+1,bass.getDuration())});
-    eNote1.addEventListener('click', () => {instrument.play('E',bass.getOctave()+UP1+1,bass.getDuration())});
-    fNote1.addEventListener('click', () => {instrument.play('F',bass.getOctave()+UP1+1,bass.getDuration())});
-    gNote1.addEventListener('click', () => {instrument.play('G',bass.getOctave()+UP1+1,bass.getDuration())});
+    cNote1.addEventListener('click', () => {bass.playNote('C',bass.getOctave()+UP1+1,PED,TREB_VOL)});
+    dNote1.addEventListener('click', () => {bass.playNote('D',bass.getOctave()+UP1+1,PED,TREB_VOL)});
+    eNote1.addEventListener('click', () => {bass.playNote('E',bass.getOctave()+UP1+1,PED,TREB_VOL)});
+    fNote1.addEventListener('click', () => {bass.playNote('F',bass.getOctave()+UP1+1,PED,TREB_VOL)});
+    gNote1.addEventListener('click', () => {bass.playNote('G',bass.getOctave()+UP1+1,PED,TREB_VOL)});
 
-    cSNote1.addEventListener('click', () => {instrument.play('C#',bass.getOctave()+UP1+1,bass.getDuration())});
-    dSNote1.addEventListener('click', () => {instrument.play('D#',bass.getOctave()+UP1+1,bass.getDuration())});
-    fSNote1.addEventListener('click', () => {instrument.play('F#',bass.getOctave()+UP1+1,bass.getDuration())});
+    cSNote1.addEventListener('click', () => {bass.playNote('C#',bass.getOctave()+UP1+1,PED,TREB_VOL)});
+    dSNote1.addEventListener('click', () => {bass.playNote('D#',bass.getOctave()+UP1+1,PED,TREB_VOL)});
+    fSNote1.addEventListener('click', () => {bass.playNote('F#',bass.getOctave()+UP1+1,PED,TREB_VOL)});
 
     // GUITAR click event listener
     // Standard tuning: E₂, A₂, D₃, G₃, B₃, E₄
     // Direct play using external library
     // Actual octave played depending on current octave set in bass object
-    s6.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(6,fretKeyDown); Synth.play(SYNTHPROFILE[GUITAR],n,bass.getOctave()+UP1+o,bass.getDuration())});      // lower E2, fret#
-    s5.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(5,fretKeyDown); Synth.play(SYNTHPROFILE[GUITAR],n,bass.getOctave()+UP1+o,bass.getDuration())});      // A2, fret#
-    s4.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(4,fretKeyDown); Synth.play(SYNTHPROFILE[GUITAR],n,bass.getOctave()+UP1+1+o,bass.getDuration())});    // D3, fret#
-    s3.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(3,fretKeyDown); Synth.play(SYNTHPROFILE[GUITAR],n,bass.getOctave()+UP1+1+o,bass.getDuration())});    // G3, fret#
-    s2.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(2,fretKeyDown); Synth.play(SYNTHPROFILE[GUITAR],n,bass.getOctave()+UP1+1+o,bass.getDuration())});    // B3, fret#
-    s1.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(1,fretKeyDown); Synth.play(SYNTHPROFILE[GUITAR],n,bass.getOctave()+UP1+2+o,bass.getDuration())});    // higher E4, fret#
+    s6.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(6,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+o,PED,TREB_VOL)});      // lower E2, fret#
+    s5.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(5,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+o,PED,TREB_VOL)});      // A2, fret#
+    s4.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(4,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+1+o,PED,TREB_VOL)});    // D3, fret#
+    s3.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(3,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+1+o,PED,TREB_VOL)});    // G3, fret#
+    s2.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(2,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+1+o,PED,TREB_VOL)});    // B3, fret#
+    s1.addEventListener('click', () => {const [n,o] = bass.getGuitarNote(1,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+2+o,PED,TREB_VOL)});    // higher E4, fret#
 
     // PIANO mapping keys
     const noteKeyMap = {
