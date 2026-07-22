@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isTypingInTextField = (target) => {
       if (!target) return false;
-      const tagName = target.tagName?.toLowerCase();
+      const tagName = target.tagName ? target.tagName.toLowerCase() : undefined;
       return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || target.isContentEditable;
     };
 
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     
       const noteEl = document.getElementById(noteId);
-      noteEl?.classList.remove('active');
+      if (noteEl && noteEl.classList) noteEl.classList.remove('active');
     });
 
     // Minus and Plus Buttons to customize the piano
@@ -559,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const applyFilter = () => {
-        const query = searchInput?.value.trim().toLowerCase() || '';
+        const query = (searchInput && searchInput.value) ? searchInput.value.trim().toLowerCase() : '';
         filteredEntries = allEntries.filter((entry) => {
             const title = (entry.title || '').toLowerCase();
             const contributor = (entry.contributor || '').toLowerCase();
@@ -738,7 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    searchInput?.addEventListener('input', applyFilter);
+    if (searchInput) searchInput.addEventListener('input', applyFilter);
     loadDatabase();
     
     // -------- Refresh page feature, support both local storage and cookies ------ //
