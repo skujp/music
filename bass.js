@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "2.0.0";                                                
+const VERSION = "2.0.1";                                                
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -902,31 +902,63 @@ async function _saveSheetMusicToBASS() {
     }
   }
   const jsonString = JSON.stringify(_sheetMusic, null, 2);
-  try {
-    const options = {
-      suggestedName: `${_sheetMusic.title}_by_${_sheetMusic.contributor}.bass`,
-      types: [{
-        description: 'BASS Music File',
-        accept: {
-          '*/*': ['.bass'] 
-        }
-      }]
-    };
-    const handle = await window.showSaveFilePicker(options);
-    const writable = await handle.createWritable();
-    await writable.write(jsonString);
-    await writable.close();
-    return;
-  } catch (err) {
-    if (err.name === 'AbortError') {
-      const problem = "Save operation was cancelled by the user.";
-      return problem;
-    } else {
-      const problem = `[SaveAs ERROR] ${err.message}`;
+  const filename = `${_sheetMusic.title}_by_${_sheetMusic.contributor}.bass`;
+  if (global === window && 'showSaveFilePicker' in global) {
+    try {
+      const options = {
+        suggestedName: filename,
+        types: [{
+          description: 'BASS Music File',
+          accept: { '*/*': ['.bass'] }
+        }]
+      };
+      const handle = await global.showSaveFilePicker(options);
+      const writable = await handle.createWritable();
+      await writable.write(jsonString);
+      await writable.close();
+      return; 
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        const problem = "Save operation was cancelled by the user.";
+        return problem;
+      }
+      const problem = `showSaveFilePicker failed. Trying Tier 2 fallback...${err}`;
+    }
+  }
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    try {
+      const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+      const dataUri = `data:application/octet-stream;base64,${base64Data}`;
+      const a = document.createElement('a');
+      a.href = dataUri;
+      a.download = filename;
+      a.target = '_blank'; 
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    } catch (iosErr) {
+      const problem = `[SaveAs ERROR] iOS Data URI fallback failed: ${iosErr.message}`;
       return problem;
     }
-    const problem = `there is an exception when invoking _saveSheetMusicToBASS: ${err}`;
-    return problem;
+  } else {
+    try {
+      const blob = new Blob([jsonString], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      return; 
+    } catch (fallbackErr) {
+      const problem = `[SaveAs ERROR] Desktop fallback failed: ${fallbackErr.message}`;
+      return problem;
+    }
   }
 }
 async function _saveSheetMusicToPDF() {
