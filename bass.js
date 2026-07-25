@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "2.0.1";                                                
+const VERSION = "2.0.2";                                                
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -234,7 +234,7 @@ function help() {
     manual += "Please note, a pulse / is different than a slash / in a slash chord." + "\n";
     manual += "For example, A/E means A Major chord with a E at the bass." + "\n";
     manual += "" + "\n";
-    manual += "14. Duplicate %" + "\n";
+    manual += "15. Duplicate %" + "\n";
     manual += "A duplicate % means repeat playing the previous bar." + "\n";
     manual += "For example, | A B C | % || will play A, B, C, A, B, C" + "\n";
     manual += "" + "\n";
