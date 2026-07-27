@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "2.0.2";                                                
+const VERSION = "2.0.3";                                                
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -208,7 +208,7 @@ function help() {
     manual += "11. Tempo" + "\n";
     manual += "Tempo is the speed or pace at which a piece of music is played." + "\n";
     manual += "It is the number of beats per minutes (bpm) set up before " + "\n";
-    manual += `playing the sheet music. In the BASS system, by default bpm is set to ${BPM.val}. ` + "\n";
+    manual += "playing the sheet music. In the BASS system, by default bpm is set to 90. " + "\n";
     manual += "The user can change it manually. See section IV for more details." + "\n";
     manual += "" + "\n";
     manual += "12. Octave" + "\n";
