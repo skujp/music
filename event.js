@@ -3,7 +3,7 @@
 
 function initEvents() {
 
-    const VERSION = "2.1.2";
+    const VERSION = "2.2.0";
 
     // check if bass has been loaded
     if (typeof bass === "undefined") {
