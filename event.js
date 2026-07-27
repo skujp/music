@@ -1,4 +1,6 @@
-const VERSION = "2.1.0";
+document.addEventListener("DOMContentLoaded", () => {
+    
+const VERSION = "2.1.1";
 
 // check if bass has been loaded
 if (typeof bass === "undefined") {
@@ -792,3 +794,5 @@ document.addEventListener('visibilitychange', () => {
         checkPageAge();
     }
 });
+
+}); // end of DOMContentLoaded
