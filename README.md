@@ -151,4 +151,4 @@ Contact
 
 Feel free to email me at: (listed in manual section V, demo website)
 
-Or X/Twitter: @soccer8746 (The Music)
+Or X/Twitter: @bassthemusic101 (The Music 101)
