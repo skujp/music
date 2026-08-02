@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "3.0.1";
+const VERSION = "3.0.2";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -146,7 +146,7 @@ function help() {
     manual += "C7b5 (C Dominant-seventh flat five), Cdim7 (C Fully Diminished)," + "\n";
     manual += "Csus2 (C Suspended 2), Csus4 (C Suspended 4), Cadd9 (C Add 9), " + "\n";
     manual += "C5 (C Power Chord), Cmaj9 (C Major 9), C6 (C Major 6), C9 (C 9), " + "\n";
-    manual += "C/E (C with E in the bass)." + "\n";
+    manual += "C/E (C with E in the bass), Cmaug (C Minor Augmented)." + "\n";
     manual += "" + "\n";
     manual += "3. Sheet Music" + "\n";
     manual += "A sheet music is a written or printed guide for musicians." + "\n";
@@ -370,7 +370,7 @@ function getErrorMsg() {
     return error.msg;
 }
 function getChordNotes(chord=FAKE) {
-    const chordRegex = /^([A-G])(#|b)?(m|maj|min|dim|aug|sus)?(add|maj)?(\d*)?((b)(\d+))?(\/([A-G])(#|b)?)?\s*$/;
+    const chordRegex = /^([A-G])(#|b)?(m|maj|min|dim|aug|sus|maug)?(add|maj)?(\d*)?((b)(\d+))?(\/([A-G])(#|b)?)?\s*$/;
     chord = chord.trim();
     const match = chord.match(chordRegex);
     if (!match) {
@@ -402,6 +402,9 @@ function getChordNotes(chord=FAKE) {
         thirdNoteNumber = (thirdNoteNumber - 1) % OCTAVE_LENGTH || OCTAVE_LENGTH;
         fifthNoteNumber = (fifthNoteNumber - 1) % OCTAVE_LENGTH || OCTAVE_LENGTH;
     } else if (quality === 'aug') {
+        fifthNoteNumber = (fifthNoteNumber + 1) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+    } else if (quality === 'maug') {
+        thirdNoteNumber = (thirdNoteNumber - 1) % OCTAVE_LENGTH || OCTAVE_LENGTH;
         fifthNoteNumber = (fifthNoteNumber + 1) % OCTAVE_LENGTH || OCTAVE_LENGTH;
     }
     if (number === '6') {
