@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "3.0.0";                                                
+const VERSION = "3.0.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -48,9 +48,7 @@ const BPM = {
     },
     set val(v) {
         this._val = v;
-        let target_note_value = 1/beatType;
-        let metronome_note_value = (beatType === 4) ? 0.25 : (beatType === 8 && [6, 9, 12].includes(beats)) ? 0.375 : (1 / beatType);
-        DEF_DURATION = 60 / this._val * (target_note_value / metronome_note_value);
+        DEF_DURATION = 60 / this._val * (beats / beatType);
         DEF_MSEC = DEF_DURATION * 1000;
         error.msg = `reshaking for time signature ${beats}/${beatType} : one note now lasts ${DEF_DURATION} seconds`;
     }
@@ -208,7 +206,8 @@ function help() {
     manual += "11. Tempo" + "\n";
     manual += "Tempo is the speed or pace at which a piece of music is played." + "\n";
     manual += "It is the number of beats per minutes (bpm) set up before " + "\n";
-    manual += "playing the sheet music. In the BASS system, by default bpm is set to 90. " + "\n";
+    manual += "playing the sheet music. In the BASS system, by default bpm is set to 90, " + "\n";
+    manual += "assuming quarter note is in time signature. " + "\n";
     manual += "The user can change it manually. See section IV for more details." + "\n";
     manual += "" + "\n";
     manual += "12. Octave" + "\n";
@@ -333,7 +332,7 @@ function help() {
     manual += "Users can save to .bass file and send it to this email: bassthemusic101 |at| gmail |dot| com" + "\n";
     manual += "Certain phrases are required in order to save to .bass file such as Title:, Contributor:, or URL:" + "\n";
     manual += "(see section IV)." + "\n";
-    manual += "Note, any music (chords, rhythms, melody) is allowed, but lyrics and URLs will be audited for explicit material prior to posting." + "\n";
+    manual += "Note, any music (chords, rhythms, melody) is allowed, but lyrics and URLs will be checked for explicit content prior to posting." + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
