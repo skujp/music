@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "3.1.0";                                                 
+const VERSION = "4.0.0";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -74,7 +74,7 @@ var MIN_OCTAVE = 0;
 var MAX_OCTAVE = 8;                                                     
 var MIN_TEMPO  = 30;                                                    
 var MAX_TEMPO  = 300;                                                   
-var MIN_VOL = 0;                                                        
+var MIN_VOL = 0.0001;                                                   
 var MAX_VOL = 1;                                                        
 var PULSE_FLAG = true;                                                  
 var END = false;                                                        
@@ -865,29 +865,40 @@ function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volum
   return {osc, gain};
 }
 function _delay(ms = DEF_MSEC, signal) {
-  return new Promise((resolve, reject) => {
-    if (signal && signal.aborted) return reject(new DOMException("Aborted", "AbortError"));
-    const timer = setTimeout(() => {
-      if (signal) signal.removeEventListener("abort", onAbort);
+  return new Promise(function (resolve, reject) {
+    if (signal && signal.aborted) {
+      return reject(new DOMException("Aborted", "AbortError"));
+    }
+    var timer;
+    function cleanup() {
+      if (signal) {
+        signal.removeEventListener("abort", onAbort);
+      }
+    }
+    function onAbort() {
+      clearTimeout(timer);
+      cleanup();
+      reject(new DOMException("Aborted", "AbortError"));
+    }
+    timer = setTimeout(function () {
+      cleanup();
       resolve();
     }, ms);
-    const onAbort = () => {
-      clearTimeout(timer);
-      reject(new DOMException("Aborted", "AbortError"));
-    };
-    if (signal) signal.addEventListener("abort", onAbort);
+    if (signal) {
+      signal.addEventListener("abort", onAbort);
+    }
   });
 }
-function _playSequencerChord(sequencerChord = BM, octave = DEF_OCTAVE, duration = DEF_DURATION) {
+function _playSequencerChord(sequencerChord = BM, octave = DEF_OCTAVE, duration = DEF_DURATION, volume = MAX_VOL) {
     if (sequencerChord != BM) {
         if (sequencerChord[1]) {
-            playNote(sequencerChord[1], octave - 1, duration);
+            playNote(sequencerChord[1], octave - 1, duration, volume); 
         }
         sequencerChord[0].forEach(note => {
-            playNote(note, octave, duration); 
+            playNote(note, octave, duration, volume); 
         });
     } else {  
-        playNote(FAKE,MIN_OCTAVE,duration,0.001);
+        playNote(FAKE, MIN_OCTAVE, duration, MIN_VOL); 
     }
 }
 async function _saveSheetMusicToBASS() {
@@ -1032,7 +1043,9 @@ async function playSequencer(sequencerObj) {
   let heuristic_lowest_number_index = -1;
   if (LST_SKIPNUM in skipNumberIndex) heuristic_lowest_number_index = skipNumberIndex[LST_SKIPNUM];
   try {
-    playNote(FAKE,0,1,0.001);
+    playNote(FAKE,MIN_OCTAVE,DEF_DURATION,MIN_VOL); 
+    await _delay(DEF_MSEC, signal); 
+    playNote(FAKE,MIN_OCTAVE,DEF_DURATION,MIN_VOL); 
     await _delay(DEF_MSEC, signal); 
     while (!signal.aborted) { 
       i = 0;
@@ -1041,7 +1054,7 @@ async function playSequencer(sequencerObj) {
       let skipFlag = false; 
       while (i < n) {
         if (signal.aborted) break;
-        _playSequencerChord(sequencer[i], DEF_OCTAVE, 0); 
+        _playSequencerChord(sequencer[i], DEF_OCTAVE, 0.0001); 
         await _delay(DEF_MSEC, signal); 
         if (skipFlag && i in forwardIndex) {   
             i = forwardIndex[i].pop(); 

@@ -134,7 +134,7 @@ bass.playNote(noteName, octave, duration, volume)
 	volume
 		a float number between 0.001 and 1
 		1 is maximum volume (100%)
-		0.001 is minimum volume (~0%)
+		0.0001 is minimum volume (~0%)
 
 	Example: bass.playNote('Gb') or bass.playNote('Gb', 4, 1, 1);
 */
