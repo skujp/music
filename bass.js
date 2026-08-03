@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "4.0.0";                                                 
+const VERSION = "4.0.1";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -853,7 +853,7 @@ function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volum
   gain.connect(masterGain);
   const now = audioCtx.currentTime || 0;
   const attackTime = 0.01;
-  const minimumVolume = 0.0001; 
+  const minimumVolume = MIN_VOL; 
   const attackVolume = volume;
   const sustainVolume = (volume > 0.3) ? 0.7 : minimumVolume;  
   gain.gain.value = minimumVolume;
