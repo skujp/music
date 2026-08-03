@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "3.0.2";                                                 
+const VERSION = "3.1.0";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -568,7 +568,6 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                 sequencer.push(chord); 
                 openingClassicalCount++ ; 
             } else {
-                error.msg = `[OPENING ERROR 1] Invalid token at position ${index + 1}: "${tokens[index]}"`;
                 return;
             }
             index++;   
@@ -827,7 +826,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
             error.msg = `func ${func} is a regular synchronous function. Will be invoked like regular function`;
             let result = this[func](arg);  
             if (result !== undefined) {    
-                error.msg = result.err;
+                error.msg = result;
                 return;                    
             } 
         }
@@ -1101,8 +1100,9 @@ function getInstrument() {
 function setInstrument(inst) {
     let lc_inst = inst.toLowerCase();
     if (!DEF_SUPPORT_INST.has(lc_inst)) {
-        error.msg = `[Set Instrument Error] Currently not support ${inst} instrument`;
-        return error;
+        const problem = `[Set Instrument Error] Currently not support ${inst} instrument`;
+        error.msg = problem;
+        return problem;
     }
 }
 function oops(message, type = 'info') {
@@ -1110,7 +1110,7 @@ function oops(message, type = 'info') {
         const problem = `[Oops ERROR] Oops function is currently supported in browser environment only`;
         error.msg = problem;
         alert(problem);
-        return error;
+        return problem;
     }
     const oopsContainer = document.getElementById('oopsContainer') || _createOopsContainer();
     const oopsEl = document.createElement('div');
@@ -1138,12 +1138,14 @@ function setTempo(bpm) {
             throw new Error(`"${bpm}" cannot be converted to a valid number.`);
         }
     } catch (err) {
-        error.msg = `[SET TEMPO ERROR] Conversion failed: ${err.message}`; 
-        return error; 
+        const problem = `[SET TEMPO ERROR] Conversion failed: ${err.message}`;
+        error.msg = problem;
+        return problem;
     }
     if (!Number.isInteger(convert) || convert < MIN_TEMPO || convert > MAX_TEMPO) {
-        error.msg = `[TEMPO ERROR] Tempo (BPM) must be an integer in the range of ${MIN_TEMPO} and ${MAX_TEMPO}`;
-        return error;
+        const problem = `[TEMPO ERROR] Tempo (BPM) must be an integer in the range of ${MIN_TEMPO} and ${MAX_TEMPO}`;
+        error.msg = problem;
+        return problem;
     }
     BPM.val = convert;
 }
@@ -1155,12 +1157,14 @@ function setOctave(oct) {
             throw new Error(`"${oct}" cannot be converted to a valid number.`);
         }
     } catch (err) {
-        error.msg = `[SET OCTAVE ERROR] Conversion failed: ${err.message}`; 
-        return error; 
+        const problem = `[SET OCTAVE ERROR] Conversion failed: ${err.message}`;
+        error.msg = problem;
+        return problem;
     }
     if (!Number.isInteger(convert) || convert < MIN_OCTAVE || convert > MAX_OCTAVE) {
-        error.msg = `[SET OCTAVE ERROR] Default octave must be a number in the range of ${MIN_OCTAVE} and ${MAX_OCTAVE}. `;
-        return error;
+        const problem = `[SET OCTAVE ERROR] Default octave must be a number in the range of ${MIN_OCTAVE} and ${MAX_OCTAVE}. `;
+        error.msg = problem;
+        return problem;
     }
     DEF_OCTAVE = convert;
 }
@@ -1182,8 +1186,9 @@ function setSustain(d) {
     } else if (d == "No") {
         PULSE_FLAG = true; 
     } else {
-        error.msg=`[SUSTAIN ERROR] To sustain BM / character, must use control phrase Sustain:Yes or Sustain:No`;
-        return error;
+        const problem = `[SUSTAIN ERROR] To sustain BM / character, must use control phrase Sustain:Yes or Sustain:No`;
+        error.msg = problem;
+        return problem;
     }
 }
 function getSustain() {
@@ -1198,8 +1203,9 @@ function getGuitarNote(st = 6, fret = 0) {
     if (typeof fret !== 'number' || !Number.isInteger(fret) || fret < MIN_FRETS || fret > MAX_FRETS ||
         typeof st !== 'number' || !Number.isInteger(st) || st < 1 || st > 6  
     ) {
-        error.msg = `[getGuitarNote Error] parameters error, fret = ${fret}, st = ${st}`;
-        return error;
+        const problem = `[getGuitarNote Error] parameters error, fret = ${fret}, st = ${st}`;
+        error.msg = problem;
+        return problem;
     }
     var lookup_note;
     switch (st) {
@@ -1222,8 +1228,9 @@ function getGuitarNote(st = 6, fret = 0) {
         lookup_note = notes['E'];   
         break;
     default:
-        error.msg = `lookup_note failed in getGuitarNotes`;
-        return error;
+        const problem = `[getGuitarNote Error] string number must be between 1 and 6, but got ${st}`;
+        error.msg = problem;
+        return problem;
     }
     var calculated_lookup_note = (lookup_note + fret) % OCTAVE_LENGTH || OCTAVE_LENGTH;
     var octave_offset = 0;
