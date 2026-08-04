@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "4.0.2";                                                 
+const VERSION = "4.0.3";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -275,7 +275,7 @@ function help() {
     manual += "%" + "\n";
     manual += "" + "\n";
     manual += "Chord:" + "\n";
-    manual += "m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 /" + "\n";
+    manual += "m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug" + "\n";
     manual += "" + "\n";
     manual += "Metadata:" + "\n";
     manual += "(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) " + "\n";
