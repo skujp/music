@@ -2,133 +2,114 @@
   {
     "title": "Song 1",
     "content": "| C Cmaj C7 Cm ||",
-    "contributor": "Contributor 1",
-    "url": "https://example.com/song/1"
+    "contributor": "Contributor 1"
   },
   {
     "title": "Song 2",
     "content": "| D Dmin D7 Dm ||",
-    "contributor": "Contributor 2",
-    "url": "https://example.com/song/2"
+    "contributor": "Contributor 2"
   },
   {
     "title": "Song 3",
     "content": "| E Esus E7 Em ||",
-    "contributor": "Contributor 3",
-    "url": "https://example.com/song/3"
+    "contributor": "Contributor 3"
   },
   {
     "title": "Song 4",
     "content": "| F Fdim F7 Fm ||",
-    "contributor": "Contributor 4",
-    "url": "https://example.com/song/4"
+    "contributor": "Contributor 4"
   },
   {
     "title": "Song 5",
     "content": "| G Gmaj G7 Gm ||",
-    "contributor": "Contributor 5",
-    "url": "https://example.com/song/5"
+    "contributor": "Contributor 5"
   },
   {
     "title": "Song 6",
     "content": "| A Amin A7 Am ||",
-    "contributor": "Contributor 6",
-    "url": "https://example.com/song/6"
+    "contributor": "Contributor 6"
   },
   {
     "title": "Song 7",
     "content": "| B Bsus B7 Bm ||",
-    "contributor": "Contributor 7",
-    "url": "https://example.com/song/7"
+    "contributor": "Contributor 7"
   },
   {
     "title": "Song 8",
     "content": "| C Cdim C7 Cm ||",
-    "contributor": "Contributor 8",
-    "url": "https://example.com/song/8"
+    "contributor": "Contributor 8"
   },
   {
     "title": "Song 9",
     "content": "| D Dmaj D7 Dm ||",
-    "contributor": "Contributor 9",
-    "url": "https://example.com/song/9"
+    "contributor": "Contributor 9"
   },
   {
     "title": "Song 10",
     "content": "| E Emin E7 Em ||",
-    "contributor": "Contributor 10",
-    "url": "https://example.com/song/10"
+    "contributor": "Contributor 10"
   },
   {
     "title": "Song 11",
     "content": "| F Fsus F7 Fm ||",
-    "contributor": "Contributor 11",
-    "url": "https://example.com/song/11"
+    "contributor": "Contributor 11"
   },
   {
     "title": "Song 12",
     "content": "| G Gdim G7 Gm ||",
-    "contributor": "Contributor 12",
-    "url": "https://example.com/song/12"
+    "contributor": "Contributor 12"
   },
   {
     "title": "Song 13",
     "content": "| A Amaj A7 Am ||",
-    "contributor": "Contributor 13",
-    "url": "https://example.com/song/13"
+    "contributor": "Contributor 13"
   },
   {
     "title": "Song 14",
     "content": "| B Bmin B7 Bm ||",
-    "contributor": "Contributor 14",
-    "url": "https://example.com/song/14"
+    "contributor": "Contributor 14"
   },
   {
     "title": "Song 15",
     "content": "| C Csus C7 Cm ||",
-    "contributor": "Contributor 15",
-    "url": "https://example.com/song/15"
+    "contributor": "Contributor 15"
   },
   {
     "title": "Song 16",
     "content": "| D Ddim D7 Dm ||",
-    "contributor": "Contributor 16",
-    "url": "https://example.com/song/16"
+    "contributor": "Contributor 16"
   },
   {
     "title": "Song 17",
     "content": "| E Emaj E7 Em ||",
-    "contributor": "Contributor 17",
-    "url": "https://example.com/song/17"
+    "contributor": "Contributor 17"
   },
   {
     "title": "Song 18",
     "content": "| F Fmin F7 Fm ||",
-    "contributor": "Contributor 18",
-    "url": "https://example.com/song/18"
+    "contributor": "Contributor 18"
   },
   {
     "title": "Song 19",
     "content": "| G Gsus G7 Gm ||",
-    "contributor": "Contributor 19",
-    "url": "https://example.com/song/19"
-  },
-  {
-    "title": "Song 20",
-    "content": "| A Adim A7 Am ||",
-    "contributor": "Contributor 20",
-    "url": "https://example.com/song/20"
+    "contributor": "Contributor 19"
   },
   {
     "title": "Let It Be",
-    "contributor": "TheBasics",
-    "content": "Title:Let_It_Be\nContributor:TheBasics\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
+    "contributor": "srock",
+    "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
     "url": "https://youtu.be/iiLGJluYzjA"
   },
   {
     "title": "Havana",
-    "contributor": "R&B",
-    "content": "Title:Havana\nContributor:R&B\nSustain:Yes\nTempo:100\nCover:Yes\nMisc:Gm\n\n8/16 | Gm / Bb D Eb Eb / Eb |\n        D / /  D D  D  D  D |",
+    "contributor": "rb",
+    "content": "Title:Havana\nContributor:rb\nSustain:Yes\nTempo:100\nCover:Yes\nMisc:Gm\n\n8/16 | Gm / Bb D Eb Eb / Eb |\n        D / /  D D  D  D  D |",
     "url": "https://youtube.com/shorts/MaP2r50p5Ww?si=EsLdD7OltJgDGO4m"
+  },
+  {
+    "title": "Viva La Vida",
+    "contributor": "bpop",
+    "content": "Title:Viva_La_Vida\nSustain:Yes\nContributor:bpop\nTempo:140\nCover:Yes\nMisc:Ab\n\n8/16 | (32x) (intro2x_verseA2x_interlude2x_verseB4x_chorus4x)\n             (bridge1x_verseB4x_chorus4x_bridge5x_chorus4x)\n\nDb5/Db     /    Db5/Db    /    Db5/Db  /  Db5/Db Eb5/Eb   |\n   /    Eb5/Eb     /   Eb5/Eb  Eb5/Eb  /  Eb5/Eb    /     |\nCmaug/C    /   Cmaug/C    /   Cmaug/C  /  Cmaug/C Fm/F    |\n   /     Fm/F      /     Fm/F    Fm/F  /   Fm/F     /   :|| ",
+    "url": "https://youtu.be/qAB0z55eUgU"
   }
 ]
