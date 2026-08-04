@@ -158,7 +158,7 @@ function initEvents() {
         const sequencer = bass.buildSequencer(sheetContent);
         
         if (sequencer) {
-            oops(`Playing music, Tempo ${bass.getTempo()}, Bass Octave ${bass.getOctave()}, Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
+            oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
             const result = bass.playSequencer(sequencer);
             result.then((data) => {
                 if (data) {  // mean error return from async previously
@@ -476,7 +476,7 @@ function initEvents() {
                 sheetMusic.style.height = sheetMusic.scrollHeight + 'px';
                 sheetMusic.dispatchEvent(new Event('input', { bubbles: true }));
                 sheetMusic.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                oops(`Loaded: ${entry.title || 'Untitled Song'}`, 'info');
+                oops(`(Loading) ${entry.title || 'Untitled Song'}`, 'info');
             }
         });
 

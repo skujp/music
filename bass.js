@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "4.0.1";                                                 
+const VERSION = "4.0.2";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -70,6 +70,7 @@ const AUX = /^\(([^)]+)\)$/;
 var MAX_SHEET_LENGTH = 3000;                                            
 var FAKE = "G";                                                         
 var DEF_OCTAVE = 4;                                                     
+var STACKATO_LEGATO = 0.0001;                                           
 var MIN_OCTAVE = 0;                                                     
 var MAX_OCTAVE = 8;                                                     
 var MIN_TEMPO  = 30;                                                    
@@ -1043,9 +1044,14 @@ async function playSequencer(sequencerObj) {
   let heuristic_lowest_number_index = -1;
   if (LST_SKIPNUM in skipNumberIndex) heuristic_lowest_number_index = skipNumberIndex[LST_SKIPNUM];
   try {
-    playNote(FAKE,MIN_OCTAVE,DEF_DURATION,MIN_VOL); 
+    oops('⏳ 3...', 'info');
+    playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
     await _delay(DEF_MSEC, signal); 
-    playNote(FAKE,MIN_OCTAVE,DEF_DURATION,MIN_VOL); 
+    oops('⏳ 2...', 'info');
+    playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
+    await _delay(DEF_MSEC, signal); 
+    oops('⏳ 1...', 'info');
+    playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
     await _delay(DEF_MSEC, signal); 
     while (!signal.aborted) { 
       i = 0;
@@ -1054,7 +1060,7 @@ async function playSequencer(sequencerObj) {
       let skipFlag = false; 
       while (i < n) {
         if (signal.aborted) break;
-        _playSequencerChord(sequencer[i], DEF_OCTAVE, 0.0001); 
+        _playSequencerChord(sequencer[i],DEF_OCTAVE,STACKATO_LEGATO); 
         await _delay(DEF_MSEC, signal); 
         if (skipFlag && i in forwardIndex) {   
             i = forwardIndex[i].pop(); 
