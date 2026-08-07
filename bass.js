@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "4.0.3";                                                 
+const VERSION = "4.0.4";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -1150,14 +1150,9 @@ function stopSequencer() {
   }
 }
 function setTempo(bpm) {
-    let convert;
-    try {
-        convert = Number(bpm);
-        if (Number.isNaN(convert)) {
-            throw new Error(`"${bpm}" cannot be converted to a valid number.`);
-        }
-    } catch (err) {
-        const problem = `[SET TEMPO ERROR] Conversion failed: ${err.message}`;
+    const convert = Number(bpm);
+    if (Number.isNaN(convert)) {
+        const problem = `[SET TEMPO ERROR] Conversion failed: "${bpm}" cannot be converted to a valid number.`;
         error.msg = problem;
         return problem;
     }
@@ -1169,14 +1164,9 @@ function setTempo(bpm) {
     BPM.val = convert;
 }
 function setOctave(oct) {
-    let convert;
-    try {
-        convert = Number(oct);
-        if (Number.isNaN(convert)) {
-            throw new Error(`"${oct}" cannot be converted to a valid number.`);
-        }
-    } catch (err) {
-        const problem = `[SET OCTAVE ERROR] Conversion failed: ${err.message}`;
+    const convert = Number(oct);
+    if (Number.isNaN(convert)) {
+        const problem = `[SET OCTAVE ERROR] Conversion failed: "${oct}" cannot be converted to a valid number.`;
         error.msg = problem;
         return problem;
     }
