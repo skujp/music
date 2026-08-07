@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "4.0.4";                                                 
+const VERSION = "4.0.5";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -94,7 +94,7 @@ var DEF_MSEC = DEF_DURATION * 1000;
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:Melodius\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var SAVE_AS_TYPES = new Set(["PDF","BASS"]);                            
 var BASSBOARD_DB_FIELD = new Set(["Contributor","Title"]);              
-var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative)(:)(.+)$/;
+var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative)(:)(.+)$/;
 var taskDropper = null;                                                 
 var validArgs = new WeakSet();                                          
 var _sheetMusic;                                                        
@@ -293,7 +293,7 @@ function help() {
     manual += "They are case-sensitive and used for special purposes such as " + "\n";
     manual += "changing music tempo, tuning middle C, or save the sheet music to PDF or BASS files." + "\n";
     manual += "Please note, they must be written at the beginning of the sheet music." + "\n";
-    manual += "Also, any value after the colon character (:) can not have any blank space." + "\n";
+    manual += "Also, any value after the double dot character (:) can not have any blank space." + "\n";
     manual += "It is recommended to use the underscore character (_). For example, " + "\n"; 
     manual += "Composer:Loremipsum_Dolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Chkft" + "\n";
     manual += "" + "\n";
@@ -305,7 +305,7 @@ function help() {
     manual += "Sustain:No              enable playing previous BM chord /" + "\n";
     manual += "Title:<songtitle>       for example, Title:My_awesome_melody. Required field when saving to .bass" + "\n";
     manual += "Artist:<name>           for example, Artist:The_BASS" + "\n";
-    manual += "Contributor:<name>      for example, Musician:BeatBox" + "\n";
+    manual += "Musician:<name>         for example, Musician:BeatBox" + "\n";
     manual += "Composer:<name>         for example, Composer:RHYTHM" + "\n";
     manual += "Arranger:<name>         for example, Arranger:Chorder" + "\n";
     manual += "Singer:<name>           for example, Singer:Unknown" + "\n";
