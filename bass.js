@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "4.1.1";                                                 
+const VERSION = "4.1.2";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -993,6 +993,9 @@ async function _saveSheetMusicToPDF() {
     iframe.style.border = 'none';
     document.body.appendChild(iframe);
     const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
+    doc.close();
     const style = doc.createElement('style');
     style.textContent = `
         body, pre {
@@ -1001,6 +1004,7 @@ async function _saveSheetMusicToPDF() {
         @media print {
             body, pre {
                 font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+                color-adjust: exact;
                 -webkit-print-color-adjust: exact;
             }
         }
@@ -1011,10 +1015,16 @@ async function _saveSheetMusicToPDF() {
     pre.textContent = _sheetMusic.content; 
     doc.body.appendChild(pre);
     iframe.contentWindow.addEventListener('afterprint', () => {
-        document.body.removeChild(iframe);    
+        if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);    
+        }
     });
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }, 250); 
+    });
     setTimeout(() => {
         if (document.body.contains(iframe)) {
             document.body.removeChild(iframe);
