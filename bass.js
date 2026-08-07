@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "4.1.0";                                                 
+const VERSION = "4.1.1";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -17,8 +17,8 @@ var FULL_ASYNC_DEBUG_MODE = false;
 var DEF_INST = "piano";
 var DEF_SUPPORT_INST = new Set([DEF_INST, "drum", "guitar", "flute"]);
 var instrument = DEF_INST; 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const masterGain = audioCtx.createGain(); masterGain.gain.value = 0.22; masterGain.connect(audioCtx.destination);
+var audioCtx = null; 
+var masterGain = null; 
 const _oBass = global.bass;
 const TheBass = {};
 global.bass = TheBass;
@@ -846,6 +846,15 @@ function playChord(chord = FAKE, octave = DEF_OCTAVE, duration = DEF_DURATION) {
     _playSequencerChord(notes, octave, duration);
 }
 function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volume=MAX_VOL) {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain(); 
+    masterGain.gain.value = 0.22; 
+    masterGain.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = 'triangle'; 
@@ -922,7 +931,7 @@ async function _saveSheetMusicToBASS() {
         suggestedName: filename,
         types: [{
           description: 'BASS Music File',
-          accept: { '*/*': ['.bass'] }
+          accept: { '*/.bass': ['.bass'] }
         }]
       };
       const handle = await global.showSaveFilePicker(options);
