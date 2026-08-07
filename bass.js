@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "4.0.5";                                                 
+const VERSION = "4.1.0";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -80,7 +80,6 @@ var MAX_VOL = 1;
 var PULSE_FLAG = true;                                                  
 var END = false;                                                        
 var SMP_SEQUENCER = [[['F','A','C'],'C'],[['A','C','E'],'E']];          
-var SMP_SEQUENCER_CHORD = SMP_SEQUENCER[0];                             
 var DEF_REP_NUM = 1;                                                    
 var DEF_TIME_SIGNATURE = '4/4';                                         
 var DEF_BEAT_JUMP = 1;                                                  
@@ -548,7 +547,8 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
         error.msg = `[SHEET MUSIC ERROR] Empty Sheet Music Error`;
         return;
     }
-    BPM.val = BPM.val;
+    const reshake = BPM.val;
+    BPM.val = reshake;
     var stack = [];                
     var sequencer = [];            
     var loopBackIndex = {};        
@@ -800,7 +800,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
         }        
     } 
     if (length > 0 ) {
-        te = tokens[length - 1];
+        let te = tokens[length - 1];
         if (te.slice(-2) === DBL_BAR) {
             end = true;        
         }    
@@ -935,7 +935,6 @@ async function _saveSheetMusicToBASS() {
         const problem = "Save operation was cancelled by the user.";
         return problem;
       }
-      const problem = `showSaveFilePicker failed. Trying Tier 2 fallback...${err}`;
     }
   }
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -1218,28 +1217,35 @@ function getGuitarNote(st = 6, fret = 0) {
     }
     var lookup_note;
     switch (st) {
-    case 6:
-        lookup_note = notes['E'];   
-        break;
-    case 5:
-        lookup_note = notes['A'];
-        break;
-    case 4:
-        lookup_note = notes['D'];
-        break;
-    case 3:
-        lookup_note = notes['G'];
-        break;
-    case 2:
-        lookup_note = notes['B'];
-        break;
-    case 1:
-        lookup_note = notes['E'];   
-        break;
-    default:
-        const problem = `[getGuitarNote Error] string number must be between 1 and 6, but got ${st}`;
-        error.msg = problem;
-        return problem;
+        case 6: {
+            lookup_note = notes['E'];   
+            break;
+        }        
+        case 5: {
+            lookup_note = notes['A'];
+            break;
+        }
+        case 4: {
+            lookup_note = notes['D'];
+            break;
+        }
+        case 3: {
+            lookup_note = notes['G'];
+            break;
+        }
+        case 2: {
+            lookup_note = notes['B'];
+            break;
+        }
+        case 1: {
+            lookup_note = notes['E'];   
+            break;
+        }
+        default: {
+            const problem = `[getGuitarNote Error] string number must be between 1 and 6, but got ${st}`;
+            error.msg = problem;
+            return problem;
+        }
     }
     var calculated_lookup_note = (lookup_note + fret) % OCTAVE_LENGTH || OCTAVE_LENGTH;
     var octave_offset = 0;

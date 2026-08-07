@@ -1,9 +1,8 @@
-// start self invoked function
 (function () {
 
 function initEvents() {
 
-    const VERSION = "2.2.1";
+    // VERSION = "4.1.0";
 
     // check if bass has been loaded
     if (typeof bass === "undefined") {
@@ -18,8 +17,8 @@ function initEvents() {
 
     // treble clef raise octave compared to bass clef
     var UP1 = 0;
-    const MAXUP = 9;
-    const MINUP = -9;
+    const MAXUP = 3;    
+    const MINUP = -5;
 
     // sustain pedal for treble clef
     var PED = 0.3;
@@ -84,16 +83,11 @@ function initEvents() {
     const PIANOICON = '🎹';
     const GUITARICON = '🎸';
     const ALLICONS = '🎹 🎸';
-    const MINUSICON = '➖';
-    const PLUSICON = '➕';
-
 
     // bassboard
     const BASSBOARD = 'bassboard';
     const SONGLIST = 'songList';
     const PAGE_SIZE = 11;
-
-    // get id of all the html components
 
     // piano
     const sheetMusic = document.getElementById(SHEETMUSIC);
@@ -144,13 +138,11 @@ function initEvents() {
     // songlist
     const songList = document.getElementById(SONGLIST);
 
-
     // Initialize sheetMusic
     sheetMusic.value = bass.getSampleTestCase();
 
-
     // Pointer to the last note of the piano for - + adjustment
-    adjustPtr = gNote1;
+    var adjustPtr = gNote1;
 
     // Play Button Event Listener
     playBtn.addEventListener('click', () => {
@@ -290,7 +282,7 @@ function initEvents() {
         
     };
 
-    const isTypingInTextField = (target) => {
+    function isTypingInTextField(target) {
         if (!target) return false;
         const tagName = target.tagName ? target.tagName.toLowerCase() : undefined;
         return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || target.isContentEditable;
@@ -397,7 +389,7 @@ function initEvents() {
     plusBtn.addEventListener('click', addNoteClick);
 
     function upOctave() {
-        if (UP1 > MAXUP) {
+        if (UP1 >= MAXUP) {
             oops('Max Octave Reached', 'error');
             return;
         }
@@ -406,7 +398,7 @@ function initEvents() {
     }
 
     function downOctave() {
-        if (UP1 < MINUP) {
+        if (UP1 <= MINUP) {
             oops('Min Octave Reached', 'error');
             return;
         }
@@ -415,7 +407,7 @@ function initEvents() {
     }
 
     // Change instrument button to cycle through each instrument
-    // + and - buttons will be have accordingly depending
+    // + and - buttons will behave accordingly depending
     // on which instruments are in used
     rotateBtn.currentIns = PIANO;
     rotateBtn.textContent = PIANOICON;
@@ -460,7 +452,7 @@ function initEvents() {
     let currentPage = 1;
     const searchInput = bassBoard.querySelector('.song-search');
 
-    const createSongItem = (entry) => {
+    function createSongItem(entry) {
         const item = document.createElement('li');
         item.className = 'song-item';
 
@@ -503,9 +495,9 @@ function initEvents() {
         item.appendChild(meta);
         item.appendChild(link);
         return item;
-    };
+    }
 
-    const renderPage = () => {
+    function renderPage() {
         songList.innerHTML = '';
 
         const start = (currentPage - 1) * PAGE_SIZE;
@@ -549,9 +541,9 @@ function initEvents() {
         controls.appendChild(pageSpanInfo);
         controls.appendChild(nextBtn);
         songList.appendChild(controls);
-    };
+    }
 
-    const shuffleEntries = (entries) => {
+    function shuffleEntries(entries) {
         const shuffled = Array.isArray(entries) ? [...entries] : [];
 
         for (let index = shuffled.length - 1; index > 0; index -= 1) {
@@ -560,9 +552,9 @@ function initEvents() {
         }
 
         return shuffled;
-    };
+    }
 
-    const applyFilter = () => {
+    function applyFilter() {
         const query = (searchInput && searchInput.value) ? searchInput.value.trim().toLowerCase() : '';
         filteredEntries = allEntries.filter((entry) => {
             const title = (entry.title || '').toLowerCase();
@@ -571,9 +563,9 @@ function initEvents() {
         });
         currentPage = 1;
         renderPage();
-    };
+    }
 
-    const renderEntries = (entries) => {
+    function renderEntries(entries) {
         allEntries = shuffleEntries(entries);
         filteredEntries = allEntries;
 
@@ -587,9 +579,9 @@ function initEvents() {
         }
 
         renderPage();
-    };
+    }
 
-    const storageAvailable = (storageType) => {
+    function storageAvailable(storageType) {
         try {
             const storage = window[storageType];
             const testKey = '__bassboard_storage_test__';
@@ -597,17 +589,17 @@ function initEvents() {
             storage.removeItem(testKey);
             return true;
         } catch (error) {
-            let msg = `Storage unavailable for ${storageType}:`;
+            let msg = `Storage unavailable for ${storageType}, error: ${error}`;
             oops(msg, 'error');
             //console.warn(msg, error);
             return false;
         }
-    };
+    }
 
     // [!Important]
     var isStorageAvailable = storageAvailable('localStorage');
 
-    const readStoredValue = (key) => {
+    function readStoredValue(key) {
         if (!isStorageAvailable) {
             return null;
         }
@@ -615,14 +607,14 @@ function initEvents() {
         try {
             return localStorage.getItem(key);
         } catch (error) {
-            let msg = `Unable to read cached value for ${key}:`;
+            let msg = `Unable to read cached value for ${key}, error: ${error}`;
             oops(msg, 'warning');
             //console.warn(msg, error);
             return null;
         }
-    };
+    }
 
-    const writeStoredValue = (key, value) => {
+    function writeStoredValue(key, value) {
         if (!isStorageAvailable) {
             return;
         }
@@ -630,22 +622,20 @@ function initEvents() {
         try {
             localStorage.setItem(key, value);
         } catch (error) {
-            let msg = `Unable to save cached value for ${key}:`;
+            let msg = `Unable to save cached value for ${key}, error: ${error}`;
             oops(msg, 'error');
             //console.warn(msg, error);
         }
-    };
+    }
 
     // 7. if localStorage is full or disabled
-    const safeWriteStoredValue = (key, value) => {
+    function safeWriteStoredValue(key, value) {
         try {
             writeStoredValue(key, value);
         } catch (domException) {
             // Targets QuotaExceededError variants across different web browsers
-            if (
-                domException.name === 'QuotaExceededError' ||
-                domException.name === 'NS_ERROR_DOM_QUOTA_REACHED'
-            ) {
+            if (domException.name === 'QuotaExceededError' ||
+                domException.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
                 const problem = `Local storage quota exceeded! Running database entirely in-memory, ${domException}`;
                 oops(problem, 'error');
                 //console.error(problem);
@@ -655,13 +645,13 @@ function initEvents() {
                 //console.error(problem);
             }
         }
-    };
+    }
 
-    const loadDatabase = async () => {
+    async function loadDatabase() {
         const etagKey = 'bassboard-db-etag';
         const lastModifiedKey = 'bassboard-db-last-modified';
         const cachedDataKey = 'bassboard-db-data';
-        const lastCheckedKey = 'bassboard-db-last-checked'
+        const lastCheckedKey = 'bassboard-db-last-checked';
 
         try {
 
@@ -719,7 +709,7 @@ function initEvents() {
             const serverEtag = response.headers.get('etag') || '';
             const serverLastModified = response.headers.get('last-modified') || '';
             const entries = await response.json();
-            
+
             safeWriteStoredValue(etagKey, serverEtag);
             safeWriteStoredValue(lastModifiedKey, serverLastModified);
             safeWriteStoredValue(cachedDataKey, JSON.stringify(entries));
@@ -738,9 +728,9 @@ function initEvents() {
             fallbackItem.className = 'song-item';
             fallbackItem.innerHTML = '<span>Unable to load songs</span>';
             songList.appendChild(fallbackItem);
-            
+
         }
-    };
+    }
 
     if (searchInput) searchInput.addEventListener('input', applyFilter);
     loadDatabase();
@@ -807,4 +797,4 @@ if (document.readyState === 'interactive' || document.readyState === 'complete')
     document.addEventListener('DOMContentLoaded', initEvents);
 }
 
-})(); // end of self invoked function
+})();
