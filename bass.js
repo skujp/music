@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "5.0.0";                                                 
+const VERSION = "5.0.1";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -818,13 +818,13 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
             let result = this[func](arg);  
             result.then((data) => {
                 if (data) {  
-                    oops(`[Async] [Func Arg Error] ${data}`,'warning');
+                    oops(`[Async] [Error] ${data}`,'warning');
                 } 
             }).catch((exp) => {
-                oops(`[Async] [Func Arg Exception] ${exp}`, 'warning');
+                oops(`[Async] [Exception] ${exp}`, 'warning');
             });
         } else {
-            error.msg = `func ${func} is a regular synchronous function. Will be invoked like regular function`;
+            error.msg = `func ${func} is a synchronous function. Will be invoked like regular function`;
             let result = this[func](arg);  
             if (result !== undefined) {    
                 error.msg = result;
@@ -1044,48 +1044,44 @@ async function playSequencer(sequencerObj) {
   let n = sequencer.length;
   let heuristic_lowest_number_index = -1;
   if (LST_SKIPNUM in skipNumberIndex) heuristic_lowest_number_index = skipNumberIndex[LST_SKIPNUM];
-  try {
-    oops('🤟 | | |', 'info');
-    playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
-    await _delay(DEF_MSEC, signal); 
-    oops('✌️ | |', 'info');
-    playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
-    await _delay(DEF_MSEC, signal); 
-    oops('☝️ |', 'info');
-    playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
-    await _delay(DEF_MSEC, signal); 
-    while (!signal.aborted) { 
-      i = 0;
-      let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));
-      let tempForwardIndex = JSON.parse(JSON.stringify(forwardIndex));
-      let skipFlag = false; 
-      while (i < n) {
-        if (signal.aborted) break;
-        _playSequencerChord(sequencer[i],DEF_OCTAVE,STACKATO_LEGATO); 
-        await _delay(DEF_MSEC, signal); 
-        if (skipFlag && i in forwardIndex) {   
-            i = forwardIndex[i].pop(); 
-            skipFlag = false;
-        } else if (i in loopBackIndex && repeatCount[i] > 0) {  
-          repeatCount[i]--;
-          if (repeatCount[i] == 0 &&  i > heuristic_lowest_number_index) {  
-            skipFlag = true;
-          } else {
-            skipFlag = false;
-          }
-          i = loopBackIndex[i];  
-        } else {  
-          i++;
+  oops('🤟 | | |', 'info');
+  playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
+  await _delay(DEF_MSEC, signal); 
+  oops('✌️ | |', 'info');
+  playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
+  await _delay(DEF_MSEC, signal); 
+  oops('☝️ |', 'info');
+  playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
+  await _delay(DEF_MSEC, signal);     
+  while (!signal.aborted) { 
+    i = 0;
+    let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));
+    let tempForwardIndex = JSON.parse(JSON.stringify(forwardIndex));
+    let skipFlag = false; 
+    while (i < n) {
+      if (signal.aborted) break;
+      _playSequencerChord(sequencer[i],DEF_OCTAVE,STACKATO_LEGATO); 
+      await _delay(DEF_MSEC, signal); 
+      if (skipFlag && i in forwardIndex) {   
+          i = forwardIndex[i].pop(); 
+          skipFlag = false;
+      } else if (i in loopBackIndex && repeatCount[i] > 0) {  
+        repeatCount[i]--;
+        if (repeatCount[i] == 0 &&  i > heuristic_lowest_number_index) {  
+          skipFlag = true;
+        } else {
+          skipFlag = false;
         }
+        i = loopBackIndex[i];  
+      } else {  
+        i++;
       }
-      if (end && (!(n-1 in repeatCount) || repeatCount[n-1] == 0)) {
-        stopSequencer();  
-      }
-      repeatCount = tempRepeatCount; 
-      forwardIndex = tempForwardIndex;
     }
-  } catch (exp) {
-    return exp;
+    if (end && (!(n-1 in repeatCount) || repeatCount[n-1] == 0)) {
+      stopSequencer();  
+    }
+    repeatCount = tempRepeatCount; 
+    forwardIndex = tempForwardIndex;
   }
   return;
 }

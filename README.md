@@ -51,7 +51,9 @@ bass.playSequencer(sequencer);
 /* 
    Only chords (NOT note) will be played in the BASS system. 
 
-   If the squencer is undefined, bass will play its default sequencer.
+   If the sequencer is undefined, bass will play its default sequencer.
+
+   If sheet music ends with a double bar, an undefined promise will be returned.  
 */
 ```
 
@@ -144,6 +146,12 @@ To turn on debugging...
 
 ```javascript
 bass.setDebug(true)
+```
+
+To check library version...
+
+```javascript
+bass.getVersion();
 ```
 
 Contact
