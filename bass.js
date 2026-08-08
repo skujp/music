@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "4.1.2";                                                 
+const VERSION = "5.0.0";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -926,30 +926,22 @@ async function _saveSheetMusicToBASS() {
   const jsonString = JSON.stringify(_sheetMusic, null, 2);
   const filename = `${_sheetMusic.title}_by_${_sheetMusic.contributor}.bass`;
   if (global === window && 'showSaveFilePicker' in global) {
-    try {
-      const options = {
+    const options = {
         suggestedName: filename,
         types: [{
-          description: 'BASS Music File',
-          accept: { '*/.bass': ['.bass'] }
+            description: 'BASS Music File',
+            accept: { '*/.bass': ['.bass'] }
         }]
-      };
-      const handle = await global.showSaveFilePicker(options);
-      const writable = await handle.createWritable();
-      await writable.write(jsonString);
-      await writable.close();
-      return; 
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        const problem = "Save operation was cancelled by the user.";
-        return problem;
-      }
-    }
+    };
+    const handle = await global.showSaveFilePicker(options);
+    const writable = await handle.createWritable();
+    await writable.write(jsonString);
+    await writable.close();
+    return; 
   }
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (isIOS) {
-    try {
       const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
       const dataUri = `data:application/octet-stream;base64,${base64Data}`;
       const a = document.createElement('a');
@@ -960,12 +952,7 @@ async function _saveSheetMusicToBASS() {
       a.click();
       document.body.removeChild(a);
       return;
-    } catch (iosErr) {
-      const problem = `[SaveAs ERROR] iOS Data URI fallback failed: ${iosErr.message}`;
-      return problem;
-    }
   } else {
-    try {
       const blob = new Blob([jsonString], { type: 'application/octet-stream' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -976,10 +963,6 @@ async function _saveSheetMusicToBASS() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       return; 
-    } catch (fallbackErr) {
-      const problem = `[SaveAs ERROR] Desktop fallback failed: ${fallbackErr.message}`;
-      return problem;
-    }
   }
 }
 async function _saveSheetMusicToPDF() {
@@ -1062,13 +1045,13 @@ async function playSequencer(sequencerObj) {
   let heuristic_lowest_number_index = -1;
   if (LST_SKIPNUM in skipNumberIndex) heuristic_lowest_number_index = skipNumberIndex[LST_SKIPNUM];
   try {
-    oops('⏳ 3...', 'info');
+    oops('🤟 | | |', 'info');
     playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
     await _delay(DEF_MSEC, signal); 
-    oops('⏳ 2...', 'info');
+    oops('✌️ | |', 'info');
     playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
     await _delay(DEF_MSEC, signal); 
-    oops('⏳ 1...', 'info');
+    oops('☝️ |', 'info');
     playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
     await _delay(DEF_MSEC, signal); 
     while (!signal.aborted) { 
@@ -1102,13 +1085,7 @@ async function playSequencer(sequencerObj) {
       forwardIndex = tempForwardIndex;
     }
   } catch (exp) {
-    if (exp.name === "AbortError") {
-      const problem = `Async sequence canceled instantly during _delay.`;
-      return problem;
-    } else {
-      const problem = `[Exception] ${exp}`;
-      return problem;
-    }
+    return exp;
   }
   return;
 }

@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "4.1.0";
+    // VERSION = "5.0.0";
 
     // check if bass has been loaded
     if (typeof bass === "undefined") {
@@ -151,14 +151,7 @@ function initEvents() {
         
         if (sequencer) {
             oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
-            const result = bass.playSequencer(sequencer);
-            result.then((data) => {
-                if (data) {  // mean error return from async previously
-                    if (bass.getFullAsyncDebugMode()) oops(`[Async] [While Play Button Click] ${data}`,'warning');
-                } 
-            }).catch((exp) => {
-                oops(`[Async] [Exception While Play Button Click] ${exp}`, 'warning');
-            });
+            bass.playSequencer(sequencer);
         } else {
             oops(bass.getErrorMsg(), 'error');  // synchronous error
         }
