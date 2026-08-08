@@ -81,7 +81,7 @@ var the_bass = bass.rename();
 To play a chord...
 
 ```javascript
-bass.playChord(chordName, octave, duration)
+bass.playChord(chordName, octave, duration);
 
 /*
 	Play a musical chord
@@ -106,7 +106,7 @@ bass.playChord(chordName, octave, duration)
 To get chord notes...
 
 ```javascript
-bass.getChordNotes(chordName)
+bass.getChordNotes(chordName);
 
 /*
 	Return notes for a musical chord
@@ -118,7 +118,7 @@ bass.getChordNotes(chordName)
 To play a note...
 
 ```javascript
-bass.playNote(noteName, octave, duration, volume)
+bass.playNote(noteName, octave, duration, volume);
 
 /*
 	Play a musical note
@@ -145,7 +145,7 @@ bass.playNote(noteName, octave, duration, volume)
 To turn on debugging...
 
 ```javascript
-bass.setDebug(true)
+bass.setDebug(true);
 ```
 
 To check library version...
