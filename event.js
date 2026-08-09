@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "5.0.2";
+    // VERSION = "5.2.0";
 
     // check if bass has been loaded
     if (typeof bass === "undefined") {
@@ -145,13 +145,13 @@ function initEvents() {
     var adjustPtr = gNote1;
 
     // Play Button Event Listener
-    playBtn.addEventListener('click', () => {
+    playBtn.addEventListener('click', function() {
         const sheetContent = sheetMusic.value;
         const sequencer = bass.buildSequencer(sheetContent);
         
         if (sequencer) {
             oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
-            bass.playSequencer(sequencer).catch(() => {});
+            bass.playSequencer(sequencer).catch(function() {});
         } else {
             oops(bass.getErrorMsg(), 'error');  // synchronous error
         }
@@ -160,7 +160,7 @@ function initEvents() {
     });
 
     // Stop Button Event Listener
-    stopBtn.addEventListener('click', () => {
+    stopBtn.addEventListener('click', function() {
         if (sheetMusic.prevClick == READBTN) {
             if (sheetMusic.value.length >  bass.getMaxSheetLength()) {
                 sheetMusic.value = "";
@@ -180,7 +180,7 @@ function initEvents() {
     });
 
     // READ Button Event Listener
-    readBtn.addEventListener('click', () => {
+    readBtn.addEventListener('click', function() {
         if (sheetMusic.prevClick !== READBTN || sheetMusic.value.length == 0) {
             sheetMusic.value = bass.help();
             sheetMusic.style.height = '300px';
@@ -404,7 +404,7 @@ function initEvents() {
     // on which instruments are in used
     rotateBtn.currentIns = PIANO;
     rotateBtn.textContent = PIANOICON;
-    rotateBtn.addEventListener('click', () => {
+    rotateBtn.addEventListener('click', function() {
         if (rotateBtn.currentIns == PIANO) {
             piano.style.display = 'none';
             guitar.style.display = 'flex';
@@ -508,7 +508,7 @@ function initEvents() {
         prevBtn.className = 'pagination-btn';
         prevBtn.textContent = 'Prev';
         prevBtn.disabled = currentPage === 1 || filteredEntries.length === 0;
-        prevBtn.addEventListener('click', () => {
+        prevBtn.addEventListener('click', function() {
             if (currentPage > 1) {
                 currentPage -= 1;
                 renderPage();
@@ -519,7 +519,7 @@ function initEvents() {
         nextBtn.className = 'pagination-btn';
         nextBtn.textContent = 'Next';
         nextBtn.disabled = currentPage >= Math.ceil(filteredEntries.length / PAGE_SIZE) || filteredEntries.length === 0;
-        nextBtn.addEventListener('click', () => {
+        nextBtn.addEventListener('click', function() {
             if (currentPage < Math.ceil(filteredEntries.length / PAGE_SIZE)) {
                 currentPage += 1;
                 renderPage();
@@ -768,14 +768,14 @@ function initEvents() {
 
         if (shouldUpdate) {
             oops("Refreshing website for updates...","warning");
-            setTimeout(() => {
+            setTimeout(function() {
                 window.location.reload(true); // Force reload from server
             }, 3000);
         }
     }
 
     // [!Important]
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible') {
             checkPageAge();
         }

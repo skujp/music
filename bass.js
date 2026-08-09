@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "5.1.0";                                                 
+const VERSION = "5.2.0";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -870,10 +870,10 @@ function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volum
   gain.gain.exponentialRampToValueAtTime(attackVolume, now + attackTime);
   gain.gain.setValueAtTime(sustainVolume, now + (duration || 0.01));
   gain.gain.exponentialRampToValueAtTime(minimumVolume, now + duration + 0.8);
-  osc.onended = () => {
+  osc.addEventListener('ended', function() {
     osc.disconnect();
     gain.disconnect();
-  };
+  });
   osc.start(now);
   osc.stop(now + duration + 0.9);
 }
@@ -1000,18 +1000,18 @@ async function _saveSheetMusicToPDF() {
     pre.style.whiteSpace = 'pre-wrap';
     pre.textContent = _sheetMusic.content; 
     doc.body.appendChild(pre);
-    iframe.contentWindow.addEventListener('afterprint', () => {
+    iframe.contentWindow.addEventListener('afterprint', function() {
         if (document.body.contains(iframe)) {
             document.body.removeChild(iframe);    
         }
     });
-    requestAnimationFrame(() => {
-        setTimeout(() => {
+    requestAnimationFrame(function() {
+        setTimeout(function() {
             iframe.contentWindow.focus();
             iframe.contentWindow.print();
         }, 250); 
     });
-    setTimeout(() => {
+    setTimeout(function() {
         if (document.body.contains(iframe)) {
             document.body.removeChild(iframe);
         }
@@ -1130,12 +1130,14 @@ function oops(message, type = 'info') {
     oopsEl.className = `oops oops-${type}`;
     oopsEl.textContent = message;
     oopsContainer.appendChild(oopsEl);
-    setTimeout(() => {
+    setTimeout(function() {
         oopsEl.classList.add('oops-show');
     }, 10);
-    setTimeout(() => {
+    setTimeout(function() {
         oopsEl.classList.remove('oops-show');
-        setTimeout(() => oopsEl.remove(), 300);
+        setTimeout(function() {
+            oopsEl.remove();
+        }, 300);
     }, 3000);
 }
 function stopSequencer() {
