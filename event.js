@@ -284,14 +284,14 @@ function initEvents() {
     var fretKeyDown = undefined;
 
     document.addEventListener('keydown', (e) => {
-        e.preventDefault();
-
         if (e.target === sheetMusic || isTypingInTextField(e.target)) return;
         
         const key = e.key.toLowerCase();
         const noteId = noteKeyMap[key];
         
         if (!noteId || e.repeat) return;
+
+        e.preventDefault();
 
         switch (noteId) {
         case F1:
