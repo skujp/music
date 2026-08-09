@@ -2,9 +2,8 @@
 
 function initEvents() {
 
-    // VERSION = "5.2.0";
+    // VERSION = "5.3.0";
 
-    // check if bass has been loaded
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
         alert(problem);
@@ -12,10 +11,8 @@ function initEvents() {
         return;
     } 
 
-    // now oops function will be available via bass.oops
     const oops = bass.oops;
 
-    // treble clef raise octave compared to bass clef
     var UP1 = 0;
     const MAXUP = 3;    
     const MINUP = -5;
@@ -151,7 +148,11 @@ function initEvents() {
         
         if (sequencer) {
             oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
-            bass.playSequencer(sequencer).catch(function() {});
+            bass.playSequencer(sequencer).catch(function(e) {
+                if (e.name !== 'AbortError') {
+                    oops(`[Error playing sequencer]: ${e.message}`, 'error');
+                }
+            });
         } else {
             oops(bass.getErrorMsg(), 'error');  // synchronous error
         }
@@ -574,69 +575,42 @@ function initEvents() {
         renderPage();
     }
 
-    function storageAvailable(storageType) {
-        try {
-            const storage = window[storageType];
-            const testKey = '__bassboard_storage_test__';
-            storage.setItem(testKey, testKey);
-            storage.removeItem(testKey);
-            return true;
-        } catch (error) {
-            let msg = `Storage unavailable for ${storageType}, error: ${error}`;
-            oops(msg, 'error');
-            //console.warn(msg, error);
-            return false;
-        }
-    }
-
-    // [!Important]
-    var isStorageAvailable = storageAvailable('localStorage');
-
     function readStoredValue(key) {
-        if (!isStorageAvailable) {
-            return null;
-        }
-
         try {
+            if (typeof window === 'undefined' || !window.localStorage) {
+                return null;
+            }
             return localStorage.getItem(key);
         } catch (error) {
             let msg = `Unable to read cached value for ${key}, error: ${error}`;
             oops(msg, 'warning');
-            //console.warn(msg, error);
             return null;
         }
     }
 
     function writeStoredValue(key, value) {
-        if (!isStorageAvailable) {
-            return;
-        }
-
         try {
+            if (typeof window === 'undefined' || !window.localStorage) {
+                return;
+            }
             localStorage.setItem(key, value);
         } catch (error) {
-            let msg = `Unable to save cached value for ${key}, error: ${error}`;
-            oops(msg, 'error');
-            //console.warn(msg, error);
+            if (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                let msg = `Local storage quota exceeded! Running database entirely in-memory, error: ${error}`;
+                oops(msg, 'error');
+            } else {
+                let msg = `Could not write to local storage for ${key}, error: ${error}`;
+                oops(msg, 'error');
+            }
         }
     }
 
-    // 7. if localStorage is full or disabled
-    function safeWriteStoredValue(key, value) {
+    function safeParse(str) {
         try {
-            writeStoredValue(key, value);
-        } catch (domException) {
-            // Targets QuotaExceededError variants across different web browsers
-            if (domException.name === 'QuotaExceededError' ||
-                domException.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                const problem = `Local storage quota exceeded! Running database entirely in-memory, ${domException}`;
-                oops(problem, 'error');
-                //console.error(problem);
-            } else {
-                const problem = `Could not write to local storage: ${domException}`;
-                oops(problem, 'error');
-                //console.error(problem);
-            }
+            return str ? JSON.parse(str) : null;
+        } catch (error) {
+            oops(`JSON parsing error ${error.message}`, 'warning');
+            return null;
         }
     }
 
@@ -646,87 +620,85 @@ function initEvents() {
         const cachedDataKey = 'bassboard-db-data';
         const lastCheckedKey = 'bassboard-db-last-checked';
 
+        // 1. Pre-fetch and parse cached data
+        const cachedEtag = readStoredValue(etagKey);
+        const cachedLastModified = readStoredValue(lastModifiedKey);
+        const cachedRaw = readStoredValue(cachedDataKey);
+        const cachedEntries = safeParse(cachedRaw);
+        const cachedLastChecked = readStoredValue(lastCheckedKey);
+
+        // 2. Serve fast from local storage if 1 day (24 hours) has not passed
+        if (cachedEntries && cachedLastChecked) {
+            const oneDayInMs = 24 * 60 * 60 * 1000;
+            const timePassed = Date.now() - parseInt(cachedLastChecked, 10);
+
+            if (timePassed < oneDayInMs) {
+                renderEntries(cachedEntries);
+                oops('Loading from local storage', 'info');
+                return; 
+            }
+        }
+
+        // 3. Prepare HTTP Conditional Headers
+        const headers = {};
+        if (cachedEtag) headers['If-None-Match'] = cachedEtag;
+        if (cachedLastModified) headers['If-Modified-Since'] = cachedLastModified;
+
         try {
-
-            const cachedEtag = readStoredValue(etagKey);
-            const cachedLastModified = readStoredValue(lastModifiedKey);
-            const cachedEntries = readStoredValue(cachedDataKey);
-            const cachedLastChecked = readStoredValue(lastCheckedKey);
-
-            // 1. Check if we have cached data and if 1 day (24 hours) has passed
-            if (cachedEntries && cachedLastChecked) {
-                const oneDayInMs = 24 * 60 * 60 * 1000;
-                const timePassed = Date.now() - parseInt(cachedLastChecked, 10);
-
-                if (timePassed < oneDayInMs) {
-                    renderEntries(JSON.parse(cachedEntries));
-                    oops('Loading from local storage', 'info');
-                    return; // Stop here! No network request made at all.
-                }
-            }
-
-            // 2. If 1 day has passed, proceed with the conditional network request
-            const headers = {};
-
-            if (cachedEtag) {
-                headers['If-None-Match'] = cachedEtag;
-            }
-
-            if (cachedLastModified) {
-                headers['If-Modified-Since'] = cachedLastModified;
-            }
-
-            // Added 'cache: no-cache' back to ensure the browser performs the 304 handshake
             const response = await fetch(`records`, {
                 method: 'GET',
                 headers: headers,
                 cache: 'no-cache'
             });
 
-            // 3. CDN/Server says data hasn't changed. 
-            if (response.status === 304) {
-                if (cachedEntries) {
-                    // Update the timer so we don't ask the network again for another 24 hours
-                    safeWriteStoredValue(lastCheckedKey, Date.now().toString());
-                    renderEntries(JSON.parse(cachedEntries));
-                    oops('Loading from local storage (verified fresh)', 'info');
-                    return;
-                }
+            // 4. Server says data hasn't changed (304 Not Modified)
+            if (response.status === 304 && cachedEntries) {
+                writeStoredValue(lastCheckedKey, Date.now().toString());
+                renderEntries(cachedEntries);
+                oops('Loading from local storage (verified fresh)', 'info');
+                return;
             }
 
             if (!response.ok) {
-                throw new Error(`Failed to load database: ${response.status}`);
+                throw new Error(`Server responded with status ${response.status}`);
             }
 
-            // 4. Handle a fresh 200 OK download
+            // 5. Handle a fresh 200 OK download
             const serverEtag = response.headers.get('etag') || '';
             const serverLastModified = response.headers.get('last-modified') || '';
             const entries = await response.json();
 
-            safeWriteStoredValue(etagKey, serverEtag);
-            safeWriteStoredValue(lastModifiedKey, serverLastModified);
-            safeWriteStoredValue(cachedDataKey, JSON.stringify(entries));
-            safeWriteStoredValue(lastCheckedKey, Date.now().toString()); // Set timer for fresh data
+            writeStoredValue(etagKey, serverEtag);
+            writeStoredValue(lastModifiedKey, serverLastModified);
+            writeStoredValue(cachedDataKey, JSON.stringify(entries));
+            writeStoredValue(lastCheckedKey, Date.now().toString());
 
             renderEntries(entries);
             oops("Successfully loading new database from server", "success");
 
-        } catch (error) {
+        } catch (networkError) {
 
-            let msg = `Unable to load bassboard data: ${error}`;
+            // 6. Network/Fetch failed. Attempt emergency offline fallback using existing cache!
+            if (cachedEntries) {
+                renderEntries(cachedEntries);
+                oops(`Network error (${networkError.message}). Loaded historical offline backup.`, 'warning');
+                return;
+            }
+
+            // 7. Complete failure fallback UI (No network AND no cache found)
+            let msg = `Unable to load bassboard data: ${networkError}`;
             oops(msg, 'error');
+            
             songList.innerHTML = '';
-
             const fallbackItem = document.createElement('li');
             fallbackItem.className = 'song-item';
             fallbackItem.innerHTML = '<span>Unable to load songs</span>';
             songList.appendChild(fallbackItem);
-
         }
     }
 
     if (searchInput) searchInput.addEventListener('input', applyFilter);
-    loadDatabase();
+    loadDatabase(); // already catches errors
 
     // -------- Refresh page feature, support both local storage and cookies ------ //
 
@@ -744,12 +716,13 @@ function initEvents() {
 
     function checkPageAge() {
         const THREE_DAYS = 3 * 24 * 60 * 60 * 1000; // 3 days in ms
-
         const now = Date.now();
         let shouldUpdate = false;
 
-        if (isStorageAvailable) {
-            // --- LOCAL STORAGE ---
+        try {
+            if (typeof window === 'undefined' || !window.localStorage) {
+                throw new Error('Storage completely unavailable');
+            }
             const lastOpen = localStorage.getItem('site_last_opened');
             if (!lastOpen) {
                 localStorage.setItem('site_last_opened', now);
@@ -757,8 +730,8 @@ function initEvents() {
                 localStorage.setItem('site_last_opened', now);
                 shouldUpdate = true;
             }
-        } else {
-            // --- COOKIES FALLBACK ---
+        } catch (storageError) {
+            oops(`No local storage found: ${storageError.message}. Use cookies instead`, 'warning');
             const isSiteActive = getCookie('site_active');
             if (!isSiteActive) {
                 setThreeDayCookie();
@@ -767,7 +740,7 @@ function initEvents() {
         }
 
         if (shouldUpdate) {
-            oops("Refreshing website for updates...","warning");
+            oops("Refreshing website for updates...", "warning");
             setTimeout(function() {
                 window.location.reload(true); // Force reload from server
             }, 3000);
@@ -783,7 +756,6 @@ function initEvents() {
 
 } // end of initEvents
 
-// Run immediately if the DOM is ready, otherwise wait for the event
 if (document.readyState === 'interactive' || document.readyState === 'complete') {
     initEvents();
 } else {

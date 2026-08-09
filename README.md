@@ -13,7 +13,7 @@ https://skujp.github.io/music
 Installation
 ------------
 
-Download `bass.js` file from this repository, then include the following in your html document...
+Download `bass.js` (latest version) from this repository, then include the following in your html document...
 
 ```html
 <script src="bass.js"></script>
@@ -146,12 +146,6 @@ To turn on debugging...
 
 ```javascript
 bass.setDebug(true);
-```
-
-To check library version...
-
-```javascript
-bass.getVersion();
 ```
 
 Contact
