@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "5.0.1";                                                 
+const VERSION = "5.1.0";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -870,9 +870,12 @@ function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volum
   gain.gain.exponentialRampToValueAtTime(attackVolume, now + attackTime);
   gain.gain.setValueAtTime(sustainVolume, now + (duration || 0.01));
   gain.gain.exponentialRampToValueAtTime(minimumVolume, now + duration + 0.8);
+  osc.onended = () => {
+    osc.disconnect();
+    gain.disconnect();
+  };
   osc.start(now);
   osc.stop(now + duration + 0.9);
-  return {osc, gain};
 }
 function _delay(ms = DEF_MSEC, signal) {
   return new Promise(function (resolve, reject) {
