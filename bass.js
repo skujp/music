@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "5.2.0";                                                 
+const VERSION = "5.3.0";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -132,7 +132,7 @@ function help() {
     manual += "" + "\n";
     manual += "1. Note" + "\n";
     manual += "A musical note is a single, basic building block of music." + "\n";
-    manual += "For a piano standard musical scale, it can be written as:" + "\n";
+    manual += "For a piano common musical scale, it can be written as:" + "\n";
     manual += "C, C#, Db, D, D#, Eb, E, F, F#, Gb, G, G#, Ab, A, A#, Bb, B." + "\n";
     manual += "" + "\n";
     manual += "2. Chord" + "\n";
@@ -213,7 +213,7 @@ function help() {
     manual += "12. Octave" + "\n";
     manual += "An octave is the distance between two musical notes that share the " + "\n";
     manual += "same name (like two different C notes). " + "\n";
-    manual += "It is exactly eight steps apart on a standard musical scale." + "\n";
+    manual += "It is exactly eight steps apart on a common musical scale." + "\n";
     manual += "In the BASS system, octave ranges can be from 0 to 8 " + "\n";
     manual += "where 0 is the lowest bass, and 8 is the highest bass." + "\n";
     manual += "By default, it uses octave 4 similar to the concept of " + "\n";
@@ -338,7 +338,7 @@ function help() {
     manual += "" + "\n";
     manual += "VI. QWERTY KEYBOARD" + "\n";
     manual += "" + "\n";
-    manual += "Piano notes are mapped to the qwerty row, and number row of a standard computer keyboard. For example: q,w,e,r,t,2,3..." + "\n";
+    manual += "Piano notes are mapped to the qwerty row, and number row of a common computer keyboard. For example: q,w,e,r,t,2,3..." + "\n";
     manual += "Guitar notes are mapped to the next row." + "\n";
     manual += "For example, a,s,d,f,g for frets, and h,j,k,l,;,' for strings 6 to 1." + "\n";
     manual += "" + "\n";
@@ -355,8 +355,7 @@ function help() {
     manual += "" + "\n";
     manual += "VIII. SOURCE" + "\n";
     manual += "" + "\n";
-    manual += "The BASS source code is below. The library file name is 'bass.js' " + "\n";
-    manual += "Report errors, send patches, remix, etc. as you wish. Thanks." + "\n";
+    manual += "The BASS source code is below. The library file is bass.js" + "\n";
     manual += "" + "\n";
     manual += "https://github.com/skujp/music" + "\n";
     manual += "" + "\n";
@@ -457,14 +456,14 @@ function getChordNotes(chord=FAKE) {
     if (seventhNoteNumber) chordNotes.add(seventhNoteNumber);
     if (ninthNoteNumber) chordNotes.add(ninthNoteNumber);
     const noteNames = [];
-    chordNotes.forEach(noteNumber => {
+    for (let noteNumber of chordNotes) {
         let nn = notes[noteNumber];
         if (nn === undefined) {
             error.msg = `Invalid note number: ${noteNumber}`;
-            return null;
+            return null; 
         }
-        noteNames.push(nn); 
-    });
+        noteNames.push(nn);
+    }
     if (ebassNoteNumber) {
         let base = notes[ebassNoteNumber];
         if (base === undefined) {
@@ -816,11 +815,11 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
         if (this[func].constructor.name === 'AsyncFunction') {
             error.msg = `func ${func} is an async function. Will be invoke with async function style`;
             let result = this[func](arg);  
-            result.then((data) => {
+            result.then(function(data) {
                 if (data) {  
                     oops(`[Async] [Error] ${data}`,'warning');
                 } 
-            }).catch((exp) => {
+            }).catch(function(exp) {
                 oops(`[Async] [Exception] ${exp}`, 'warning');
             });
         } else {
@@ -907,9 +906,9 @@ function _playSequencerChord(sequencerChord = BM, octave = DEF_OCTAVE, duration 
         if (sequencerChord[1]) {
             playNote(sequencerChord[1], octave - 1, duration, volume); 
         }
-        sequencerChord[0].forEach(note => {
+        for (let note of sequencerChord[0]) {
             playNote(note, octave, duration, volume); 
-        });
+        }
     } else {  
         playNote(FAKE, MIN_OCTAVE, duration, MIN_VOL); 
     }
@@ -969,7 +968,9 @@ async function _saveSheetMusicToBASS() {
   }
 }
 async function _saveSheetMusicToPDF() {
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise(function(resolve) {
+        setTimeout(resolve, 0);
+    });
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.right = '0';

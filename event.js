@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "5.3.0";
+    // VERSION = "5.3.1";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
@@ -142,13 +142,13 @@ function initEvents() {
     var adjustPtr = gNote1;
 
     // Play Button Event Listener
-    playBtn.addEventListener('click', function() {
+    playBtn.addEventListener('click', () => {
         const sheetContent = sheetMusic.value;
         const sequencer = bass.buildSequencer(sheetContent);
         
         if (sequencer) {
             oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
-            bass.playSequencer(sequencer).catch(function(e) {
+            bass.playSequencer(sequencer).catch((e) => {
                 if (e.name !== 'AbortError') {
                     oops(`[Error playing sequencer]: ${e.message}`, 'error');
                 }
@@ -161,7 +161,7 @@ function initEvents() {
     });
 
     // Stop Button Event Listener
-    stopBtn.addEventListener('click', function() {
+    stopBtn.addEventListener('click', () => {
         if (sheetMusic.prevClick == READBTN) {
             if (sheetMusic.value.length >  bass.getMaxSheetLength()) {
                 sheetMusic.value = "";
@@ -181,7 +181,7 @@ function initEvents() {
     });
 
     // READ Button Event Listener
-    readBtn.addEventListener('click', function() {
+    readBtn.addEventListener('click', () => {
         if (sheetMusic.prevClick !== READBTN || sheetMusic.value.length == 0) {
             sheetMusic.value = bass.help();
             sheetMusic.style.height = '300px';
@@ -222,7 +222,7 @@ function initEvents() {
     fSNote1.addEventListener('click', (e) => {e.stopPropagation(); bass.playNote('F#',bass.getOctave()+UP1+1,PED,TREB_VOL)});
 
     // GUITAR click event listener
-    // Standard tuning: E₂, A₂, D₃, G₃, B₃, E₄
+    // Common tuning: E₂, A₂, D₃, G₃, B₃, E₄
     // Actual octave played depending on current octave set in bass object
     s6.addEventListener('click', (e) => {e.stopPropagation(); const [n,o] = bass.getGuitarNote(6,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+o,PED,TREB_VOL)});      // lower E2, fret#
     s5.addEventListener('click', (e) => {e.stopPropagation(); const [n,o] = bass.getGuitarNote(5,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+o,PED,TREB_VOL)});      // A2, fret#
@@ -405,7 +405,7 @@ function initEvents() {
     // on which instruments are in used
     rotateBtn.currentIns = PIANO;
     rotateBtn.textContent = PIANOICON;
-    rotateBtn.addEventListener('click', function() {
+    rotateBtn.addEventListener('click', () => {
         if (rotateBtn.currentIns == PIANO) {
             piano.style.display = 'none';
             guitar.style.display = 'flex';
@@ -509,7 +509,7 @@ function initEvents() {
         prevBtn.className = 'pagination-btn';
         prevBtn.textContent = 'Prev';
         prevBtn.disabled = currentPage === 1 || filteredEntries.length === 0;
-        prevBtn.addEventListener('click', function() {
+        prevBtn.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage -= 1;
                 renderPage();
@@ -520,7 +520,7 @@ function initEvents() {
         nextBtn.className = 'pagination-btn';
         nextBtn.textContent = 'Next';
         nextBtn.disabled = currentPage >= Math.ceil(filteredEntries.length / PAGE_SIZE) || filteredEntries.length === 0;
-        nextBtn.addEventListener('click', function() {
+        nextBtn.addEventListener('click', () => {
             if (currentPage < Math.ceil(filteredEntries.length / PAGE_SIZE)) {
                 currentPage += 1;
                 renderPage();
@@ -698,7 +698,7 @@ function initEvents() {
     }
 
     if (searchInput) searchInput.addEventListener('input', applyFilter);
-    loadDatabase(); // already catches errors
+    loadDatabase(); // already caught errors
 
     // -------- Refresh page feature, support both local storage and cookies ------ //
 
@@ -741,14 +741,14 @@ function initEvents() {
 
         if (shouldUpdate) {
             oops("Refreshing website for updates...", "warning");
-            setTimeout(function() {
+            setTimeout(() => {
                 window.location.reload(true); // Force reload from server
             }, 3000);
         }
     }
 
     // [!Important]
-    document.addEventListener('visibilitychange', function() {
+    document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
             checkPageAge();
         }

@@ -3,7 +3,7 @@ bass.js
 
 A music sequencer library, written in javascript.
 
-Process standard musical notations.
+Process common musical notations.
 
 Demo
 ----
@@ -32,7 +32,7 @@ var sequencer = bass.buildSequencer(sheetMusic);
 	Return a sequencer object which is ready for playback.
 
 	sheetMusic
-		a string containing standard musical notations. 
+		a string containing common musical notations. 
 		for example, '| F7 A Cmaj7 F ||'
 */
 ```
@@ -92,7 +92,7 @@ bass.playChord(chordName, octave, duration);
 	
 	octave
 		an integer number between 0 - 8,
-		by default it is set to 4 like middle C in a standard piano
+		by default it is set to 4 like middle C in a common piano
 	
 	duration
 		in seconds,
@@ -124,7 +124,7 @@ bass.playNote(noteName, octave, duration, volume);
 	Play a musical note
 
 	noteName
-		one of the following 12 notes in a standard musical scale:
+		one of the following 12 notes in a common musical scale:
 		C C#/Db D D#/Eb E F F#/Gb G G#/Ab A A#/Bb B 
 	
 	octave
@@ -147,6 +147,13 @@ To turn on debugging...
 ```javascript
 bass.setDebug(true);
 ```
+
+Compatibility
+-------------
+
+Works with any browser from 2016 onward.
+
+For browsers before 2013 (without updates), please port the code syntax.
 
 Contact
 -------
