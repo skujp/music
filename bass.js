@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "5.3.2";                                                 
+const VERSION = "6.0.0";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -29,18 +29,18 @@ function rename() {
     }
     return TheBass;
 }
-function bind(libObject, functionObj) {
+function attach(libObject, functionObj) {
     Object.assign(libObject, functionObj);
 }
-bind(TheBass, {rename, setDebug, help, getErrorMsg, getChordNotes, buildSequencer});  
-bind(TheBass, {setFullAsyncDebug, getFullAsyncDebugMode, oops, 
-                   playNote, playChord, playSequencer, stopSequencer, 
-                   setTempo, setOctave, getOctave, getTempo, 
-                   getSampleTestCase, getMaxSheetLength,
-                   setSaveAs, setSustain, getSustain, 
-                   getInstrument, setInstrument,
-                   getDuration, getGuitarNote, getVersion 
-              });    
+attach(TheBass, {rename, setDebug, help, getErrorMsg, getChordNotes, buildSequencer});  
+attach(TheBass, {setFullAsyncDebug, getFullAsyncDebugMode, oops, 
+                 playNote, playChord, playSequencer, stopSequencer, 
+                 setTempo, setOctave, getOctave, getTempo, 
+                 getSampleTestCase, getMaxSheetLength,
+                 setSaveAs, setSustain, getSustain, 
+                 getInstrument, setInstrument,
+                 getDuration, getGuitarNote, getVersion 
+                });    
 const BPM = {                                                           
     _val: 90,                                                           
     get val() {
@@ -1036,7 +1036,7 @@ async function playSequencer(sequencerObj) {
     [sequencer,loopBackIndex,repeatCount,end=END,forwardIndex,skipNumberIndex] = sequencerObj;
     validArgs.delete(sequencerObj); 
     const problem = `Sequencer object will be removed from WeakSet right after playing`;
-    if (FULL_ASYNC_DEBUG_MODE) oops(problem, 'info'); 
+    oops(problem, 'warning', FULL_ASYNC_DEBUG_MODE);
   } else {
     const problem = `[SEQUENCER WARNING] Must run buildSequencer() first before feeding result to playSequencer(). Using default sequencer: ${JSON.stringify(SMP_SEQUENCER)} with tempo: ${BPM.val} bpm`;
     oops(problem, 'warning');
@@ -1119,12 +1119,15 @@ function setInstrument(inst) {
         return problem;
     }
 }
-function oops(message, type = 'info') {
+function oops(message, type = 'info', show=true) {
     if (typeof(global) !== "object" || global !== window) {
         const problem = `[Oops ERROR] Oops function is currently supported in browser environment only`;
         error.msg = problem;
         alert(problem);
         return problem;
+    }
+    if (!show) {
+        return;
     }
     const oopsContainer = document.getElementById('oopsContainer') || _createOopsContainer();
     const oopsEl = document.createElement('div');

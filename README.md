@@ -1,4 +1,4 @@
-bass.js (<!--version-->v5.3.2<!--/version-->)
+bass.js (<!--version-->v6.0.0<!--/version-->)
 =======
 
 A music sequencer library, written in javascript.
@@ -142,10 +142,16 @@ bass.playNote(noteName, octave, duration, volume);
 */
 ```
 
-To turn on debugging...
+To turn on synchronous debugging...
 
 ```javascript
 bass.setDebug(true);
+```
+
+To turn on asynchronous debugging...
+
+```javascript
+bass.setFullAsyncDebug(true);
 ```
 
 Compatibility
