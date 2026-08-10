@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "5.3.1";
+    // VERSION = "5.3.2";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
@@ -698,7 +698,9 @@ function initEvents() {
     }
 
     if (searchInput) searchInput.addEventListener('input', applyFilter);
-    loadDatabase(); // already caught errors
+    loadDatabase().catch((error) => {
+        oops(`Unexpected error during database load: ${error}`, 'error');
+    });
 
     // -------- Refresh page feature, support both local storage and cookies ------ //
 

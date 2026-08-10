@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "5.3.0";                                                 
+const VERSION = "5.3.2";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -90,7 +90,7 @@ var EMPTY = "";
 var [beats, beatType] = DEF_TIME_SIGNATURE.split('/').map(Number);      
 var DEF_DURATION = 60 / BPM.val;                                        
 var DEF_MSEC = DEF_DURATION * 1000;                                     
-var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:Melodius\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
+var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var SAVE_AS_TYPES = new Set(["PDF","BASS"]);                            
 var BASSBOARD_DB_FIELD = new Set(["Contributor","Title"]);              
 var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative)(:)(.+)$/;
@@ -1099,10 +1099,10 @@ async function setSaveAs(option) {
         return problem;
     }
     if (option == "PDF") {             
-        let result = await _saveSheetMusicToPDF();
+        let result = await _saveSheetMusicToPDF().catch(function(err) {throw new Error("Save As PDF Exception: " + err.message);});
         return result;                 
     } else if (option == "BASS") {     
-        let result = await _saveSheetMusicToBASS(); 
+        let result = await _saveSheetMusicToBASS().catch(function(err) {throw new Error("Save As BASS Exception: " + err.message);});
         return result;                 
     } 
     const problem = `This SaveAs format is not supported : ${option}`;

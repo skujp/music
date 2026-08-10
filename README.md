@@ -1,4 +1,4 @@
-bass.js
+bass.js (<!--version-->v5.3.2<!--/version-->)
 =======
 
 A music sequencer library, written in javascript.
@@ -13,7 +13,7 @@ https://skujp.github.io/music
 Installation
 ------------
 
-Download `bass.js` (latest version) from this repository, then include the following in your html document...
+Download `bass.js` from this repository, then include the following in your html document...
 
 ```html
 <script src="bass.js"></script>
@@ -53,7 +53,7 @@ bass.playSequencer(sequencer);
 
    If the sequencer is undefined, bass will play its default sequencer.
 
-   If sheet music ends with a double bar, an undefined promise will be returned.  
+   If sheet music has an end, returns undefined promise, otherwises it plays in a loop.  
 */
 ```
 
