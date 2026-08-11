@@ -157,9 +157,7 @@ bass.setFullAsyncDebug(true);
 Compatibility
 -------------
 
-Works with any browser from 2016 onward.
-
-For browsers before 2013 (without updates), please port the code syntax.
+Currently works for ES6-compatible browsers
 
 Contact
 -------
