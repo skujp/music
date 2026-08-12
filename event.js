@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "6.0.0";
+    // VERSION = "6.0.1";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
@@ -23,13 +23,11 @@ function initEvents() {
     // volume for treble clef
     var TREB_VOL = 0.5;
 
-    // literals
     const SHEETMUSIC = 'sheetMusic';
     const PLAYBTN = 'playBtn';
     const STOPBTN = 'stopBtn';
     const READBTN = 'readBtn';
 
-    // piano notes
     const CNOTE = 'cNote';
     const CSNOTE = 'cSNote';
     const DNOTE = 'dNote';
@@ -52,17 +50,14 @@ function initEvents() {
     const FSNOTE1 = 'fSNote1';
     const GNOTE1 = 'gNote1';
 
-    // instruments
     const PIANO = 'piano';
     const GUITAR = 'acoustic';
     const ALL = 'allInstrument';
 
-    // piano controls;
     const MINUSBTN = 'minusBtn';
     const PLUSBTN = 'plusBtn';
     const ROTATEBTN = 'rotateBtn';
 
-    // guitar strings and frets
     const S6 = 's6';
     const S5 = 's5';
     const S4 = 's4';
@@ -76,17 +71,14 @@ function initEvents() {
     const F4 = 'f4';
     const F5 = 'f5';
 
-    // emoticons
     const PIANOICON = '🎹';
     const GUITARICON = '🎸';
     const ALLICONS = '🎹 🎸';
 
-    // bassboard
     const BASSBOARD = 'bassboard';
     const SONGLIST = 'songList';
     const PAGE_SIZE = 11;
 
-    // piano
     const sheetMusic = document.getElementById(SHEETMUSIC);
     const playBtn = document.getElementById(PLAYBTN);
     const stopBtn = document.getElementById(STOPBTN);
@@ -119,7 +111,6 @@ function initEvents() {
 
     const piano = document.getElementById(PIANO);
 
-    // guitar 
     const s1 = document.getElementById(S1);
     const s2 = document.getElementById(S2);
     const s3 = document.getElementById(S3);
@@ -129,19 +120,14 @@ function initEvents() {
 
     const guitar = document.getElementById(GUITAR);
 
-    // bassboard
     const bassBoard = document.getElementById(BASSBOARD);
 
-    // songlist
     const songList = document.getElementById(SONGLIST);
 
-    // Initialize sheetMusic
     sheetMusic.value = bass.getSampleTestCase();
 
-    // Pointer to the last note of the piano for - + adjustment
     var adjustPtr = gNote1;
 
-    // Play Button Event Listener
     playBtn.addEventListener('click', () => {
         const sheetContent = sheetMusic.value;
         const sequencer = bass.buildSequencer(sheetContent);
@@ -154,13 +140,12 @@ function initEvents() {
                 }
             });
         } else {
-            oops(bass.getErrorMsg(), 'error');  // synchronous error
+            oops(bass.getErrorMsg(), 'error');  // synchronous
         }
 
         sheetMusic.prevClick = PLAYBTN;
     });
 
-    // Stop Button Event Listener
     stopBtn.addEventListener('click', () => {
         if (sheetMusic.prevClick == READBTN) {
             if (sheetMusic.value.length >  bass.getMaxSheetLength()) {
@@ -180,7 +165,6 @@ function initEvents() {
         sheetMusic.prevClick = STOPBTN;
     });
 
-    // READ Button Event Listener
     readBtn.addEventListener('click', () => {
         if (sheetMusic.prevClick !== READBTN || sheetMusic.value.length == 0) {
             sheetMusic.value = bass.help();
@@ -190,13 +174,11 @@ function initEvents() {
         }
     });
 
-    // SHEETMUSIC Text Area Listener
     sheetMusic.addEventListener('input', function() {
         this.style.height = 'auto'; // Reset height to calculate correctly
         this.style.height = this.scrollHeight + 'px'; // Expand to fit text
     });
 
-    // PIANO (treble clef) click event listener
     cNote.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); bass.playNote('C',bass.getOctave()+UP1,PED,TREB_VOL)});
     dNote.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); bass.playNote('D',bass.getOctave()+UP1,PED,TREB_VOL)});
     eNote.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); bass.playNote('E',bass.getOctave()+UP1,PED,TREB_VOL)});
@@ -221,9 +203,7 @@ function initEvents() {
     dSNote1.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); bass.playNote('D#',bass.getOctave()+UP1+1,PED,TREB_VOL)});
     fSNote1.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); bass.playNote('F#',bass.getOctave()+UP1+1,PED,TREB_VOL)});
 
-    // GUITAR click event listener
-    // Common tuning: E₂, A₂, D₃, G₃, B₃, E₄
-    // Actual octave played depending on current octave set in bass object
+    // Guitar common tuning: E₂, A₂, D₃, G₃, B₃, E₄
     s6.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); const [n,o] = bass.getGuitarNote(6,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+o,PED,TREB_VOL)});      // lower E2, fret#
     s5.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); const [n,o] = bass.getGuitarNote(5,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+o,PED,TREB_VOL)});      // A2, fret#
     s4.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); const [n,o] = bass.getGuitarNote(4,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+1+o,PED,TREB_VOL)});    // D3, fret#
@@ -231,7 +211,6 @@ function initEvents() {
     s2.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); const [n,o] = bass.getGuitarNote(2,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+1+o,PED,TREB_VOL)});    // B3, fret#
     s1.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); const [n,o] = bass.getGuitarNote(1,fretKeyDown); bass.playNote(n,bass.getOctave()+UP1+2+o,PED,TREB_VOL)}); 
 
-    // PIANO mapping keys
     const noteKeyMap = {
         /* piano section */
         /* w notes */
@@ -295,29 +274,29 @@ function initEvents() {
         e.preventDefault();
 
         switch (noteId) {
-        case F1:
-            fretKeyDown = 1;
-            break;
-        case F2:
-            fretKeyDown = 2;
-            break;
-        case F3:
-            fretKeyDown = 3;
-            break;
-        case F4:
-            fretKeyDown = 4;
-            break;
-        case F5:
-            fretKeyDown = 5;
-            break;
-        default:
-            break;
+            case F1:
+                fretKeyDown = 1;
+                break;
+            case F2:
+                fretKeyDown = 2;
+                break;
+            case F3:
+                fretKeyDown = 3;
+                break;
+            case F4:
+                fretKeyDown = 4;
+                break;
+            case F5:
+                fretKeyDown = 5;
+                break;
+            default:
+                break;
         }
 
         const noteEl = document.getElementById(noteId);
         if (noteEl) {
-        noteEl.classList.add('active');
-        noteEl.click(); 
+            noteEl.classList.add('active');
+            noteEl.click(); 
         }
     });
 
@@ -330,22 +309,21 @@ function initEvents() {
         if (!noteId) return;
 
         switch (noteId) {
-        case F1: 
-        case F2: 
-        case F3: 
-        case F4: 
-        case F5:
-            fretKeyDown = undefined;
-            break;
-        default:
-            break;
+            case F1: 
+            case F2: 
+            case F3: 
+            case F4: 
+            case F5:
+                fretKeyDown = undefined;
+                break;
+            default:
+                break;
         }
 
         const noteEl = document.getElementById(noteId);
         if (noteEl && noteEl.classList) noteEl.classList.remove('active');
     });
 
-    // Minus and Plus Buttons to customize the piano
     function dropNoteClick() {
         if (adjustPtr === cNote) { oops('Minimum notes reached', 'warning'); return; } // sentinel left
 
@@ -361,6 +339,7 @@ function initEvents() {
             }
         }  
     }
+
     minusBtn.addEventListener('click', dropNoteClick);
 
     function addNoteClick() {
@@ -400,9 +379,7 @@ function initEvents() {
         oops('Octave -1', 'warning');
     }
 
-    // Change instrument button to cycle through each instrument
-    // + and - buttons will behave accordingly depending
-    // on which instruments are in used
+    // + - behave differently depending on which instrument is in use
     rotateBtn.currentIns = PIANO;
     rotateBtn.textContent = PIANOICON;
     rotateBtn.addEventListener('click', () => {
@@ -634,7 +611,7 @@ function initEvents() {
 
             if (timePassed < oneDayInMs) {
                 renderEntries(cachedEntries);
-                oops('Loading from local storage', 'info');
+                oops("Rhythm and bass, loading with grace!", 'info');
                 return; 
             }
         }
@@ -655,7 +632,7 @@ function initEvents() {
             if (response.status === 304 && cachedEntries) {
                 writeStoredValue(lastCheckedKey, Date.now().toString());
                 renderEntries(cachedEntries);
-                oops('Loading from local storage (verified fresh)', 'info');
+                oops('Verified flow, ready to go!', 'info');
                 return;
             }
 
@@ -674,7 +651,7 @@ function initEvents() {
             writeStoredValue(lastCheckedKey, Date.now().toString());
 
             renderEntries(entries);
-            oops("Successfully loading new database from server", "success");
+            oops("All clear, the vibe is here!", "success");
 
         } catch (networkError) {
 
@@ -702,57 +679,98 @@ function initEvents() {
         oops(`Unexpected error during database load: ${error}`, 'error');
     });
 
-    // -------- Refresh page feature, support both local storage and cookies ------ //
+    // -------- Refresh feature, support both local storage and cookies ------ //
 
     function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
+        const safeName = name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        const match = document.cookie.match(new RegExp('(^|;\\s*)' + safeName + '=([^;]*)'));
+        return match ? decodeURIComponent(match[2]) : null;
     }
+
+    const THREE_DAYS_IN_SECONDS = 3 * 24 * 60 * 60;
+    const THREE_DAYS_IN_MILLISECONDS = THREE_DAYS_IN_SECONDS * 1000;
 
     function setThreeDayCookie() {
-        const THREE_DAYS_IN_SECONDS = 3 * 24 * 60 * 60;
-        document.cookie = `site_active=true; max-age=${THREE_DAYS_IN_SECONDS}; path=/; SameSite=Strict; Secure`;
+        const date = new Date();
+        date.setTime(date.getTime() + THREE_DAYS_IN_MILLISECONDS);
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = `__Host-site_active=true; ${expires}; max-age=${THREE_DAYS_IN_SECONDS}; path=/; SameSite=Strict; Secure`;
     }
 
-    function checkPageAge() {
-        const THREE_DAYS = 3 * 24 * 60 * 60 * 1000; // 3 days in ms
+    function _cookiesEnabled() {
+        try {
+            document.cookie = "cookietest=1; path=/";
+            const cookiesEnabled = document.cookie.indexOf("cookietest=") !== -1;
+            document.cookie = "cookietest=1; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+            return cookiesEnabled;
+        } catch (e) {
+            oops(`Cookies are not enabled: ${e.message}`, 'warning');
+            return false;
+        }
+    }
+
+    const cookiesEnabled = _cookiesEnabled();
+
+    function refresher() {
         const now = Date.now();
         let shouldUpdate = false;
+        let fallbackRequired = false; // indicates if localStorage is unavailable
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const completedFallbackReload = urlParams.has('m');
 
         try {
             if (typeof window === 'undefined' || !window.localStorage) {
                 throw new Error('Storage completely unavailable');
             }
-            const lastOpen = localStorage.getItem('site_last_opened');
-            if (!lastOpen) {
+            const lastOpen = parseInt(localStorage.getItem('site_last_opened'), 10);
+            if (isNaN(lastOpen)) {
                 localStorage.setItem('site_last_opened', now);
-            } else if (now - parseInt(lastOpen, 10) > THREE_DAYS) {
+            } else if (now - lastOpen > THREE_DAYS_IN_MILLISECONDS) {
                 localStorage.setItem('site_last_opened', now);
                 shouldUpdate = true;
             }
-        } catch (storageError) {
-            oops(`No local storage found: ${storageError.message}. Use cookies instead`, 'warning');
-            const isSiteActive = getCookie('site_active');
-            if (!isSiteActive) {
-                setThreeDayCookie();
-                shouldUpdate = true;
+        } catch {
+            fallbackRequired = true;
+
+            if (cookiesEnabled && !completedFallbackReload) {
+                const isSiteActive = getCookie('__Host-site_active');
+                if (!isSiteActive) {
+                    setThreeDayCookie();
+                    shouldUpdate = true;
+                }
+            } else {
+                if (!completedFallbackReload) {
+                    shouldUpdate = true;
+                } else {
+                    const sParam = urlParams.get('p');
+                    const sTimestamp = parseInt(sParam, 10);
+                    if (!isNaN(sTimestamp) && (now - sTimestamp > THREE_DAYS_IN_MILLISECONDS)) {
+                        shouldUpdate = true;
+                    }
+                }
             }
         }
 
         if (shouldUpdate) {
-            oops("Refreshing website for updates...", "warning");
+            oops("Checking for updates...", "warning");
             setTimeout(() => {
-                window.location.reload(true); // Force reload from server
-            }, 3000);
+                // when both localStorage and cookies are unavailable
+                if (fallbackRequired && !cookiesEnabled) {
+                    const url = new URL(window.location.href);                    
+                    url.searchParams.set('m', 'r');
+                    url.searchParams.set('p', Date.now().toString());                    
+                    window.location.replace(url.toString());
+                } else {
+                    window.location.replace(window.location.origin + window.location.pathname);
+                }
+            }, 1000);
         }
     }
 
-    // [!Important]
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-            checkPageAge();
+            refresher();
         }
     });
 
