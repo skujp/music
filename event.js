@@ -632,7 +632,7 @@ function initEvents() {
             if (response.status === 304 && cachedEntries) {
                 writeStoredValue(lastCheckedKey, Date.now().toString());
                 renderEntries(cachedEntries);
-                oops('Verified flow, ready to go!', 'info');
+                oops('Loaded local, verified global!', 'info');
                 return;
             }
 
