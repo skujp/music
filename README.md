@@ -159,12 +159,7 @@ Compatibility
 
 Works for ES6-compatible browsers.
 
-For ES5-compatible browsers, download `bass.es5.js` in legacy directory.
-
-Acknowledgement
----------------
-
-Thanks Babel/Polyfill for providing backward compatibility.
+For ES5-compatible browsers, download `bass.es5.js` in legacy directory, beta-release using Babel/Polyfill
 
 Contact
 -------
