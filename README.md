@@ -157,11 +157,18 @@ bass.setFullAsyncDebug(true);
 Compatibility
 -------------
 
-Currently works for ES6-compatible browsers
+Works for ES6-compatible browsers.
+
+For ES5-compatible browsers, download `bass.es5.js` in legacy directory.
+
+Acknowledgement
+---------------
+
+Thanks Babel/Polyfill for providing backward compatibility.
 
 Contact
 -------
 
-Feel free to email me at: (listed in manual section V, demo website)
+Feel free to email me at: (listed in manual section V, demo website).
 
-Or X/Twitter: @bassthemusic101 (The Music 101)
+Or X/Twitter: @bassthemusic101 (The Music 101).
