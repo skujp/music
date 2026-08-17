@@ -90,11 +90,6 @@
     "contributor": "Contributor 18"
   },
   {
-    "title": "Song 19",
-    "content": "| G Gsus G7 Gm ||",
-    "contributor": "Contributor 19"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -111,5 +106,11 @@
     "contributor": "bpop",
     "content": "Title:Viva_La_Vida\nSustain:Yes\nContributor:bpop\nTempo:140\nCover:Yes\nMisc:Ab\n\n8/16 | (35x)\n(intro2x_verseA2x_interlude2x_verseB4x_chorus4x)\n(bridge2x_verseB4x_chorus4x_bridge5x_chorus4x_fadeout2x)\n\nDb5/Db     /    Db5/Db    /    Db5/Db  /  Db5/Db Eb5/Eb   |\n   /    Eb5/Eb     /   Eb5/Eb  Eb5/Eb  /  Eb5/Eb    /     |\nCmaug/C    /   Cmaug/C    /   Cmaug/C  /  Cmaug/C Fm/F    |\n   /     Fm/F      /     Fm/F    Fm/F  /   Fm/F     /   :|| ",
     "url": "https://youtu.be/qAB0z55eUgU"
+  },
+  {
+    "title": "This Love",
+    "contributor": "frock",
+    "content": "Title:This_Love Tempo:100 Sustain:Yes Contributor:frock Misc:Ab\n\n8/16 |: (4x) (verse)\nG/G       G     G/G      G     G/G      G     G/G      G      | \nCm/C      Cm    Cm/C     Cm    Cm/C     Cm    Cm/C     Cm     | \nAb/Ab     Ab    Ab/Ab    Ab    Ab/Ab    Ab    Ab/Ab    Ab     |\nAbdim/Ab  Abdim Abdim/Ab Abdim Abdim/Ab Abdim Abdim/Ab Abdim  \n\n:|: (2x) (chorus)\nCm        /     Cm       /     Cm       /     Cm       /      | \nF         /     F        /     F        /     F        /      | \nDdim      /     Ddim     /     Ddim     /     Ddim     /      |\nEb        /     Eb       /     Eb       /     Eb       /   \n\n:|: (1x) (verse)\nG/G       G     G/G      G     G/G      G     G/G      G      | \nCm/C      Cm    Cm/C     Cm    Cm/C     Cm    Cm/C     Cm     | \nAb/Ab     Ab    Ab/Ab    Ab    Ab/Ab    Ab    Ab/Ab    Ab     |\nAbdim/Ab  Abdim Abdim/Ab Abdim Abdim/Ab Abdim Abdim/Ab Abdim \n \n:|: (4x) (chorus)\nCm        /     Cm       /     Cm       /     Cm       /      | \nF         /     F        /     F        /     F        /      | \nDdim      /     Ddim     /     Ddim     /     Ddim     /      |\nEb        /     Eb       /     Eb       /     Eb       /     :|\n\n(fade) /  /     /        /     /        /     /        /     ||                         ",
+    "url": "https://youtube.com/shorts/ey1vU7nR_ig?si=LmS4O2v5o9gbUdsH"
   }
 ]
