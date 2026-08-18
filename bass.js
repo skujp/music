@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "6.0.0";                                                 
+const VERSION = "6.0.1";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -278,7 +278,7 @@ function help() {
     manual += "" + "\n";
     manual += "Metadata:" + "\n";
     manual += "(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) " + "\n";
-    manual += "(Allegro) (Moderato) (Adagio) (Lyrics can go here too) ..." + "\n";
+    manual += "(allegro) (moderato) (adagio) (lyrics_separated_by_underscores) ..." + "\n";
     manual += "" + "\n";
     manual += "Remark:   " + "\n";
     manual += "... means et cetera" + "\n";
