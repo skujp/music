@@ -85,11 +85,6 @@
     "contributor": "Contributor 17"
   },
   {
-    "title": "Song 18",
-    "content": "| F Fmin F7 Fm ||",
-    "contributor": "Contributor 18"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -110,7 +105,13 @@
   {
     "title": "This Love",
     "contributor": "frock",
-    "content": "Title:This_Love Tempo:100 Sustain:Yes Contributor:frock Misc:Ab\n\n8/16 |: (4x) (verse)\nG/G       G     G/G      G     G/G      G     G/G      G      | \nCm/C      Cm    Cm/C     Cm    Cm/C     Cm    Cm/C     Cm     | \nAb/Ab     Ab    Ab/Ab    Ab    Ab/Ab    Ab    Ab/Ab    Ab     |\nAbdim/Ab  Abdim Abdim/Ab Abdim Abdim/Ab Abdim Abdim/Ab Abdim  \n\n:|: (2x) (chorus)\nCm        /     Cm       /     Cm       /     Cm       /      | \nF         /     F        /     F        /     F        /      | \nDdim      /     Ddim     /     Ddim     /     Ddim     /      |\nEb        /     Eb       /     Eb       /     Eb       /   \n\n:|: (1x) (verse)\nG/G       G     G/G      G     G/G      G     G/G      G      | \nCm/C      Cm    Cm/C     Cm    Cm/C     Cm    Cm/C     Cm     | \nAb/Ab     Ab    Ab/Ab    Ab    Ab/Ab    Ab    Ab/Ab    Ab     |\nAbdim/Ab  Abdim Abdim/Ab Abdim Abdim/Ab Abdim Abdim/Ab Abdim \n \n:|: (4x) (chorus)\nCm        /     Cm       /     Cm       /     Cm       /      | \nF         /     F        /     F        /     F        /      | \nDdim      /     Ddim     /     Ddim     /     Ddim     /      |\nEb        /     Eb       /     Eb       /     Eb       /     :|\n\n(fade) /  /     /        /     /        /     /        /     ||                         ",
+    "content": "Title:This_Love Tempo:100 Sustain:Yes Contributor:frock Cover:Yes Misc:Ab\n\n8/16 |: (4x) (verse)\nG/G       G     G/G      G     G/G      G     G/G      G      | \nCm/C      Cm    Cm/C     Cm    Cm/C     Cm    Cm/C     Cm     | \nAb/Ab     Ab    Ab/Ab    Ab    Ab/Ab    Ab    Ab/Ab    Ab     |\nAbdim/Ab  Abdim Abdim/Ab Abdim Abdim/Ab Abdim Abdim/Ab Abdim  \n\n:|: (2x) (chorus)\nCm        /     Cm       /     Cm       /     Cm       /      | \nF         /     F        /     F        /     F        /      | \nDdim      /     Ddim     /     Ddim     /     Ddim     /      |\nEb        /     Eb       /     Eb       /     Eb       /   \n\n:|: (1x) (verse)\nG/G       G     G/G      G     G/G      G     G/G      G      | \nCm/C      Cm    Cm/C     Cm    Cm/C     Cm    Cm/C     Cm     | \nAb/Ab     Ab    Ab/Ab    Ab    Ab/Ab    Ab    Ab/Ab    Ab     |\nAbdim/Ab  Abdim Abdim/Ab Abdim Abdim/Ab Abdim Abdim/Ab Abdim \n \n:|: (4x) (chorus)\nCm        /     Cm       /     Cm       /     Cm       /      | \nF         /     F        /     F        /     F        /      | \nDdim      /     Ddim     /     Ddim     /     Ddim     /      |\nEb        /     Eb       /     Eb       /     Eb       /     :|\n\n(fade) /  /     /        /     /        /     /        /     ||                         ",
     "url": "https://youtube.com/shorts/ey1vU7nR_ig?si=LmS4O2v5o9gbUdsH"
+  },
+  {
+    "title": "Stand By Me",
+    "contributor": "soul",
+    "content": "Title:Stand_By_Me\nSustain:Yes\nTempo:140\nCover:Yes\nMisc:Ab\nContributor:soul\n\n18/32 |  \nA   / / A   / / / A/E    A/G#  A   / / A   / / / A/A    A/G#  |\nF#m / / F#m / / / F#m/C# F#m/E F#m / / F#m / / / F#m/F# F#m/E | D   / / D   / / / D/D    D/F#  E   / / E   / / / E/E    E/G#  |\nA   / / A   / / / A/E    A/G#  A   / / A   / / /  /      /    | \n",
+    "url": "https://youtube.com/shorts/D7ibq8FnagE?feature=share"
   }
 ]
