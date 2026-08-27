@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "6.0.1";                                                 
+const VERSION = "6.1.0";                                                 
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -846,7 +846,9 @@ function playChord(chord = FAKE, octave = DEF_OCTAVE, duration = DEF_DURATION) {
 }
 function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volume=MAX_VOL) {
   if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+        latencyHint: 'playback'
+    });
     masterGain = audioCtx.createGain(); 
     masterGain.gain.value = 0.22; 
     masterGain.connect(audioCtx.destination);

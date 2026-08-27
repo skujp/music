@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "6.0.0";
+  var VERSION = "6.1.0";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -388,7 +388,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "" + "\n";
     manual += "Metadata:" + "\n";
     manual += "(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) " + "\n";
-    manual += "(Allegro) (Moderato) (Adagio) (Lyrics can go here too) ..." + "\n";
+    manual += "(allegro) (moderato) (adagio) (lyrics_separated_by_underscores) ..." + "\n";
     manual += "" + "\n";
     manual += "Remark:   " + "\n";
     manual += "... means et cetera" + "\n";
@@ -978,7 +978,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var duration = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : DEF_DURATION;
     var volume = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : MAX_VOL;
     if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+        latencyHint: 'playback'
+      });
       masterGain = audioCtx.createGain();
       masterGain.gain.value = 0.22;
       masterGain.connect(audioCtx.destination);
