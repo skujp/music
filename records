@@ -80,11 +80,6 @@
     "contributor": "Contributor 16"
   },
   {
-    "title": "Song 17",
-    "content": "| E Emaj E7 Em ||",
-    "contributor": "Contributor 17"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -113,5 +108,11 @@
     "contributor": "soul",
     "content": "Title:Stand_By_Me\nSustain:Yes\nTempo:140\nCover:Yes\nMisc:Ab\nContributor:soul\n\n18/32 |  \nA   / / A   / / / A/E    A/G#  A   / / A   / / / A/A    A/G#  |\nF#m / / F#m / / / F#m/C# F#m/E F#m / / F#m / / / F#m/F# F#m/E | D   / / D   / / / D/D    D/F#  E   / / E   / / / E/E    E/G#  |\nA   / / A   / / / A/E    A/G#  A   / / A   / / /  /      /    | \n",
     "url": "https://youtube.com/shorts/D7ibq8FnagE?feature=share"
+  },
+  {
+    "title": "Hotel California",
+    "contributor": "crock",
+    "content": "Title:Hotel_California\nTempo:69\nContributor:crock\nMisc:Gb\n\n| (2x) \nBmin / / / |     Bbaug / / /  |\nA    / / / |     E     / / /  |\nG    / / / |     D     / / /  |\nEm   / / / |     F#    / / / \n\n:|:\nG    / / / |     D     / / /  |\nEm   / / / | [1. Bmin  / / / :|\n             [2. F#    / / /  \n\n||: (2x) \nBmin / / / |     Bbaug / / /  |\nA    / / / |     E     / / /  |\nG    / / / |     D     / / /  |\nEm   / / / |     F#    / / / \n\n:||",
+    "url": "https://youtube.com/shorts/056lroWEZkI?feature=share"
   }
 ]
