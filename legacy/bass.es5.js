@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "6.1.0";
+  var VERSION = "6.1.1";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -875,7 +875,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         if (match_rep_num) {
           beatCount = beatCount - jump;
           var _p4 = stack.pop();
-          if (length >= 2 && tokens[i - 1] !== REP_START && tokens[i - 1] !== DBL_REP_START && _p4 && _p4.length !== 3) {
+          if (_p4 === undefined || length >= 2 && tokens[i - 1] !== REP_START && tokens[i - 1] !== DBL_REP_START && _p4 && _p4.length !== 3) {
             error.msg = "[REPEAT NUMBER ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
             return;
           }

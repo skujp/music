@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "6.1.0";                                                 
+const VERSION = "6.1.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -754,7 +754,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
             if (match_rep_num) {
                 beatCount = beatCount - jump;
                 let p = stack.pop();
-                if (length >= 2 && tokens[i-1] !== REP_START && tokens[i-1] !== DBL_REP_START && p && p.length !== 3) {
+                if ((p === undefined) || (length >= 2 && tokens[i-1] !== REP_START && tokens[i-1] !== DBL_REP_START && p && p.length !== 3)) {
                     error.msg = `[REPEAT NUMBER ERROR] Invalid token at position ${i + 1}: "${tokens[i]}"`;
                     return;
                 }
