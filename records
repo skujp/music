@@ -75,11 +75,6 @@
     "contributor": "Contributor 15"
   },
   {
-    "title": "Song 16",
-    "content": "| D Ddim D7 Dm ||",
-    "contributor": "Contributor 16"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -112,7 +107,13 @@
   {
     "title": "Hotel California",
     "contributor": "crock",
-    "content": "Title:Hotel_California\nTempo:69\nContributor:crock\nMisc:Gb\n\n| (2x) \nBmin / / / |     Bbaug / / /  |\nA    / / / |     E     / / /  |\nG    / / / |     D     / / /  |\nEm   / / / |     F#    / / / \n\n:|:\nG    / / / |     D     / / /  |\nEm   / / / | [1. Bmin  / / / :|\n             [2. F#    / / /  \n\n||: (2x) \nBmin / / / |     Bbaug / / /  |\nA    / / / |     E     / / /  |\nG    / / / |     D     / / /  |\nEm   / / / |     F#    / / / \n\n:||",
+    "content": "Title:Hotel_California\nTempo:69\nContributor:crock\nCover:Yes\nMisc:Gb\n\n| (2x) \nBmin / / / |     Bbaug / / /  |\nA    / / / |     E     / / /  |\nG    / / / |     D     / / /  |\nEm   / / / |     F#    / / / \n\n:|:\nG    / / / |     D     / / /  |\nEm   / / / | [1. Bmin  / / / :|\n             [2. F#    / / /  \n\n||: (2x) \nBmin / / / |     Bbaug / / /  |\nA    / / / |     E     / / /  |\nG    / / / |     D     / / /  |\nEm   / / / |     F#    / / / \n\n:||",
     "url": "https://youtube.com/shorts/056lroWEZkI?feature=share"
+  },
+  {
+    "title": "Shape Of You",
+    "contributor": "tpop",
+    "content": "Title:Shape_of_You\nSustain:Yes\nTempo:140\nCover:Yes\nContributor:tpop\n\n10/32 | (20x)\n\nC#5/C# / / /  C#5/E  / / /  C#5/C# /   |\nF#5/C# / / /  F#5/E  / / /  F#5/C# /   |\nA5/C#  / / /  A5/E   / / /  A5/C#  /   |\nB5/D#  / / /  B5/C#  / / /  B5/B   / :||",
+    "url": "https://youtube.com/shorts/SwgSwSA1POY?feature=share"
   }
 ]
