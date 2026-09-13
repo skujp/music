@@ -70,11 +70,6 @@
     "contributor": "Contributor 14"
   },
   {
-    "title": "Song 15",
-    "content": "| C Csus C7 Cm ||",
-    "contributor": "Contributor 15"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -115,5 +110,11 @@
     "contributor": "tpop",
     "content": "Title:Shape_of_You\nSustain:Yes\nTempo:140\nCover:Yes\nContributor:tpop\n\n10/32 | (20x)\n\nC#5/C# / / /  C#5/E  / / /  C#5/C# /   |\nF#5/C# / / /  F#5/E  / / /  F#5/C# /   |\nA5/C#  / / /  A5/E   / / /  A5/C#  /   |\nB5/D#  / / /  B5/C#  / / /  B5/B   / :||",
     "url": "https://youtube.com/shorts/SwgSwSA1POY?feature=share"
+  },
+  {
+    "title": "Journey To The West",
+    "contributor": "spop",
+    "url": "https://youtube.com/shorts/WIA0Gc1F5As?feature=share",
+    "content": "Title:Journey_To_The_West\nSustain:Yes Cover:Yes Tempo:140 Contributor:spop \n\n3/4 |: \n(8x) Bbm/F / Bbm/F :|: (8x) Bbmaug/F# / Bbmaug/F#  :|:\n(6x) Bbm/F / Bbm/F :|: (6x) Bbmaug/F# / Bbmaug/F#  :|:\n(2x) F/F   / F/F   :|: \n\n(4x) Bbm/F / Bbm/F :|: (4x) F/F       / F/F        :|: \n(4x) Bbm/F / Bbm/F :|: (4x) Ab/Ab     / Ab/Ab      :|: \n(4x) Db/Db / Db/Db :|: (4x) Ab/Ab     / Ab/Ab      :|: \n(4x) Gb/Gb / Gb/Gb :|: (4x) F/F       / F/F        :|:\n\n(4x) Bbm/F / Bbm/F :|: (4x) F/F       / F/F        :|:\n(4x) Bbm/F / Bbm/F :|: (4x) Ab/Ab     / Ab/Ab      :|:\n(4x) Bbm/F / Bbm/F :|: (4x) Ab/Ab     / Ab/Ab      :|:\n(4x) Bbm/F / Bbm/F :|: (4x) Bb/Bb     / Bb/Bb      :|:\n\n(4x) Cm/C  / Cm/C  :|: (4x) Bb/Bb     / Bb/Bb      :|:\n(4x) Ab/Ab / Ab/Ab :|: (4x) G/G       / G/G        :|:\n(4x) Cm/C  / Cm/C  :|: (4x) Bb/Bb     / Bb/Bb      :|:\n(4x) Ab/Ab / Ab/Ab :|: (4x) G/G       / G/G        :|:\n\n(4x) Cm/C  / Cm/C  :|: (4x) G/G       / G/G        :|:\n(4x) Cm/C  / Cm/C  :|: (4x) Bb/Bb     / Bb/Bb      :|:\n\n(8x) Cm/C  Cm/C /  :|        /        /  /         ||"
   }
 ]
