@@ -65,11 +65,6 @@
     "contributor": "Contributor 13"
   },
   {
-    "title": "Song 14",
-    "content": "| B Bmin B7 Bm ||",
-    "contributor": "Contributor 14"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -115,6 +110,12 @@
     "title": "Journey To The West",
     "contributor": "spop",
     "url": "https://youtube.com/shorts/WIA0Gc1F5As?feature=share",
-    "content": "Title:Journey_To_The_West\nSustain:Yes Cover:Yes Tempo:140 Contributor:spop \n\n3/4 |: \n(8x) Bbm/F / Bbm/F :|: (8x) Bbmaug/F# / Bbmaug/F#  :|:\n(6x) Bbm/F / Bbm/F :|: (6x) Bbmaug/F# / Bbmaug/F#  :|:\n(2x) F/F   / F/F   :|: \n\n(4x) Bbm/F / Bbm/F :|: (4x) F/F       / F/F        :|: \n(4x) Bbm/F / Bbm/F :|: (4x) Ab/Ab     / Ab/Ab      :|: \n(4x) Db/Db / Db/Db :|: (4x) Ab/Ab     / Ab/Ab      :|: \n(4x) Gb/Gb / Gb/Gb :|: (4x) F/F       / F/F        :|:\n\n(4x) Bbm/F / Bbm/F :|: (4x) F/F       / F/F        :|:\n(4x) Bbm/F / Bbm/F :|: (4x) Ab/Ab     / Ab/Ab      :|:\n(4x) Bbm/F / Bbm/F :|: (4x) Ab/Ab     / Ab/Ab      :|:\n(4x) Bbm/F / Bbm/F :|: (4x) Bb/Bb     / Bb/Bb      :|:\n\n(4x) Cm/C  / Cm/C  :|: (4x) Bb/Bb     / Bb/Bb      :|:\n(4x) Ab/Ab / Ab/Ab :|: (4x) G/G       / G/G        :|:\n(4x) Cm/C  / Cm/C  :|: (4x) Bb/Bb     / Bb/Bb      :|:\n(4x) Ab/Ab / Ab/Ab :|: (4x) G/G       / G/G        :|:\n\n(4x) Cm/C  / Cm/C  :|: (4x) G/G       / G/G        :|:\n(4x) Cm/C  / Cm/C  :|: (4x) Bb/Bb     / Bb/Bb      :|:\n\n(8x) Cm/C  Cm/C /  :|        /        /  /         ||"
+    "content": "Title:Journey_To_The_West\nSustain:Yes Cover:Yes Tempo:140 Contributor:spop Misc:F_C \n\n3/4 |: \n(8x) Bbm/F / Bbm/F :|: (8x) Bbmaug/F# / Bbmaug/F#  :|:\n(6x) Bbm/F / Bbm/F :|: (6x) Bbmaug/F# / Bbmaug/F#  :|:\n(2x) F/F   / F/F   :|: \n\n(4x) Bbm/F / Bbm/F :|: (4x) F/F       / F/F        :|: \n(4x) Bbm/F / Bbm/F :|: (4x) Ab/Ab     / Ab/Ab      :|: \n(4x) Db/Db / Db/Db :|: (4x) Ab/Ab     / Ab/Ab      :|: \n(4x) Gb/Gb / Gb/Gb :|: (4x) F/F       / F/F        :|:\n\n(4x) Bbm/F / Bbm/F :|: (4x) F/F       / F/F        :|:\n(4x) Bbm/F / Bbm/F :|: (4x) Ab/Ab     / Ab/Ab      :|:\n(4x) Bbm/F / Bbm/F :|: (4x) Ab/Ab     / Ab/Ab      :|:\n(4x) Bbm/F / Bbm/F :|: (4x) Bb/Bb     / Bb/Bb      :|:\n\n(4x) Cm/C  / Cm/C  :|: (4x) Bb/Bb     / Bb/Bb      :|:\n(4x) Ab/Ab / Ab/Ab :|: (4x) G/G       / G/G        :|:\n(4x) Cm/C  / Cm/C  :|: (4x) Bb/Bb     / Bb/Bb      :|:\n(4x) Ab/Ab / Ab/Ab :|: (4x) G/G       / G/G        :|:\n\n(4x) Cm/C  / Cm/C  :|: (4x) G/G       / G/G        :|:\n(4x) Cm/C  / Cm/C  :|: (4x) Bb/Bb     / Bb/Bb      :|:\n\n(8x) Cm/C  Cm/C /  :|        /        /  /         ||"
+  },
+  {
+    "title": "Eye Of The Tiger",
+    "contributor": "hrock",
+    "url": "https://youtube.com/shorts/52rHIcFlu7I?feature=share",
+    "content": "Title:Eye_Of_The_Tiger\nTempo:120\nCover:Yes\nContributor:hrock\nMisc:Eb \n\n|: (3x) C5 /  /  / :| Ab / / /  \n|: (3x) C5 /  /  / :| Ab / / / \n\n|: (2x) C5 /  /  /  | Bb / / /  |\n        Ab /  /  /  | Bb / / /  |\n        C5 /  /  /  | Bb / / /  |\n        Ab /  /  /  | Bb / / / :|\n\n        Fm /  /  /  | Eb / / /  |\n        Fm /  /  /  | Bb / / /  |\n        Fm /  /  /  | Eb / / /  |\n        Fm / Gm  /  | Ab / / /  | \n        Cm /  /  /   \n\n|: (3x) C5 /  /  / :| Ab / / /  \n|: (3x) C5 /  /  / :| Ab / / / ||"
   }
 ]
