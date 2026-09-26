@@ -60,11 +60,6 @@
     "contributor": "Contributor 12"
   },
   {
-    "title": "Song 13",
-    "content": "| A Amaj A7 Am ||",
-    "contributor": "Contributor 13"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -117,5 +112,11 @@
     "contributor": "hrock",
     "url": "https://youtube.com/shorts/52rHIcFlu7I?feature=share",
     "content": "Title:Eye_Of_The_Tiger\nTempo:120\nCover:Yes\nContributor:hrock\nMisc:Eb \n\n|: (3x) C5 /  /  / :| Ab / / /  \n|: (3x) C5 /  /  / :| Ab / / / \n\n|: (2x) C5 /  /  /  | Bb / / /  |\n        Ab /  /  /  | Bb / / /  |\n        C5 /  /  /  | Bb / / /  |\n        Ab /  /  /  | Bb / / / :|\n\n        Fm /  /  /  | Eb / / /  |\n        Fm /  /  /  | Bb / / /  |\n        Fm /  /  /  | Eb / / /  |\n        Fm / Gm  /  | Ab / / /  | \n        Cm /  /  /   \n\n|: (3x) C5 /  /  / :| Ab / / /  \n|: (3x) C5 /  /  / :| Ab / / / ||"
+  },
+  {
+    "title": "Por Una Cabeza",
+    "contributor": "tango",
+    "url": "https://www.instagram.com/reel/DdvomybpshR/?stkn=MTBkMW1qNDlrcjM0bg==",
+    "content": "Title:Por_Una_Cabeza Tempo:120 \nSustain:Yes Misc:Gm_h Cover:Yes\nContributor:tango 16/64 |: \n(4x) G  / / / / / G  /  G  / / /  G / / / :|:\n(2x) Am / / / / / Am / Am  / / / Am / / / :|:\n(2x) D  / / / / / D  /  D  / / /  D / / / :|:\n(4x) G  / / / / / G  /  G  / / /  G / / / :|\n     C  / / / / / C  /  C  / / /  C / / /  |\n     Cm / / / / / Cm /  Eb / / / Eb / / /  |\n     G  / / / / / G  /  G  / / /  G / / /  |\n     A  / / / / / A  /  D  / / /  D / / /  |\n     G  / / / / / G  /  G  / / /  G / / /  \n\n |:  Gm / / / / / Gm / Gm  / / / Gm / / /  |\n     Dm / / / / / Dm / Dm  / / / Dm / / /  |\n     Eb / / / / / Eb / Eb  / / / Eb / / /  |\n     Bb / / / / / Bb / Bb  / / / Bb / / /  |\n     Cm / / / / / Cm / Cm  / / / Cm / / /  |\n     Gm / / / / / Gm / Gm  / / / Gm / / /  |\n\n [1.  A / / / / / A  /  A  / / /  A / / /  |\n      D / / / / / D  /  D  / / /  D / / / :|\n [2.  A / / / / / A  /  D  / / /  D / / /  |\n      G / / / / / G  /  G  / / /  G / / /  | "
   }
 ]
