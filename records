@@ -50,11 +50,6 @@
     "contributor": "Contributor 10"
   },
   {
-    "title": "Song 11",
-    "content": "| F Fsus F7 Fm ||",
-    "contributor": "Contributor 11"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -119,5 +114,11 @@
     "contributor": "dhal",
     "url": "https://youtube.com/shorts/iDYD_MMgVHs?feature=share",
     "content": "Title:Get_Busy\nCover:Yes Tempo:100 Misc:Fm \nContributor:dhal\n\n|: (4x) F5/F Fm/Ab    F5/F     Fm/Ab :|:\n   (4x) F5/F Fm/Ab    F5/F     Fm/Ab  |\n        G5/G  G/B  Bbaug/Gb Bbaug/D  :|:\n\n  (10x) F5/F Fm/Ab    F5/F     Fm/Ab :|:\n   (4x) F5/F Fm/Ab    F5/F     Fm/Ab  |\n        G5/G  G/B  Bbaug/Gb Bbaug/D  :|:\n \n  (10x) F5/F Fm/Ab    F5/F     Fm/Ab :|:\n   (4x) F5/F Fm/Ab    F5/F     Fm/Ab  |\n        G5/G  G/B  Bbaug/Gb Bbaug/D  :|:\n\n   (7x) F5/F Fm/Ab    F5/F     Fm/Ab :| "
+  },
+  {
+    "title": "Lambada",
+    "contributor": "apop",
+    "url": "https://youtube.com/shorts/U1Z_Xf6Cjhs?feature=share",
+    "content": "Title:Lambada\nTempo:120 Sustain:Yes Cover:Yes Contributor:apop Misc:F\n\n16/128\n |  (opening) \nDm / / / / / / Dm Dm / / / Dm / / / | % | % | %\n\n |: (2x) (verse:chorando_se_foi)\nDm / / / / / / Dm Dm / / / Dm / / / | % |\nBb / / / / / / Bb Bb / / / Bb / / / | \n C / / / / / /  C  C / / /  C / / / | \n F / / / / / /  F  F / / /  F / / / | % \n\n:|: (2x) (verse:chorando_estará)\nGm / / / / / / Gm Gm / / / Gm / / / | % | % | % |\n C / / / / / /  C  C / / /  C / / / | % |\nDm / / / / / / Dm Dm / / / Dm / / / | % \n\n:|  (dancing)\nDm / / / / / / Dm Dm / / / Dm / / / | % |\n F / / / / / /  F  F / / /  F / / / | % \n \n |  (mix_2_verses_and_dancing_above_as_you_like)\n / / / / / / /  /  / / / /  / / / / || "
   }
 ]
