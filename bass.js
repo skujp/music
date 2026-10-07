@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "7.0.0";
+const VERSION = "7.0.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -181,7 +181,7 @@ function help() {
     manual += "In some cases, it can use back to back loop symbol :|: or :||: " + "\n";
     manual += "For example, |:   :|:   :| or ||:   :||:   :||" + "\n";
     manual += "By default, repeat section will loop for 1 time (2x), but it is up to the user to " + "\n";
-    manual += "modify using repeat modifiers as (3x), (4x), etc." + "\n";
+    manual += "modify using repeat multipliers such as (3x), (4x), etc." + "\n";
     manual += "For example, |: (4x)  F  /  / C  |  B  /  /  A  :| means " + "\n";
     manual += "loop 4 times over the 2 bars of chords." + "\n";
     manual += "" + "\n";
@@ -253,9 +253,9 @@ function help() {
     manual += "For example, 4/4 | C D E F | (Z) G A B C | D E F G | (Zx1) || " + "\n";
     manual += "means the last bar will repeat 1 time the section marked with (Z) which is G A B C | D E F G |" + "\n";
     manual += "Please note, there are 3 types of notations often used in section marker. For example: (Z), (Zx2), and (Z*2)," + "\n";
-    manual += "in which (Z) is the section marker definition, (Zx2) is the section marker usage with repeat 2 times, including multiplier." + "\n";
-    manual += "and (Z*2) is the section marker usage with repeat 2 times excluding multiplier." + "\n";
-    manual += "For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) || will play the last bar 9 times in total because of the multipler (3x)," + "\n";
+    manual += "in which (Z) is the section marker definition, (Zx2) is the section marker usage with repeat 2 times, including multipliers." + "\n";
+    manual += "and (Z*2) is the section marker usage with repeat 2 times excluding multipliers." + "\n";
+    manual += "For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) || will play the last bar 9 times in total because of the multiplier (3x)," + "\n";
     manual += "whereas 3/4 | A A A |: (3x) (Q) B B B :| (Q*3) || will play the last bar 3 times only." + "\n";
     manual += "Note that, this useful feature is first introduced in revision 7.0.0 and not available in earlier versions." + "\n";
     manual += "" + "\n";
