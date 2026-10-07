@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "6.1.1";
+const VERSION = "7.0.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -90,6 +90,7 @@ var EMPTY = "";
 var [beats, beatType] = DEF_TIME_SIGNATURE.split('/').map(Number);      
 var DEF_DURATION = 60 / BPM.val;                                        
 var DEF_MSEC = DEF_DURATION * 1000;                                     
+var MAX_SECTION_REP = 51;                                               
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var SAVE_AS_TYPES = new Set(["PDF","BASS"]);                            
 var BASSBOARD_DB_FIELD = new Set(["Contributor","Title"]);              
@@ -237,6 +238,27 @@ function help() {
     manual += "A duplicate % means repeat playing the previous bar." + "\n";
     manual += "For example, | A B C | % || will play A, B, C, A, B, C" + "\n";
     manual += "" + "\n";
+    manual += "16. Section Marker (#)" + "\n";
+    manual += "A group of bars can be marked with a section marker such as (A), (B), (C), etc." + "\n";
+    manual += "Inside the parenthesis, it must be a single uppercase letter A-Z. " + "\n";
+    manual += "Once a section marker is defined, it can be used later in the sheet music to repeat that section." + "\n";
+    manual += "For example, 3/4 | (A) F G A | B C D | (B) E F G | (C) D E F | (Bx3) || " + "\n";
+    manual += "means the last bar will repeat the section marked with (B) three times." + "\n";
+    manual += "Please note, the section marker must be defined before it is used." + "\n";
+    manual += "For example, 3/4 | D D D | (Mx2) G G G | will raise an error because (M) is not defined before it is used." + "\n";
+    manual += "Another example, 4/4 |: (3x) (T) C D E F :| (G) G A B C | (Tx2) || " + "\n";
+    manual += "means the last bar will repeat 2 times the first bar (including 3x), so it will be played 6 times in total." + "\n";
+    manual += "By default, the marker works by scanning until the next marker is found to determine the section to repeat. " + "\n";
+    manual += "If it doesn't find any marker, it will scan until the end of the sheet music." + "\n";
+    manual += "For example, 4/4 | C D E F | (Z) G A B C | D E F G | (Zx1) || " + "\n";
+    manual += "means the last bar will repeat 1 time the section marked with (Z) which is G A B C | D E F G |" + "\n";
+    manual += "Please note, there are 3 types of notations often used in section marker. For example: (Z), (Zx2), and (Z*2)," + "\n";
+    manual += "in which (Z) is the section marker definition, (Zx2) is the section marker usage with repeat 2 times, including multiplier." + "\n";
+    manual += "and (Z*2) is the section marker usage with repeat 2 times excluding multiplier." + "\n";
+    manual += "For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) || will play the last bar 9 times in total because of the multipler (3x)," + "\n";
+    manual += "whereas 3/4 | A A A |: (3x) (Q) B B B :| (Q*3) || will play the last bar 3 times only." + "\n";
+    manual += "Note that, this useful feature is first introduced in revision 7.0.0 and not available in earlier versions." + "\n";
+    manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
     manual += "III. THE CHORD-BASED NOTATION SYSTEM" + "\n";
@@ -265,7 +287,7 @@ function help() {
     manual += "(1x) (2x) (3x) (4x) (5x) ..." + "\n";
     manual += "" + "\n";
     manual += "Skip:" + "\n";
-    manual += "[1. [2. [3. [4. ..." + "\n";
+    manual += "[1. [2. " + "\n";
     manual += "" + "\n";
     manual += "Pulse:" + "\n";
     manual += "/" + "\n";
@@ -280,8 +302,13 @@ function help() {
     manual += "(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) " + "\n";
     manual += "(allegro) (moderato) (adagio) (lyrics_separated_by_underscores) ..." + "\n";
     manual += "" + "\n";
+    manual += "Section Marker:" + "\n";
+    manual += "(#) (#x<number>) (#*<number>)" + "\n";
+    manual += "" + "\n";
     manual += "Remark:   " + "\n";
     manual += "... means et cetera" + "\n";
+    manual += "# means any uppercase letter A-Z" + "\n";
+    manual += "<number> means any non-negative integer" + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
@@ -556,6 +583,9 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
     var forwardIndex = {};         
     var skipNumberIndex = {};      
     var openingClassicalCount = 0; 
+    var sectionMarker = [];        
+    var markerIndex = {};          
+    var currentSection = 0;        
     if (!tokens[index] || !openingTokens.has(tokens[index])) {
         error.msg = `Expected a bar line or repeat start token after time signature, but found: "${tokens[index]}"`;
         error.msg = `Assuming opening sections exists`;
@@ -584,7 +614,12 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
     index++;
     var beatCount = 0; 
     var jump = DEF_BEAT_JUMP;
+    var maxsequencerlength = MAX_SHEET_LENGTH * MAX_SECTION_REP; 
     for (let i = index; i < length; i++) {
+        if (sequencer.length > maxsequencerlength) {
+            error.msg = `[BUILD SEQUENCER ERROR] Sequencer length after built exceeds limit of ${maxsequencerlength} characters. Please check your sheet music for too many repeats or too long sections.`;
+            return;
+        } 
         beatCount = beatCount + jump;
         if (beatCount > beats) {
             if (!seperateBarTokens.has(tokens[i]) && 
@@ -787,6 +822,103 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
             if (match_aux) {
                 beatCount = beatCount - jump;
                 error.msg = `Found an auxiliary token: "${tokens[i]}"`;
+                if (match_aux[1].match(/^[A-Z]$/)) {
+                    if (match_aux[1] in markerIndex) {
+                        error.msg = `[AUX ERROR 1] Section marker "${match_aux[1]}" is already defined`;
+                        return;
+                    }
+                    markerIndex[match_aux[1]] = currentSection; 
+                    sectionMarker[markerIndex[match_aux[1]]] = sequencer.length;
+                    currentSection += 1; 
+                    continue;
+                }
+                if (match_aux[1].match(/^[A-Z]x\d+$/)) {                    
+                    const letter = match_aux[1].match(/^[A-Z]/)[0];
+                    const times = match_aux[1].match(/\d+$/)[0];
+                    if (!(letter in markerIndex)) {
+                        error.msg = `[AUX ERROR 2] Section marker "${letter}" is not defined`;
+                        return;
+                    }
+                    if (times > MAX_SECTION_REP) {
+                        error.msg = `[AUX ERROR 3] Section number "${times}" exceeds maximum limit of ${MAX_SECTION_REP}`;
+                        return;
+                    }
+                    sectionMarker[currentSection] = sequencer.length;
+                    currentSection += 1; 
+                    let i = 0;
+                    let left = markerIndex[letter];
+                    let right = left + 1;
+                    if (right < sectionMarker.length) {
+                        right = sectionMarker[right]-1; 
+                    } else {
+                        right = sequencer.length-1;
+                    }
+                    left = sectionMarker[left]; 
+                    let offset = sequencer.length - 1 - right; 
+                    let distance = right - left + 1;  
+                    let temp = [];
+                    while (i < times) {
+                        temp.push(...sequencer.slice(left, right + 1));
+                        for (let key in loopBackIndex) {
+                            key = Number(key); 
+                            if (key >= left && key <= right) {
+                                let newkey = key + offset + distance * (i + 1);
+                                let newvalue = loopBackIndex[key] + offset + distance * (i + 1);
+                                loopBackIndex[newkey] = newvalue;
+                            }
+                        }
+                        for (let key in repeatCount) {
+                            key = Number(key); 
+                            if (key >= left && key <= right) {
+                                let newkey = key + offset + distance * (i + 1);
+                                let newvalue = repeatCount[key]; 
+                                repeatCount[newkey] = newvalue;
+                            }
+                        }
+                        for (let key in forwardIndex) {
+                            key = Number(key); 
+                            if (key >= left && key <= right) {
+                                let newkey = key + offset + distance * (i + 1);
+                                let newvalue = forwardIndex[key].map(v => v + offset + distance * (i + 1)); 
+                                forwardIndex[newkey] = newvalue;
+                            }
+                        }
+                        i += 1;
+                    }
+                    sequencer.push(...temp);
+                    beatCount = beats;
+                    continue;
+                } else if (match_aux[1].match(/^[A-Z]\*\d+$/)) {           
+                    const letter = match_aux[1].match(/^[A-Z]/)[0];
+                    const times = match_aux[1].match(/\d+$/)[0];
+                    if (!(letter in markerIndex)) {
+                        error.msg = `[AUX ERROR 4] Section marker "${letter}" is not defined`;
+                        return;
+                    }
+                    if (times > MAX_SECTION_REP) {
+                        error.msg = `[AUX ERROR 5] Section number "${times}" exceeds maximum limit of ${MAX_SECTION_REP}`;
+                        return;
+                    }
+                    sectionMarker[currentSection] = sequencer.length;
+                    currentSection += 1; 
+                    let i = 0;
+                    let left = markerIndex[letter];
+                    let right = left + 1;
+                    if (right < sectionMarker.length) {
+                        right = sectionMarker[right] - 1;
+                    } else {
+                        right = sequencer.length - 1;
+                    }
+                    left = sectionMarker[left]; 
+                    let temp = [];
+                    while (i < times) {
+                        temp.push(...sequencer.slice(left, right + 1));
+                        i += 1;
+                    }
+                    sequencer.push(...temp);
+                    beatCount = beats;
+                    continue;
+                } 
                 continue;
             }
             const chord = getChordNotes(tokens[i]);
@@ -833,6 +965,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
     }
     const result = [sequencer, loopBackIndex, repeatCount, end, forwardIndex, skipNumberIndex];
     validArgs.add(result); 
+    PULSE_FLAG = true; 
     return result; 
 }
 function _freq(note, octave = DEF_OCTAVE) {
