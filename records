@@ -45,11 +45,6 @@
     "contributor": "Contributor 9"
   },
   {
-    "title": "Song 10",
-    "content": "| E Emin E7 Em ||",
-    "contributor": "Contributor 10"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nMisc:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -119,6 +114,12 @@
     "title": "Lambada",
     "contributor": "apop",
     "url": "https://youtube.com/shorts/U1Z_Xf6Cjhs?feature=share",
-    "content": "Title:Lambada\nTempo:120 Sustain:Yes Cover:Yes Contributor:apop Misc:F\n\n16/128\n |  (opening)\nDm / / / / / / Dm Dm / / / Dm / / / | % | % | %\n\n |: (2x) (sefoi) (A)\nDm / / / / / / Dm Dm / / / Dm / / / | % |\nBb / / / / / / Bb Bb / / / Bb / / / | \n C / / / / / /  C  C / / /  C / / / | \n F / / / / / /  F  F / / /  F / / / | % \n\n:|: (2x) (estara) (B)\nGm / / / / / / Gm Gm / / / Gm / / / | % | % | % |\n C / / / / / /  C  C / / /  C / / / | % |\nDm / / / / / / Dm Dm / / / Dm / / / | % \n\n:|  (repeat) \n(Ax1) | (Bx1) | (Ax1) | (Bx1) \n\n |  (dancing) (C)\nDm / / / / / / Dm Dm / / / Dm / / / | % |\n F / / / / / /  F  F / / /  F / / / | % \n\n |  (repeat) \n(Bx1) | (Ax1) | (Bx1) | (Cx1)\n   \n |  (ending)\nDm / / / / / / / / / / / / / / / ||"
+    "content": "Title:Lambada\nTempo:120 Sustain:Yes Cover:Yes Contributor:apop Misc:Dm\n\n16/128\n |  (opening)\nDm / / / / / / Dm Dm / / / Dm / / / | % | % | %\n\n |: (2x) (sefoi) (A)\nDm / / / / / / Dm Dm / / / Dm / / / | % |\nBb / / / / / / Bb Bb / / / Bb / / / | \n C / / / / / /  C  C / / /  C / / / | \n F / / / / / /  F  F / / /  F / / / | % \n\n:|: (2x) (estara) (B)\nGm / / / / / / Gm Gm / / / Gm / / / | % | % | % |\n C / / / / / /  C  C / / /  C / / / | % |\nDm / / / / / / Dm Dm / / / Dm / / / | % \n\n:|  (repeat) \n(Ax1) | (Bx1) | (Ax1) | (Bx1) \n\n |  (dancing) (C)\nDm / / / / / / Dm Dm / / / Dm / / / | % |\n F / / / / / /  F  F / / /  F / / / | % \n\n |  (repeat) \n(Bx1) | (Ax1) | (Bx1) | (Cx1)\n   \n |  (ending)\nDm / / / / / / / / / / / / / / / ||"
+  },
+  {
+    "title": "Pirates Of The Carribean",
+    "contributor": "orc",
+    "url": "https://youtube.com/shorts/oIdqHCDrmh8?feature=share",
+    "content": "         Title:Pirates_Of_The_Carribean_Main_Theme\n  Cover:Yes Sustain:Yes Tempo:300 Contributor:orc Misc:Dm 6/8\n\n|: (C) D5/D  / D5/D   / / / |    Bb5/Bb / Bb5/Bb / / / \n|      A5/A  / A5/A   / / / |     D5/D  /  D5/D  / / /  |  \n                          (Cx1)\n|      D5/D  /  D5/D  / / / |    Eb5/Eb / Eb5/Eb / / / \n|      G5/G  /  G5/G  / / / |     D5/D  /  D5/D  / / / \n|     Bb5/Bb / Bb5/Bb / / / |     D5/D  /  D5/D  / / / \n|      A5/A  /  A5/A  / / / | [1. A5/A  /  A5/A  / / / :|\n\n   [2. D5/D  /  D5/D  / / / |    Bb5/Bb / Bb5/Bb / / / \n|      D5/D  /  D5/D  / / / |    Bb5/Bb / Bb5/Bb / / / \n|      A5/A       /       G5/G       /     F5/F         /                \n\n|  (E) D5/D  /  D5/D  / / / |     D5/D  /  D5/D  / / / \n|      C5/C  /  C5/C  / / / | (A) C5/C  /  D5/D  / / /   \n|          (Ex1)            |     D5/D  /  D5/D  / / / \n\n|      D5/D  /  D5/D  / / / |     C5/C  /  C5/C  / / / \n|     Bb5/Bb / Bb5/Bb / / / |     A5/A  /  A5/A  / / / \n|     Bb5/Bb / Bb5/Bb / / / |     C5/C  /  C5/C  / / / \n|      D5/D  /  D5/D  / / / |     D5/D  /  D5/D  / / / \n\n|      D5/D  /  D5/D  / / / |     C5/C  /  C5/C  / / /\n|     Bb5/Bb / Bb5/Bb / / / |     A5/A  /  A5/A  / / / \n|  (Z) A5/A  /  A5/A  / / / |          (Zx3)                          \n\n||:    D5/D  /  D5/D  / / / |    Bb5/Bb / Bb5/Bb / / /\n|      F5/F  /  F5/F  / / / |     C5/C  /  C5/C  / / /\n|      G5/G  /  G5/G  / / / |     A5/A  /  A5/A  / / / \n|     Db5/Db / Db5/Db / / / |     D5/D  /  D5/D  / / / :|| "
   }
 ]
