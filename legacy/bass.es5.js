@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "7.0.1";
+  var VERSION = "8.0.0";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -124,7 +124,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     setInstrument: setInstrument,
     getDuration: getDuration,
     getGuitarNote: getGuitarNote,
-    getVersion: getVersion
+    getVersion: getVersion,
+    hasComment: hasComment
   });
   var BPM = {
     _val: 90,
@@ -152,6 +153,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var SKIP_NUM = /\[(\d+)\./;
   var TIME_SIG = /^(\d+)\/(1|2|4|8|16|32|64|128|256|512|1024)$/;
   var AUX = /^\(([^)]+)\)$/;
+  var CMT_START = "<-";
+  var CMT_END = "->";
   var MAX_SHEET_LENGTH = 3000;
   var FAKE = "G";
   var DEF_OCTAVE = 4;
@@ -169,7 +172,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var DEF_TIME_SIGNATURE = '4/4';
   var DEF_BEAT_JUMP = 1;
   var CLASSICAL_CHECK = true;
-  var LST_SKIPNUM = 1;
+  var MAX_VOLTA = 11;
+  var MAX_TIMEOUT = 50;
+  var MAX_REPEAT_MULTIPLIER = MAX_TIMEOUT * 3;
   var OCTAVE_LENGTH = 12;
   var EMPTY = "";
   var _DEF_TIME_SIGNATURE$s = DEF_TIME_SIGNATURE.split('/').map(Number),
@@ -186,6 +191,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var taskDropper = null;
   var validArgs = new WeakSet();
   var _sheetMusic;
+  var _cmtActive = false;
+  var cmtExist = _cmtActive;
   var notes = _initMusicMajorScale();
   function _initMusicMajorScale() {
     var baseNotes = {
@@ -227,6 +234,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function help() {
     var manual = "";
+    manual += "| Rev ".concat(VERSION, " |");
+    manual += "" + "\n\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
     manual += "I. INTRODUCTION" + "\n";
@@ -264,6 +273,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "In the BASS system, a chord (NOT note) is the basic unit of a sheet music." + "\n";
     manual += "For example, 4/4 | C C C C || means " + "\n";
     manual += "to play chord C Major four times (NOT single C note four times)." + "\n";
+    manual += "If you just want a single C note, try this AI verse: " + "\n";
+    manual += "| We got one C on the page, but the mind hears three |" + "\n";
+    manual += "|     That's the magic of a C5/C, harmony on MVP     |" + "\n";
     manual += "" + "\n";
     manual += "4. Time Signature" + "\n";
     manual += "A time signature is a musical notation symbol made of two stacked " + "\n";
@@ -272,6 +284,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "For example, 3/4 | A B C | D E / | " + "\n";
     manual += "If the sheet music does not start with a time signature, by default the " + "\n";
     manual += "time signature is 4/4. For example, | F D A C | B A B A |" + "\n";
+    manual += "Please note, time signature in the BASS system has more varieties than common sheet music. " + "\n";
+    manual += "For example, the nominator part represents the number of beats in a bar. It can be any number. " + "\n";
+    manual += "The denominator part is a power of 2, representing a fraction of a quarter note for calculating the actual sheet music speed." + "\n";
+    manual += "For example, 8/16 means there are 8 beats in a bar, and music speed will be a tempo adjusted based on the 16th note." + "\n";
+    manual += "So do not be surprised if you see a time signature such as 123/256 :)" + "\n";
     manual += "" + "\n";
     manual += "5. Time Measure" + "\n";
     manual += "Time Measure (or Bar) is a small container of time that holds " + "\n";
@@ -279,15 +296,18 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "contains 3 beats: | / / / |, this bar contains 0 beat: |     | " + "\n";
     manual += "" + "\n";
     manual += "6. Opening Section" + "\n";
-    manual += "Opening Section (leading tone) is optional. The number of opening beats " + "\n";
+    manual += "An opening section begins the sheet music. It may or may not have a leading tone." + "\n";
+    manual += "If it has a leading tone, the number of opening beats " + "\n";
     manual += "cannot go over the nominator beats of time signature." + "\n";
     manual += "For example, A A | D / D / | Amaj7 / Amaj7 / || is accepted " + "\n";
     manual += "with a leading tone A A (2 beats)." + "\n";
+    manual += "Please note, without a leading tone, an opening section usually starts with a | or |: or ||: " + "\n";
+    manual += "Double bar symbol || is currently not supported in opening section to avoid any confusion with the ending section. " + "\n";
     manual += "" + "\n";
     manual += "7. Repeat Section" + "\n";
     manual += "A repeat section (or loop) is a section which is played again and again." + "\n";
-    manual += "The loop usually looks like this |:   :|  or ||:    :|| or  " + "\n";
-    manual += "|    :| (loop back from beginning)." + "\n";
+    manual += "The loop usually looks like this |:   :|  or ||:    :|| or special loop back from beginning " + "\n";
+    manual += "such as |    :| and |    :|| " + "\n";
     manual += "In some cases, it can use back to back loop symbol :|: or :||: " + "\n";
     manual += "For example, |:   :|:   :| or ||:   :||:   :||" + "\n";
     manual += "By default, repeat section will loop for 1 time (2x), but it is up to the user to " + "\n";
@@ -295,12 +315,23 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "For example, |: (4x)  F  /  / C  |  B  /  /  A  :| means " + "\n";
     manual += "loop 4 times over the 2 bars of chords." + "\n";
     manual += "" + "\n";
-    manual += "8. Skip Section" + "\n";
-    manual += "A skip section is similar to a loop but will be skipped to play " + "\n";
-    manual += "before the last time it is repeated. " + "\n";
-    manual += "For example, the following example during repetition will " + "\n";
-    manual += "skip the [1. bar and play the [2. bar instead: " + "\n";
-    manual += "4/4 |: A A A A | [1. B B B B | [2. C C C C :| D D D D |" + "\n";
+    manual += "8. Branching Section" + "\n";
+    manual += "A branching section (or volta bracket) is used to skip from one section to another" + "\n";
+    manual += "of a sheet music AFTER REPEAT. It is written as an open bracket " + "\n";
+    manual += "followed by a number and a dot. For example: [1. [2. [3. [321. , etc." + "\n";
+    manual += "Below is a section of a sheet music which will skip [1. and jump to [2. after repeat. " + "\n";
+    manual += "4/4 |: A A A A | [1. B B B B :| [2. C C C C | D D D D |" + "\n";
+    manual += "Please note, BASS supports POSITIONAL volta brackets, including uses beyond common music notation. " + "\n";
+    manual += "For example: 3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B || ", manual += "After the 1st repeat, it will skip [40. bar to the next bar [20. " + "\n";
+    manual += "After the 2nd repeat, it will skip [40. bar and [20. bar to the next bar [30. " + "\n";
+    manual += "Please note, the branching section relies on repeat symbols :| or :|| to move back to the closest " + "\n";
+    manual += "matching |: or ||: . If not finding a match, it will go back to the beginning of the sheet music. " + "\n";
+    manual += "Also, colliding numbers for branching section are allowed but NOT RECOMMENDED for the clarity of a music sheet. " + "\n";
+    manual += "For example, instead of writing 3/4 | C C C | [1. D D D :| [1. E E E || , it is better to replace " + "\n";
+    manual += "the second [1. as [2. or so ... " + "\n";
+    manual += "A final note for branching section is it can coexist with multipliers in repeat section. " + "\n";
+    manual += "However, it will override the default behavior of multipliers in repeat section. " + "\n";
+    manual += "So for example, 2/4 | (123x) A A | [1. B B :| C C || will completely ignore (123x) on the second repeat. " + "\n";
     manual += "" + "\n";
     manual += "9. Ending Section" + "\n";
     manual += "A sheet music must end with either a single bar character | or " + "\n";
@@ -308,9 +339,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "If it ends with a || , the system will stop playing (no loop back)." + "\n";
     manual += "Otherwise, the system by default will keep looping back from the beginning " + "\n";
     manual += "even without the user's intervention." + "\n";
+    manual += "Please note, if it ends with :| or :|| it will loop back according to user's intention first " + "\n";
+    manual += "before the default system loop back kicks in. For the case of :||, it will stop eventually." + "\n";
     manual += "" + "\n";
     manual += "10. Classical Rule" + "\n";
-    manual += "The following rule will be applied heuristically on a case basis:" + "\n";
+    manual += "If there is a leading tone, the following rule will be applied: " + "\n";
     manual += "The number of opening beats and ending beats must equal the  " + "\n";
     manual += "nominator beats in time signature." + "\n";
     manual += "" + "\n";
@@ -320,6 +353,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "playing the sheet music. In the BASS system, by default bpm is set to 90, " + "\n";
     manual += "assuming quarter note is in time signature. " + "\n";
     manual += "The user can change it manually. See section IV for more details." + "\n";
+    manual += "Please note that, tempo will be adjusted based on time signature to " + "\n";
+    manual += "result in the actual sheet music speed. " + "\n";
     manual += "" + "\n";
     manual += "12. Octave" + "\n";
     manual += "An octave is the distance between two musical notes that share the " + "\n";
@@ -343,6 +378,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "For example, | B A / | will play B, A, A" + "\n";
     manual += "Please note, a pulse / is different than a slash / in a slash chord." + "\n";
     manual += "For example, A/E means A Major chord with a E at the bass." + "\n";
+    manual += "To sustain, use command Sustain:Yes at the beginning of the sheet music (see Section IV)." + "\n";
     manual += "" + "\n";
     manual += "15. Duplicate %" + "\n";
     manual += "A duplicate % means repeat playing the previous bar." + "\n";
@@ -363,27 +399,34 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "For example, 4/4 | C D E F | (Z) G A B C | D E F G | (Zx1) || " + "\n";
     manual += "means the last bar will repeat 1 time the section marked with (Z) which is G A B C | D E F G |" + "\n";
     manual += "Please note, there are 3 types of notations often used in section marker. For example: (Z), (Zx2), and (Z*2)," + "\n";
-    manual += "in which (Z) is the section marker definition, (Zx2) is the section marker usage with repeat 2 times, including multipliers." + "\n";
+    manual += "in which (Z) is the section marker definition, (Zx2) is the section marker usage with repeat 2 times, including multipliers. " + "\n";
     manual += "and (Z*2) is the section marker usage with repeat 2 times excluding multipliers." + "\n";
     manual += "For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) || will play the last bar 9 times in total because of the multiplier (3x)," + "\n";
     manual += "whereas 3/4 | A A A |: (3x) (Q) B B B :| (Q*3) || will play the last bar 3 times only." + "\n";
-    manual += "Note that, this useful feature is first introduced in revision 7.0.0 and not available in earlier versions." + "\n";
+    manual += "Please note, (Zx2) also works with branching section, preserving the branching behavior." + "\n";
+    manual += "whereas, (Z*2) will ignore branching behavior." + "\n";
+    manual += "" + "\n";
+    manual += "17. Commented Out Section" + "\n";
+    manual += "Commented out section (or Vi-De) is a special marked section NOT to be played in a sheet music. " + "\n";
+    manual += "The commented opening symbol (Vi) is <- and the closing (De) is -> " + "\n";
+    manual += "For example, 2/4 | G G | <- A A | B B | -> D D | <- E E |  -> F F || will only play | G G | D D | F F || " + "\n";
+    manual += "This Vi-De mode can be useful to test playing only specific parts of the sheet music. " + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
     manual += "III. THE CHORD-BASED NOTATION SYSTEM" + "\n";
     manual += "" + "\n";
     manual += "Time Signature:" + "\n";
-    manual += "3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 ..." + "\n";
+    manual += "3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 6/16 32/64 8/128 123/512 ..." + "\n";
     manual += " " + "\n";
     manual += "Bar:" + "\n";
     manual += "|" + "\n";
     manual += "" + "\n";
-    manual += "Opening:" + "\n";
-    manual += "|" + "\n";
+    manual += "Opening (incl. repeat):" + "\n";
+    manual += "| |: ||:" + "\n";
     manual += "" + "\n";
-    manual += "Closing:" + "\n";
-    manual += "| ||" + "\n";
+    manual += "Closing (incl. repeat):" + "\n";
+    manual += "| || :| :||" + "\n";
     manual += "" + "\n";
     manual += "Repeat:" + "\n";
     manual += ":|" + "\n";
@@ -397,7 +440,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "(1x) (2x) (3x) (4x) (5x) ..." + "\n";
     manual += "" + "\n";
     manual += "Skip:" + "\n";
-    manual += "[1. [2. " + "\n";
+    manual += "[1. [2. [3. [4. [123. [456. ..." + "\n";
     manual += "" + "\n";
     manual += "Pulse:" + "\n";
     manual += "/" + "\n";
@@ -415,6 +458,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "Section Marker:" + "\n";
     manual += "(#) (#x<number>) (#*<number>)" + "\n";
     manual += "" + "\n";
+    manual += "Commented Out: " + "\n";
+    manual += "<- ->" + "\n";
+    manual += "" + "\n";
     manual += "Remark:   " + "\n";
     manual += "... means et cetera" + "\n";
     manual += "# means any uppercase letter A-Z" + "\n";
@@ -431,10 +477,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "Please note, they must be written at the beginning of the sheet music." + "\n";
     manual += "Also, any value after the double dot character (:) can not have any blank space." + "\n";
     manual += "It is recommended to use the underscore character (_). For example, " + "\n";
-    manual += "Composer:Loremipsum_Dolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Chkft" + "\n";
+    manual += "Composer:Loremipsum_Dolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Ninja_Chkft" + "\n";
     manual += "" + "\n";
     manual += "Tempo:<number>          for example, Tempo:100 to set BPM=100" + "\n";
-    manual += "Octave:<number>         for example, Octave:5 set middle C to C5 (**)" + "\n";
+    manual += "Octave:<number>         for example, Octave:5 set middle C to C5 (*)" + "\n";
     manual += "SaveAs:PDF              pop up print dialog box for saving as pdf file" + "\n";
     manual += "SaveAs:BASS             save sheet music to .bass format for listing on bassboard chart" + "\n";
     manual += "Sustain:Yes             disable playing previous BM chord /" + "\n";
@@ -458,7 +504,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "URL:<address>           for example, URL:https://youtube.com/yourmusicchannel. Optional but recommended when saving to .bass" + "\n";
     manual += "Misc:<anything>         for example, Misc:anything_you_want_to_write_here_seperated_by_underscore_character" + "\n";
     manual += "" + "\n";
-    manual += "(**) Octave: notation is to set the BASS default system octave, which is not the same as the musical instrument's current octave." + "\n";
+    manual += "(*) Octave: notation is to set the BASS default system octave, which is not the same as the musical instrument's current octave." + "\n";
     manual += "By default, the BASS system covers the bass clef, and other instruments cover the treble clef." + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
@@ -497,8 +543,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "https://github.com/skujp/music" + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    manual += "" + "\n";
-    manual += "Rev ".concat(VERSION);
     error.msg = "Loading manual...";
     return manual;
   }
@@ -626,6 +670,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var sheetMusic = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : EMPTY;
     var pulseFlag = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : PULSE_FLAG;
     _sheetMusic = {};
+    _cmtActive = false;
+    cmtExist = _cmtActive;
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
       error.msg = "[SHEET MUSIC ERROR] sheet music length exceeds limit";
       return;
@@ -705,8 +751,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var loopBackIndex = {};
     var repeatCount = {};
     var end = END;
-    var forwardIndex = {};
-    var skipNumberIndex = {};
+    var voltaMap = {};
+    var voltaArr = [];
     var openingClassicalCount = 0;
     var sectionMarker = [];
     var markerIndex = {};
@@ -740,366 +786,385 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var beatCount = 0;
     var jump = DEF_BEAT_JUMP;
     var maxsequencerlength = MAX_SHEET_LENGTH * MAX_SECTION_REP;
-    var _loop = function _loop() {
-        if (sequencer.length > maxsequencerlength) {
-          error.msg = "[BUILD SEQUENCER ERROR] Sequencer length after built exceeds limit of ".concat(maxsequencerlength, " characters. Please check your sheet music for too many repeats or too long sections.");
-          return {
-            v: void 0
-          };
+    for (var i = index; i < length; i++) {
+      if (sequencer.length > maxsequencerlength) {
+        error.msg = "[BUILD SEQUENCER ERROR] Sequencer length after built exceeds limit of ".concat(maxsequencerlength, " characters. Check your sheet music for too many repeats or too long sections.");
+        return;
+      }
+      if (_cmtActive) {
+        if (tokens[i] == CMT_END) {
+          _cmtActive = false;
         }
-        beatCount = beatCount + jump;
-        if (beatCount > beats) {
-          if (!seperateBarTokens.has(tokens[i]) && !closingTokens.has(tokens[i]) && !repeatTokens.has(tokens[i])) {
-            error.msg = "[Bar Beat Count Error 1] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-            return {
-              v: void 0
-            };
-          }
-          beatCount = 0;
-        } else {
-          if (i == length - 1) {
-            if (tokens[i] == DBL_BAR || tokens[i] == DBL_REP_END) {
-              var totalBeats = openingClassicalCount + beatCount - 1;
-              if (openingClassicalCount > 0 && CLASSICAL_CHECK && totalBeats !== beats) {
-                error.msg = "[CLASSICAL BEAT ERROR 1] Opening and Closing Bar Beat Count must add up to number of beats in time signature, currenly: ".concat(totalBeats, ". Required: ").concat(beats);
-                return {
-                  v: void 0
-                };
-              }
-            } else {
-              if (openingClassicalCount > 0) {
-                error.msg = "[CLASSICAL BEAT ERROR 2] There is no ending music but there is opening section";
-                return {
-                  v: void 0
-                };
-              } else if (seperateBarTokens.has(tokens[i]) || repeatTokens.has(tokens[i])) {
-                error.msg = "[Bar Beat Count Error 2] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-                return {
-                  v: void 0
-                };
-              } else {
-                error.msg = "<<< Bypass Classical Rule Check >>> for token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-              }
+        continue;
+      } else {
+        if (tokens[i] == CMT_START) {
+          _cmtActive = true;
+          cmtExist = true;
+          continue;
+        }
+      }
+      beatCount = beatCount + jump;
+      if (beatCount > beats) {
+        if (!seperateBarTokens.has(tokens[i]) && !closingTokens.has(tokens[i]) && !repeatTokens.has(tokens[i])) {
+          error.msg = "[Bar Beat Count Error 1] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
+          return;
+        }
+        beatCount = 0;
+      } else {
+        if (i == length - 1) {
+          if (tokens[i] == DBL_BAR || tokens[i] == DBL_REP_END) {
+            var totalBeats = openingClassicalCount + beatCount - 1;
+            if (openingClassicalCount > 0 && CLASSICAL_CHECK && totalBeats !== beats) {
+              error.msg = "[CLASSICAL BEAT ERROR 1] Opening and Closing Bar Beat Count must add up to number of beats in time signature, currenly: ".concat(totalBeats, ". Required: ").concat(beats);
+              return;
             }
-          } else if (seperateBarTokens.has(tokens[i]) || closingTokens.has(tokens[i]) || repeatTokens.has(tokens[i])) {
-            error.msg = "[Bar Beat Count Error 3] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-            return {
-              v: void 0
-            };
-          }
-        }
-        if (validTokens.has(tokens[i])) {
-          if (pulseBarTokens.has(tokens[i])) {
-            if (pulseFlag) {
-              var repeatChord = sequencer[sequencer.length - 1];
-              if (repeatChord) {
-                sequencer.push(repeatChord);
-              } else {
-                error.msg = "No previous chord to repeat at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-                sequencer.push(BM);
-              }
+          } else {
+            if (openingClassicalCount > 0) {
+              error.msg = "[CLASSICAL BEAT ERROR 2] There is no ending music but there is opening section";
+              return;
+            } else if (seperateBarTokens.has(tokens[i]) || repeatTokens.has(tokens[i])) {
+              error.msg = "[Bar Beat Count Error 2] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
+              return;
             } else {
+              error.msg = "<<< Bypass Classical Rule Check >>> for token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
+            }
+          }
+        } else if (seperateBarTokens.has(tokens[i]) || closingTokens.has(tokens[i]) || repeatTokens.has(tokens[i])) {
+          error.msg = "[Bar Beat Count Error 3] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
+          return;
+        }
+      }
+      if (validTokens.has(tokens[i])) {
+        if (pulseBarTokens.has(tokens[i])) {
+          if (pulseFlag) {
+            var repeatChord = sequencer[sequencer.length - 1];
+            if (repeatChord) {
+              sequencer.push(repeatChord);
+            } else {
+              error.msg = "No previous chord to repeat at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
               sequencer.push(BM);
             }
-            return 0; // continue
+          } else {
+            sequencer.push(BM);
           }
-          if (repeatPreviousBarTokens.has(tokens[i])) {
-            if (length < 3 || !openingTokens.has(tokens[i - 1]) && !closingTokens.has(tokens[i + 1])) {
-              error.msg = "[REPEAT PREVIOUS BAR ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-              return {
-                v: void 0
-              };
+          continue;
+        }
+        if (repeatPreviousBarTokens.has(tokens[i])) {
+          if (length < 3 || !openingTokens.has(tokens[i - 1]) && !closingTokens.has(tokens[i + 1])) {
+            error.msg = "[REPEAT PREVIOUS BAR ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
+            return;
+          }
+          if (sequencer.length >= beats) {
+            sequencer.push.apply(sequencer, _toConsumableArray(sequencer.slice(-beats)));
+            beatCount = beats;
+            continue;
+          } else {
+            error.msg = "Wrong beat count syntax, cannot repeat previous bar at position ".concat(i + 1, " with token: \"").concat(tokens[i], "\"");
+            return;
+          }
+        }
+        if (seperateBarTokens.has(tokens[i])) {
+          stack.push(BAR);
+          continue;
+        }
+        if (repeatTokens.has(tokens[i])) {
+          if (tokens[i] === REP_START || tokens[i] === DBL_REP_START) {
+            stack.push([tokens[i], sequencer.length, DEF_REP_NUM]);
+            continue;
+          } else if (tokens[i] === REP_END) {
+            if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
+              voltaArr[voltaArr.length - 1][2] = sequencer.length;
             }
-            if (sequencer.length >= beats) {
-              sequencer.push.apply(sequencer, _toConsumableArray(sequencer.slice(-beats)));
-              beatCount = beats;
-              return 0; // continue
-            } else {
-              error.msg = "Wrong beat count syntax, cannot repeat previous bar at position ".concat(i + 1, " with token: \"").concat(tokens[i], "\"");
-              return {
-                v: void 0
-              };
-            }
-          }
-          if (seperateBarTokens.has(tokens[i])) {
-            stack.push(BAR);
-            return 0; // continue
-          }
-          if (repeatTokens.has(tokens[i])) {
-            if (tokens[i] === REP_START || tokens[i] === DBL_REP_START) {
-              stack.push([tokens[i], sequencer.length, DEF_REP_NUM]);
-              return 0; // continue
-            } else if (tokens[i] === REP_END) {
-              var p;
-              var updateLoop = false;
-              while (stack.length) {
-                p = stack.pop();
-                if (p === BAR) {
-                  continue;
-                } else if (p[0] === REP_START || p[0] === BAR) {
+            var p = void 0;
+            var updateLoop = false;
+            while (stack.length) {
+              p = stack.pop();
+              if (p === BAR) {
+                continue;
+              } else if (p[0] === REP_START || p[0] === BAR) {
+                if (p[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
+                  loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
+                  repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+                } else {
                   loopBackIndex[sequencer.length - 1] = p[1];
                   repeatCount[sequencer.length - 1] = DEF_REP_NUM * p[2];
-                  updateLoop = true;
-                  break;
-                } else {
-                  error.msg = "[Stack Error 1] contains wrong matching tokens ".concat(p, " for ").concat(tokens[i]);
-                  return {
-                    v: void 0
-                  };
                 }
+                updateLoop = true;
+                if (voltaArr.length > 0) {
+                  voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
+                }
+                break;
+              } else {
+                error.msg = "[Stack Error 1] contains wrong matching tokens ".concat(p, " for ").concat(tokens[i]);
+                return;
               }
-              if (!updateLoop) {
-                loopBackIndex[sequencer.length - 1] = 0;
-                repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+            }
+            if (!updateLoop) {
+              loopBackIndex[sequencer.length - 1] = 0;
+              repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+              if (voltaArr.length > 0) {
+                voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
               }
-              return 0; // continue
-            } else if (tokens[i] === DBL_REP_END) {
-              var _p;
-              var _updateLoop = false;
-              while (stack.length) {
-                _p = stack.pop();
-                if (_p === BAR) {
-                  continue;
-                } else if (_p[0] === DBL_REP_START || _p[0] === BAR) {
+            }
+            continue;
+          } else if (tokens[i] === DBL_REP_END) {
+            if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
+              voltaArr[voltaArr.length - 1][2] = sequencer.length;
+            }
+            var _p = void 0;
+            var _updateLoop = false;
+            while (stack.length) {
+              _p = stack.pop();
+              if (_p === BAR) {
+                continue;
+              } else if (_p[0] === DBL_REP_START || _p[0] === BAR) {
+                if (_p[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
+                  loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
+                  repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+                } else {
                   loopBackIndex[sequencer.length - 1] = _p[1];
                   repeatCount[sequencer.length - 1] = DEF_REP_NUM * _p[2];
-                  _updateLoop = true;
-                  break;
-                } else {
-                  error.msg = "[Stack Error 2] contains wrong matching tokens ".concat(_p, " for ").concat(tokens[i]);
-                  return {
-                    v: void 0
-                  };
                 }
+                _updateLoop = true;
+                if (voltaArr.length > 0) {
+                  voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
+                }
+                break;
+              } else {
+                error.msg = "[Stack Error 2] contains wrong matching tokens ".concat(_p, " for ").concat(tokens[i]);
+                return;
               }
-              if (!_updateLoop) {
-                loopBackIndex[sequencer.length - 1] = 0;
-                repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+            }
+            if (!_updateLoop) {
+              loopBackIndex[sequencer.length - 1] = 0;
+              repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+              if (voltaArr.length > 0) {
+                voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
               }
-              return 0; // continue
-            } else if (tokens[i] === BTB_REP) {
-              var _p2;
-              var _updateLoop2 = false;
-              while (stack.length) {
-                _p2 = stack.pop();
-                if (_p2 === BAR) {
-                  continue;
-                } else if (_p2[0] === REP_START || _p2[0] === BAR) {
+            }
+            continue;
+          } else if (tokens[i] === BTB_REP) {
+            if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
+              voltaArr[voltaArr.length - 1][2] = sequencer.length;
+            }
+            var _p2 = void 0;
+            var _updateLoop2 = false;
+            while (stack.length) {
+              _p2 = stack.pop();
+              if (_p2 === BAR) {
+                continue;
+              } else if (_p2[0] === REP_START || _p2[0] === BAR) {
+                if (_p2[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
+                  loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
+                  repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+                } else {
                   loopBackIndex[sequencer.length - 1] = _p2[1];
                   repeatCount[sequencer.length - 1] = DEF_REP_NUM * _p2[2];
-                  _updateLoop2 = true;
-                  break;
-                } else {
-                  error.msg = "[Stack Error 3] contains wrong matching tokens ".concat(_p2, " for ").concat(tokens[i]);
-                  return {
-                    v: void 0
-                  };
                 }
+                _updateLoop2 = true;
+                if (voltaArr.length > 0) {
+                  voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
+                }
+                break;
+              } else {
+                error.msg = "[Stack Error 3] contains wrong matching tokens ".concat(_p2, " for ").concat(tokens[i]);
+                return;
               }
-              if (!_updateLoop2) {
-                loopBackIndex[sequencer.length - 1] = 0;
-                repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+            }
+            if (!_updateLoop2) {
+              loopBackIndex[sequencer.length - 1] = 0;
+              repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+              if (voltaArr.length > 0) {
+                voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
               }
-              stack.push([REP_START, sequencer.length, DEF_REP_NUM]);
-              return 0; // continue
-            } else if (tokens[i] === DBL_BTB_REP) {
-              var _p3;
-              var _updateLoop3 = false;
-              while (stack.length) {
-                _p3 = stack.pop();
-                if (_p3 === BAR) {
-                  continue;
-                } else if (_p3[0] === DBL_REP_START || _p3[0] === BAR) {
+            }
+            stack.push([REP_START, sequencer.length, DEF_REP_NUM]);
+            continue;
+          } else if (tokens[i] === DBL_BTB_REP) {
+            if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
+              voltaArr[voltaArr.length - 1][2] = sequencer.length;
+            }
+            var _p3 = void 0;
+            var _updateLoop3 = false;
+            while (stack.length) {
+              _p3 = stack.pop();
+              if (_p3 === BAR) {
+                continue;
+              } else if (_p3[0] === DBL_REP_START || _p3[0] === BAR) {
+                if (_p3[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
+                  loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
+                  repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+                } else {
                   loopBackIndex[sequencer.length - 1] = _p3[1];
                   repeatCount[sequencer.length - 1] = DEF_REP_NUM * _p3[2];
-                  _updateLoop3 = true;
-                  break;
-                } else {
-                  error.msg = "[Stack Error 4] contains wrong matching tokens ".concat(_p3, " for ").concat(tokens[i]);
-                  return {
-                    v: void 0
-                  };
                 }
-              }
-              if (!_updateLoop3) {
-                loopBackIndex[sequencer.length - 1] = 0;
-                repeatCount[sequencer.length - 1] = DEF_REP_NUM;
-              }
-              stack.push([DBL_REP_START, sequencer.length, DEF_REP_NUM]);
-              return 0; // continue
-            }
-          }
-        } else {
-          var match_rep_num = tokens[i].match(REP_NUM);
-          if (match_rep_num) {
-            beatCount = beatCount - jump;
-            var _p4 = stack.pop();
-            if (_p4 === undefined || length >= 2 && tokens[i - 1] !== REP_START && tokens[i - 1] !== DBL_REP_START && _p4 && _p4.length !== 3) {
-              error.msg = "[REPEAT NUMBER ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-              return {
-                v: void 0
-              };
-            }
-            var num = Number(match_rep_num[1]);
-            _p4[2] = num - 1;
-            stack.push(_p4);
-            return 0; // continue
-          }
-          var match_skip_num = tokens[i].match(SKIP_NUM);
-          if (match_skip_num) {
-            beatCount = beatCount - jump;
-            var current_skip_number = Number(match_skip_num[1]);
-            if (current_skip_number < LST_SKIPNUM) {
-              error.msg = "[SKIP NUMBER ERROR 1] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-              return {
-                v: void 0
-              };
-            } else if (current_skip_number == LST_SKIPNUM) {
-              skipNumberIndex[current_skip_number] = sequencer.length - 1;
-            } else {
-              var prev_num = current_skip_number - 1;
-              if (!(prev_num in skipNumberIndex)) {
-                error.msg = "[SKIP NUMBER ERROR 2] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-                return {
-                  v: void 0
-                };
-              }
-              forwardIndex[skipNumberIndex[prev_num]] = forwardIndex[skipNumberIndex[prev_num]] ? [sequencer.length].concat(_toConsumableArray(forwardIndex[skipNumberIndex[prev_num]])) : [sequencer.length];
-              skipNumberIndex[current_skip_number] = skipNumberIndex[prev_num];
-            }
-            return 0; // continue
-          }
-          var match_aux = tokens[i].match(AUX);
-          if (match_aux) {
-            beatCount = beatCount - jump;
-            error.msg = "Found an auxiliary token: \"".concat(tokens[i], "\"");
-            if (match_aux[1].match(/^[A-Z]$/)) {
-              if (match_aux[1] in markerIndex) {
-                error.msg = "[AUX ERROR 1] Section marker \"".concat(match_aux[1], "\" is already defined");
-                return {
-                  v: void 0
-                };
-              }
-              markerIndex[match_aux[1]] = currentSection;
-              sectionMarker[markerIndex[match_aux[1]]] = sequencer.length;
-              currentSection += 1;
-              return 0; // continue
-            }
-            if (match_aux[1].match(/^[A-Z]x\d+$/)) {
-              var letter = match_aux[1].match(/^[A-Z]/)[0];
-              var times = match_aux[1].match(/\d+$/)[0];
-              if (!(letter in markerIndex)) {
-                error.msg = "[AUX ERROR 2] Section marker \"".concat(letter, "\" is not defined");
-                return {
-                  v: void 0
-                };
-              }
-              if (times > MAX_SECTION_REP) {
-                error.msg = "[AUX ERROR 3] Section number \"".concat(times, "\" exceeds maximum limit of ").concat(MAX_SECTION_REP);
-                return {
-                  v: void 0
-                };
-              }
-              sectionMarker[currentSection] = sequencer.length;
-              currentSection += 1;
-              var _i3 = 0;
-              var left = markerIndex[letter];
-              var right = left + 1;
-              if (right < sectionMarker.length) {
-                right = sectionMarker[right] - 1;
+                _updateLoop3 = true;
+                if (voltaArr.length > 0) {
+                  voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
+                }
+                break;
               } else {
-                right = sequencer.length - 1;
+                error.msg = "[Stack Error 4] contains wrong matching tokens ".concat(_p3, " for ").concat(tokens[i]);
+                return;
               }
-              left = sectionMarker[left];
-              var offset = sequencer.length - 1 - right;
-              var distance = right - left + 1;
-              var temp = [];
-              while (_i3 < times) {
-                temp.push.apply(temp, _toConsumableArray(sequencer.slice(left, right + 1)));
-                for (var key in loopBackIndex) {
-                  key = Number(key);
-                  if (key >= left && key <= right) {
-                    var newkey = key + offset + distance * (_i3 + 1);
-                    var newvalue = loopBackIndex[key] + offset + distance * (_i3 + 1);
-                    loopBackIndex[newkey] = newvalue;
-                  }
-                }
-                for (var _key in repeatCount) {
-                  _key = Number(_key);
-                  if (_key >= left && _key <= right) {
-                    var _newkey = _key + offset + distance * (_i3 + 1);
-                    var _newvalue = repeatCount[_key];
-                    repeatCount[_newkey] = _newvalue;
-                  }
-                }
-                for (var _key2 in forwardIndex) {
-                  _key2 = Number(_key2);
-                  if (_key2 >= left && _key2 <= right) {
-                    var _newkey2 = _key2 + offset + distance * (_i3 + 1);
-                    var _newvalue2 = forwardIndex[_key2].map(function (v) {
-                      return v + offset + distance * (_i3 + 1);
-                    });
-                    forwardIndex[_newkey2] = _newvalue2;
-                  }
-                }
-                _i3 += 1;
-              }
-              sequencer.push.apply(sequencer, temp);
-              beatCount = beats;
-              return 0; // continue
-            } else if (match_aux[1].match(/^[A-Z]\*\d+$/)) {
-              var _letter = match_aux[1].match(/^[A-Z]/)[0];
-              var _times = match_aux[1].match(/\d+$/)[0];
-              if (!(_letter in markerIndex)) {
-                error.msg = "[AUX ERROR 4] Section marker \"".concat(_letter, "\" is not defined");
-                return {
-                  v: void 0
-                };
-              }
-              if (_times > MAX_SECTION_REP) {
-                error.msg = "[AUX ERROR 5] Section number \"".concat(_times, "\" exceeds maximum limit of ").concat(MAX_SECTION_REP);
-                return {
-                  v: void 0
-                };
-              }
-              sectionMarker[currentSection] = sequencer.length;
-              currentSection += 1;
-              var _i4 = 0;
-              var _left = markerIndex[_letter];
-              var _right = _left + 1;
-              if (_right < sectionMarker.length) {
-                _right = sectionMarker[_right] - 1;
-              } else {
-                _right = sequencer.length - 1;
-              }
-              _left = sectionMarker[_left];
-              var _temp = [];
-              while (_i4 < _times) {
-                _temp.push.apply(_temp, _toConsumableArray(sequencer.slice(_left, _right + 1)));
-                _i4 += 1;
-              }
-              sequencer.push.apply(sequencer, _temp);
-              beatCount = beats;
-              return 0; // continue
             }
-            return 0; // continue
+            if (!_updateLoop3) {
+              loopBackIndex[sequencer.length - 1] = 0;
+              repeatCount[sequencer.length - 1] = DEF_REP_NUM;
+              if (voltaArr.length > 0) {
+                voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
+              }
+            }
+            stack.push([DBL_REP_START, sequencer.length, DEF_REP_NUM]);
+            continue;
           }
-          var _chord = getChordNotes(tokens[i]);
-          if (_chord) {
-            sequencer.push(_chord);
-            return 0; // continue
-          }
-          error.msg = "[CHORD ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
-          return {
-            v: void 0
-          };
         }
-      },
-      _ret;
-    for (var i = index; i < length; i++) {
-      _ret = _loop();
-      if (_ret === 0) continue;
-      if (_ret) return _ret.v;
+      } else {
+        var match_rep_num = tokens[i].match(REP_NUM);
+        if (match_rep_num) {
+          beatCount = beatCount - jump;
+          var _p4 = stack.pop();
+          if (_p4 === undefined || length >= 2 && tokens[i - 1] !== REP_START && tokens[i - 1] !== DBL_REP_START && _p4 && _p4.length !== 3) {
+            error.msg = "[REPEAT NUMBER ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
+            return;
+          }
+          var num = Number(match_rep_num[1]);
+          if (num > MAX_REPEAT_MULTIPLIER) {
+            error.msg = "[REPEAT MULTIPLIER ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\". Maximum multiplier allowed is: \"(").concat(MAX_REPEAT_MULTIPLIER, "x)\"");
+            return;
+          }
+          _p4[2] = num - 1;
+          stack.push(_p4);
+          continue;
+        }
+        var match_skip_num = tokens[i].match(SKIP_NUM);
+        if (match_skip_num) {
+          beatCount = beatCount - jump;
+          voltaMap[sequencer.length] = voltaArr.length;
+          voltaArr.push([false, 0, tokens.length]);
+          if (voltaArr.length > 1) {
+            if (voltaArr.length > MAX_VOLTA) {
+              error.msg = "[VOLTA BRACKETS ERROR] Too many volta brackets are in use (max allowed: ".concat(MAX_VOLTA, ")");
+              return;
+            }
+            voltaArr[voltaArr.length - 1][1] = voltaArr[voltaArr.length - 2][1];
+          }
+          continue;
+        }
+        var match_aux = tokens[i].match(AUX);
+        if (match_aux) {
+          beatCount = beatCount - jump;
+          error.msg = "Found an auxiliary token: \"".concat(tokens[i], "\"");
+          if (match_aux[1].match(/^[A-Z]$/)) {
+            if (match_aux[1] in markerIndex) {
+              error.msg = "[AUX ERROR 1] Section marker \"".concat(match_aux[1], "\" is already defined");
+              return;
+            }
+            markerIndex[match_aux[1]] = currentSection;
+            sectionMarker[markerIndex[match_aux[1]]] = sequencer.length;
+            currentSection += 1;
+            continue;
+          }
+          if (match_aux[1].match(/^[A-Z]x\d+$/)) {
+            var letter = match_aux[1].match(/^[A-Z]/)[0];
+            var times = match_aux[1].match(/\d+$/)[0];
+            if (!(letter in markerIndex)) {
+              error.msg = "[AUX ERROR 2] Section marker \"".concat(letter, "\" is not defined");
+              return;
+            }
+            if (times > MAX_SECTION_REP) {
+              error.msg = "[AUX ERROR 3] Section number \"".concat(times, "\" exceeds maximum limit of ").concat(MAX_SECTION_REP);
+              return;
+            }
+            sectionMarker[currentSection] = sequencer.length;
+            currentSection += 1;
+            var _i2 = 0;
+            var left = markerIndex[letter];
+            var right = left + 1;
+            if (right < sectionMarker.length) {
+              right = sectionMarker[right] - 1;
+            } else {
+              right = sequencer.length - 1;
+            }
+            left = sectionMarker[left];
+            var offset = sequencer.length - 1 - right;
+            var distance = right - left + 1;
+            var temp = [];
+            while (_i2 < times) {
+              temp.push.apply(temp, _toConsumableArray(sequencer.slice(left, right + 1)));
+              for (var key in loopBackIndex) {
+                key = Number(key);
+                if (key >= left && key <= right) {
+                  var newkey = key + offset + distance * (_i2 + 1);
+                  var newvalue = loopBackIndex[key] + offset + distance * (_i2 + 1);
+                  loopBackIndex[newkey] = newvalue;
+                }
+              }
+              for (var _key in repeatCount) {
+                _key = Number(_key);
+                if (_key >= left && _key <= right) {
+                  var _newkey = _key + offset + distance * (_i2 + 1);
+                  var _newvalue = repeatCount[_key];
+                  repeatCount[_newkey] = _newvalue;
+                }
+              }
+              for (var _key2 in voltaMap) {
+                _key2 = Number(_key2);
+                if (_key2 >= left && _key2 <= right) {
+                  var _newkey2 = _key2 + offset + distance * (_i2 + 1);
+                  var _newvalue2 = voltaArr.length;
+                  voltaMap[_newkey2] = _newvalue2;
+                  var volta = voltaArr[voltaMap[_key2]];
+                  var newvolta = [volta[0], volta[1] + offset + distance * (_i2 + 1), volta[2] + offset + distance * (_i2 + 1)];
+                  voltaArr.push(newvolta);
+                }
+              }
+              _i2 += 1;
+            }
+            sequencer.push.apply(sequencer, temp);
+            beatCount = beats;
+            continue;
+          } else if (match_aux[1].match(/^[A-Z]\*\d+$/)) {
+            var _letter = match_aux[1].match(/^[A-Z]/)[0];
+            var _times = match_aux[1].match(/\d+$/)[0];
+            if (!(_letter in markerIndex)) {
+              error.msg = "[AUX ERROR 4] Section marker \"".concat(_letter, "\" is not defined");
+              return;
+            }
+            if (_times > MAX_SECTION_REP) {
+              error.msg = "[AUX ERROR 5] Section number \"".concat(_times, "\" exceeds maximum limit of ").concat(MAX_SECTION_REP);
+              return;
+            }
+            sectionMarker[currentSection] = sequencer.length;
+            currentSection += 1;
+            var _i3 = 0;
+            var _left = markerIndex[_letter];
+            var _right = _left + 1;
+            if (_right < sectionMarker.length) {
+              _right = sectionMarker[_right] - 1;
+            } else {
+              _right = sequencer.length - 1;
+            }
+            _left = sectionMarker[_left];
+            var _temp = [];
+            while (_i3 < _times) {
+              _temp.push.apply(_temp, _toConsumableArray(sequencer.slice(_left, _right + 1)));
+              _i3 += 1;
+            }
+            sequencer.push.apply(sequencer, _temp);
+            beatCount = beats;
+            continue;
+          }
+          continue;
+        }
+        var _chord = getChordNotes(tokens[i]);
+        if (_chord) {
+          sequencer.push(_chord);
+          continue;
+        }
+        error.msg = "[CHORD ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
+        return;
+      }
     }
     if (length > 0) {
       var te = tokens[length - 1];
@@ -1114,8 +1179,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return;
     }
     _sheetMusic.content = sheetMusic;
-    for (var _i2 = 0, _ctrlVars = ctrlVars; _i2 < _ctrlVars.length; _i2++) {
-      var _ctrlVars$_i = _slicedToArray(_ctrlVars[_i2], 2),
+    for (var _i4 = 0, _ctrlVars = ctrlVars; _i4 < _ctrlVars.length; _i4++) {
+      var _ctrlVars$_i = _slicedToArray(_ctrlVars[_i4], 2),
         _func = _ctrlVars$_i[0],
         _arg = _ctrlVars$_i[1];
       if (this[_func].constructor.name === 'AsyncFunction') {
@@ -1137,7 +1202,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         }
       }
     }
-    var result = [sequencer, loopBackIndex, repeatCount, end, forwardIndex, skipNumberIndex];
+    var result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr];
     validArgs.add(result);
     PULSE_FLAG = true;
     return result;
@@ -1426,7 +1491,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function _playSequencer() {
     _playSequencer = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(sequencerObj) {
-      var sequencer, loopBackIndex, repeatCount, end, forwardIndex, skipNumberIndex, _sequencerObj, _sequencerObj$, problem, _problem5, _taskDropper, signal, i, n, heuristic_lowest_number_index, tempRepeatCount, tempForwardIndex, skipFlag;
+      var sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, _sequencerObj, _sequencerObj$, problem, _problem5, _taskDropper, signal, i, n, timeout, tempRepeatCount, j, len;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
@@ -1434,8 +1499,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             loopBackIndex = {};
             repeatCount = {};
             end = END;
-            forwardIndex = {};
-            skipNumberIndex = {};
+            voltaMap = {};
+            voltaArr = [];
             if (validArgs.has(sequencerObj)) {
               _sequencerObj = _slicedToArray(sequencerObj, 6);
               sequencer = _sequencerObj[0];
@@ -1443,8 +1508,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
               repeatCount = _sequencerObj[2];
               _sequencerObj$ = _sequencerObj[3];
               end = _sequencerObj$ === void 0 ? END : _sequencerObj$;
-              forwardIndex = _sequencerObj[4];
-              skipNumberIndex = _sequencerObj[5];
+              voltaMap = _sequencerObj[4];
+              voltaArr = _sequencerObj[5];
               validArgs.delete(sequencerObj);
               problem = "Sequencer object will be removed from WeakSet right after playing";
               oops(problem, 'warning', FULL_ASYNC_DEBUG_MODE);
@@ -1457,8 +1522,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             _taskDropper = taskDropper, signal = _taskDropper.signal;
             i = 0;
             n = sequencer.length;
-            heuristic_lowest_number_index = -1;
-            if (LST_SKIPNUM in skipNumberIndex) heuristic_lowest_number_index = skipNumberIndex[LST_SKIPNUM];
+            timeout = 0;
+            tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));
             oops('🤟 | | |', 'info');
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 1;
@@ -1474,54 +1539,77 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             _context3.n = 3;
             return _delay(DEF_MSEC, signal);
           case 3:
-            if (signal.aborted) {
-              _context3.n = 8;
+            if (!(!signal.aborted && timeout < MAX_TIMEOUT)) {
+              _context3.n = 13;
               break;
             }
+            timeout += 1;
             i = 0;
-            tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));
-            tempForwardIndex = JSON.parse(JSON.stringify(forwardIndex));
-            skipFlag = false;
+            for (j = 0, len = voltaArr.length; j < len; j++) {
+              voltaArr[j][0] = false;
+            }
           case 4:
             if (!(i < n)) {
-              _context3.n = 7;
+              _context3.n = 12;
               break;
             }
             if (!signal.aborted) {
               _context3.n = 5;
               break;
             }
-            return _context3.a(3, 7);
+            return _context3.a(3, 12);
           case 5:
+            if (!(i in voltaMap)) {
+              _context3.n = 9;
+              break;
+            }
+            if (voltaArr[voltaMap[i]][0]) {
+              _context3.n = 7;
+              break;
+            }
             _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
             _context3.n = 6;
             return _delay(DEF_MSEC, signal);
           case 6:
-            if (skipFlag && i in forwardIndex) {
-              i = forwardIndex[i].pop();
-              skipFlag = false;
-            } else if (i in loopBackIndex && repeatCount[i] > 0) {
-              repeatCount[i]--;
-              if (repeatCount[i] == 0 && i > heuristic_lowest_number_index) {
-                skipFlag = true;
-              } else {
-                skipFlag = false;
-              }
-              i = loopBackIndex[i];
-            } else {
-              i++;
-            }
-            _context3.n = 4;
+            voltaArr[voltaMap[i]][0] = true;
+            i += 1;
+            _context3.n = 8;
             break;
           case 7:
+            while (i < n && i in voltaMap && voltaArr[voltaMap[i]][0]) {
+              i = voltaArr[voltaMap[i]][2];
+            }
+          case 8:
+            _context3.n = 11;
+            break;
+          case 9:
+            _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
+            _context3.n = 10;
+            return _delay(DEF_MSEC, signal);
+          case 10:
+            if (i in loopBackIndex) {
+              if (repeatCount[i] > 0) {
+                repeatCount[i] -= 1;
+                i = loopBackIndex[i];
+              } else {
+                if (!end || i !== n - 1) {
+                  repeatCount[i] = tempRepeatCount[i];
+                }
+                i += 1;
+              }
+            } else {
+              i += 1;
+            }
+          case 11:
+            _context3.n = 4;
+            break;
+          case 12:
             if (end && (!(n - 1 in repeatCount) || repeatCount[n - 1] == 0)) {
               stopSequencer();
             }
-            repeatCount = tempRepeatCount;
-            forwardIndex = tempForwardIndex;
             _context3.n = 3;
             break;
-          case 8:
+          case 13:
             return _context3.a(2);
         }
       }, _callee3);
@@ -1744,5 +1832,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function getVersion() {
     return VERSION;
+  }
+  function hasComment() {
+    return cmtExist;
   }
 })(typeof window !== "undefined" ? window : void 0);
