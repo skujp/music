@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "8.0.0";
+  var VERSION = "8.0.1";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -273,9 +273,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "In the BASS system, a chord (NOT note) is the basic unit of a sheet music." + "\n";
     manual += "For example, 4/4 | C C C C || means " + "\n";
     manual += "to play chord C Major four times (NOT single C note four times)." + "\n";
-    manual += "If you just want a single C note, try this AI verse: " + "\n";
-    manual += "| We got one C on the page, but the mind hears three |" + "\n";
-    manual += "|     That's the magic of a C5/C, harmony on MVP     |" + "\n";
     manual += "" + "\n";
     manual += "4. Time Signature" + "\n";
     manual += "A time signature is a musical notation symbol made of two stacked " + "\n";
@@ -285,10 +282,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "If the sheet music does not start with a time signature, by default the " + "\n";
     manual += "time signature is 4/4. For example, | F D A C | B A B A |" + "\n";
     manual += "Please note, time signature in the BASS system has more varieties than common sheet music. " + "\n";
-    manual += "For example, the nominator part represents the number of beats in a bar. It can be any number. " + "\n";
-    manual += "The denominator part is a power of 2, representing a fraction of a quarter note for calculating the actual sheet music speed." + "\n";
+    manual += "For example, the nominator part represents the number of beats in a bar. " + "\n";
+    manual += "The denominator part is a power of two, representing a fraction of a whole note for calculating the actual sheet music speed." + "\n";
     manual += "For example, 8/16 means there are 8 beats in a bar, and music speed will be a tempo adjusted based on the 16th note." + "\n";
-    manual += "So do not be surprised if you see a time signature such as 123/256 :)" + "\n";
+    manual += "So do not be surprised if you see a time signature such as 123/256 in the BASS system :)" + "\n";
     manual += "" + "\n";
     manual += "5. Time Measure" + "\n";
     manual += "Time Measure (or Bar) is a small container of time that holds " + "\n";
@@ -318,10 +315,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "8. Branching Section" + "\n";
     manual += "A branching section (or volta bracket) is used to skip from one section to another" + "\n";
     manual += "of a sheet music AFTER REPEAT. It is written as an open bracket " + "\n";
-    manual += "followed by a number and a dot. For example: [1. [2. [3. [321. , etc." + "\n";
+    manual += "followed by a number and a dot. For example: [1. [2. [3. [123. , etc." + "\n";
     manual += "Below is a section of a sheet music which will skip [1. and jump to [2. after repeat. " + "\n";
     manual += "4/4 |: A A A A | [1. B B B B :| [2. C C C C | D D D D |" + "\n";
-    manual += "Please note, BASS supports POSITIONAL volta brackets, including uses beyond common music notation. " + "\n";
+    manual += "Please note, BASS implements positional volta brackets, including uses beyond common music notation. " + "\n";
     manual += "For example: 3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B || ", manual += "After the 1st repeat, it will skip [40. bar to the next bar [20. " + "\n";
     manual += "After the 2nd repeat, it will skip [40. bar and [20. bar to the next bar [30. " + "\n";
     manual += "Please note, the branching section relies on repeat symbols :| or :|| to move back to the closest " + "\n";
@@ -411,6 +408,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "The commented opening symbol (Vi) is <- and the closing (De) is -> " + "\n";
     manual += "For example, 2/4 | G G | <- A A | B B | -> D D | <- E E |  -> F F || will only play | G G | D D | F F || " + "\n";
     manual += "This Vi-De mode can be useful to test playing only specific parts of the sheet music. " + "\n";
+    manual += "Please note that, sometimes playback does not echo any sound due to the commented sheet music containing only BM / chords. " + "\n";
+    manual += "For example, | <- D D D D | -> / / / / || " + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
@@ -436,11 +435,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "|:      :|:    :|" + "\n";
     manual += "||:    :||:    :||" + "\n";
     manual += "" + "\n";
-    manual += "Times:" + "\n";
+    manual += "Multiplier:" + "\n";
     manual += "(1x) (2x) (3x) (4x) (5x) ..." + "\n";
     manual += "" + "\n";
-    manual += "Skip:" + "\n";
-    manual += "[1. [2. [3. [4. [123. [456. ..." + "\n";
+    manual += "Branching (Volta):" + "\n";
+    manual += "[1. [2. [3. [4. [99. [101. [123. ..." + "\n";
     manual += "" + "\n";
     manual += "Pulse:" + "\n";
     manual += "/" + "\n";
@@ -451,14 +450,14 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "Chord:" + "\n";
     manual += "m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug" + "\n";
     manual += "" + "\n";
-    manual += "Metadata:" + "\n";
+    manual += "Other:" + "\n";
     manual += "(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) " + "\n";
     manual += "(allegro) (moderato) (adagio) (lyrics_separated_by_underscores) ..." + "\n";
     manual += "" + "\n";
-    manual += "Section Marker:" + "\n";
+    manual += "Marker:" + "\n";
     manual += "(#) (#x<number>) (#*<number>)" + "\n";
     manual += "" + "\n";
-    manual += "Commented Out: " + "\n";
+    manual += "Comment (Vi-De):" + "\n";
     manual += "<- ->" + "\n";
     manual += "" + "\n";
     manual += "Remark:   " + "\n";
@@ -532,6 +531,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "The BASS system is written by a music enthusiast to help you learn rhythms, " + "\n";
     manual += "chords, and very basic compositions. It is by no means to replace a " + "\n";
     manual += "trained professional who can guide you through your complete music endeavor. " + "\n";
+    manual += "If you are a strictly classically trained musician, this system may not be the right fit for you. " + "\n";
     manual += "Well, enjoy and have fun! :)" + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
