@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "8.0.1";
+const VERSION = "8.1.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -200,6 +200,8 @@ function help() {
     manual += "modify using repeat multipliers such as (3x), (4x), etc." + "\n";
     manual += "For example, |: (4x)  F  /  / C  |  B  /  /  A  :| means " + "\n";
     manual += "loop 4 times over the 2 bars of chords." + "\n";
+    manual += "In the BASS system, if there is no matching opening repeat symbols, it will go back to the beginning. " + "\n";
+    manual += "For example, 2/4 | C D | F G :| A B :| G G ||, each time seeing a repeat symbol :| it will go back to the beginning. " + "\n";
     manual += "" + "\n";
     manual += "8. Branching Section" + "\n";
     manual += "A branching section (or volta bracket) is used to skip from one section to another" + "\n";
@@ -296,6 +298,7 @@ function help() {
     manual += "17. Commented Out Section" + "\n";
     manual += "Commented out section (or Vi-De) is a special marked section NOT to be played in a sheet music. " + "\n";
     manual += "The commented opening symbol (Vi) is <- and the closing (De) is -> " + "\n";
+    manual += "They are usually set after the opening section of a sheet music (see section 6). " + "\n";
     manual += "For example, 2/4 | G G | <- A A | B B | -> D D | <- E E |  -> F F || will only play | G G | D D | F F || " + "\n";
     manual += "This Vi-De mode can be useful to test playing only specific parts of the sheet music. " + "\n";
     manual += "Please note that, sometimes playback does not echo any sound due to the commented sheet music containing only BM / chords. " + "\n";
@@ -621,7 +624,8 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
     }
     const reshake = BPM.val;
     BPM.val = reshake;
-    var stack = [];                
+    var repeatStack = [];          
+    var repeatStackMap = {};       
     var sequencer = [];            
     var loopBackIndex = {};        
     var repeatCount = {};          
@@ -650,9 +654,11 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
         }
     }
     if (tokens[index] == BAR) {
-        stack.push([tokens[index], 0, DEF_REP_NUM]);
+        repeatStackMap[sequencer.length] = repeatStack.length;
+        repeatStack.push([tokens[index], 0, DEF_REP_NUM]);
     } else if (tokens[index] == DBL_REP_START || tokens[index] == REP_START) {
-        stack.push([tokens[index], sequencer.length, DEF_REP_NUM]);
+        repeatStackMap[sequencer.length] = repeatStack.length;
+        repeatStack.push([tokens[index], sequencer.length, DEF_REP_NUM]);
     } else {
         error.msg = `[OPENING ERROR 2] Invalid token at position ${index + 1}: "${tokens[index]}"`;
         return;
@@ -743,12 +749,12 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                 }
             }
             if (seperateBarTokens.has(tokens[i])) {
-                stack.push(BAR);
                 continue;       
             }
             if (repeatTokens.has(tokens[i])) {
                 if (tokens[i] === REP_START || tokens[i] === DBL_REP_START) {
-                    stack.push([tokens[i], sequencer.length, DEF_REP_NUM]); 
+                    repeatStackMap[sequencer.length] = repeatStack.length;
+                    repeatStack.push([tokens[i], sequencer.length, DEF_REP_NUM]);
                     continue;    
                 } else if (tokens[i] === REP_END) {
                     if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
@@ -756,11 +762,9 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                     }
                     let p;
                     let updateLoop = false;
-                    while (stack.length) {  
-                        p = stack.pop();
-                        if (p === BAR) {
-                            continue;
-                        } else if (p[0] === REP_START || p[0] === BAR) { 
+                    if (repeatStack.length) {
+                        p = repeatStack.pop();
+                        if (p[0] === REP_START || p[0] === BAR) { 
                             if (p[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
                                 loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
                                 repeatCount[sequencer.length - 1] = DEF_REP_NUM;  
@@ -772,7 +776,6 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                             if (voltaArr.length > 0) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }
-                            break;
                         } else {
                             error.msg = `[Stack Error 1] contains wrong matching tokens ${p} for ${tokens[i]}`;
                             return;
@@ -792,11 +795,9 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                     }
                     let p;
                     let updateLoop = false;
-                    while (stack.length) {  
-                        p = stack.pop();
-                        if (p === BAR) {
-                            continue;
-                        } else if (p[0] === DBL_REP_START || p[0] === BAR) {
+                    if (repeatStack.length) {
+                        p = repeatStack.pop();
+                        if (p[0] === DBL_REP_START || p[0] === BAR) {
                             if (p[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
                                 loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
                                 repeatCount[sequencer.length - 1] = DEF_REP_NUM;  
@@ -808,7 +809,6 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                             if (voltaArr.length > 0) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }                            
-                            break;
                         } else {
                             error.msg = `[Stack Error 2] contains wrong matching tokens ${p} for ${tokens[i]}`;
                             return;
@@ -828,11 +828,9 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                     }
                     let p;
                     let updateLoop = false;
-                    while (stack.length) {  
-                        p = stack.pop();
-                        if (p === BAR) {
-                            continue;
-                        } else if (p[0] === REP_START || p[0] === BAR) { 
+                    if (repeatStack.length) {
+                        p = repeatStack.pop();
+                        if (p[0] === REP_START || p[0] === BAR) { 
                             if (p[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
                                 loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
                                 repeatCount[sequencer.length - 1] = DEF_REP_NUM;  
@@ -844,7 +842,6 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                             if (voltaArr.length > 0) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }
-                            break;
                         } else {
                             error.msg = `[Stack Error 3] contains wrong matching tokens ${p} for ${tokens[i]}`;
                             return;
@@ -857,7 +854,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                             voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];    
                         }
                     }
-                    stack.push([REP_START, sequencer.length, DEF_REP_NUM]); 
+                    repeatStack.push([REP_START, sequencer.length, DEF_REP_NUM]); 
                     continue;
                 } else if (tokens[i] === DBL_BTB_REP) { 
                     if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
@@ -865,11 +862,9 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                     }
                     let p;
                     let updateLoop = false;
-                    while (stack.length) {  
-                        p = stack.pop();
-                        if (p === BAR) {
-                            continue;
-                        } else if (p[0] === DBL_REP_START || p[0] === BAR) {
+                    if (repeatStack.length) {
+                        p = repeatStack.pop();
+                        if (p[0] === DBL_REP_START || p[0] === BAR) {
                             if (p[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
                                 loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
                                 repeatCount[sequencer.length - 1] = DEF_REP_NUM;  
@@ -881,7 +876,6 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                             if (voltaArr.length > 0) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }
-                            break;
                         } else {
                             error.msg = `[Stack Error 4] contains wrong matching tokens ${p} for ${tokens[i]}`;
                             return;
@@ -894,7 +888,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                             voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];    
                         }
                     }
-                    stack.push([DBL_REP_START, sequencer.length, DEF_REP_NUM]); 
+                    repeatStack.push([DBL_REP_START, sequencer.length, DEF_REP_NUM]); 
                     continue;
                 }
             }
@@ -902,9 +896,11 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
             const match_rep_num = tokens[i].match(REP_NUM);
             if (match_rep_num) {
                 beatCount = beatCount - jump;
-                let p = stack.pop();
-                if ((p === undefined) || (length >= 2 && tokens[i-1] !== REP_START && tokens[i-1] !== DBL_REP_START && p && p.length !== 3)) {
-                    error.msg = `[REPEAT NUMBER ERROR] Invalid token at position ${i + 1}: "${tokens[i]}"`;
+                let p = repeatStack.pop();
+                if ((p === undefined) || 
+                    (length >= 2 && tokens[i-1] !== REP_START && tokens[i-1] !== DBL_REP_START && p.length !== 3) ||
+                    (p[1] === 0 && sequencer.length !== 0)) {
+                    error.msg = `[REPEAT MULTIPLIER ERROR] Invalid token at position ${i + 1}: "${tokens[i]}"`;
                     return;
                 }
                 const num = Number(match_rep_num[1]);  
@@ -913,7 +909,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
                     return;
                 }  
                 p[2] = num - 1; 
-                stack.push(p); 
+                repeatStack.push(p);
                 continue;
             }
             const match_skip_num = tokens[i].match(SKIP_NUM);

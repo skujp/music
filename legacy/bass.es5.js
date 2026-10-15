@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "8.0.1";
+  var VERSION = "8.1.0";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -311,6 +311,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "modify using repeat multipliers such as (3x), (4x), etc." + "\n";
     manual += "For example, |: (4x)  F  /  / C  |  B  /  /  A  :| means " + "\n";
     manual += "loop 4 times over the 2 bars of chords." + "\n";
+    manual += "In the BASS system, if there is no matching opening repeat symbols, it will go back to the beginning. " + "\n";
+    manual += "For example, 2/4 | C D | F G :| A B :| G G ||, each time seeing a repeat symbol :| it will go back to the beginning. " + "\n";
     manual += "" + "\n";
     manual += "8. Branching Section" + "\n";
     manual += "A branching section (or volta bracket) is used to skip from one section to another" + "\n";
@@ -406,6 +408,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "17. Commented Out Section" + "\n";
     manual += "Commented out section (or Vi-De) is a special marked section NOT to be played in a sheet music. " + "\n";
     manual += "The commented opening symbol (Vi) is <- and the closing (De) is -> " + "\n";
+    manual += "They are usually set after the opening section of a sheet music (see section 6). " + "\n";
     manual += "For example, 2/4 | G G | <- A A | B B | -> D D | <- E E |  -> F F || will only play | G G | D D | F F || " + "\n";
     manual += "This Vi-De mode can be useful to test playing only specific parts of the sheet music. " + "\n";
     manual += "Please note that, sometimes playback does not echo any sound due to the commented sheet music containing only BM / chords. " + "\n";
@@ -746,7 +749,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     }
     var reshake = BPM.val;
     BPM.val = reshake;
-    var stack = [];
+    var repeatStack = [];
+    var repeatStackMap = {};
     var sequencer = [];
     var loopBackIndex = {};
     var repeatCount = {};
@@ -775,9 +779,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       }
     }
     if (tokens[index] == BAR) {
-      stack.push([tokens[index], 0, DEF_REP_NUM]);
+      repeatStackMap[sequencer.length] = repeatStack.length;
+      repeatStack.push([tokens[index], 0, DEF_REP_NUM]);
     } else if (tokens[index] == DBL_REP_START || tokens[index] == REP_START) {
-      stack.push([tokens[index], sequencer.length, DEF_REP_NUM]);
+      repeatStackMap[sequencer.length] = repeatStack.length;
+      repeatStack.push([tokens[index], sequencer.length, DEF_REP_NUM]);
     } else {
       error.msg = "[OPENING ERROR 2] Invalid token at position ".concat(index + 1, ": \"").concat(tokens[index], "\"");
       return;
@@ -864,12 +870,12 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           }
         }
         if (seperateBarTokens.has(tokens[i])) {
-          stack.push(BAR);
           continue;
         }
         if (repeatTokens.has(tokens[i])) {
           if (tokens[i] === REP_START || tokens[i] === DBL_REP_START) {
-            stack.push([tokens[i], sequencer.length, DEF_REP_NUM]);
+            repeatStackMap[sequencer.length] = repeatStack.length;
+            repeatStack.push([tokens[i], sequencer.length, DEF_REP_NUM]);
             continue;
           } else if (tokens[i] === REP_END) {
             if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
@@ -877,11 +883,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             }
             var p = void 0;
             var updateLoop = false;
-            while (stack.length) {
-              p = stack.pop();
-              if (p === BAR) {
-                continue;
-              } else if (p[0] === REP_START || p[0] === BAR) {
+            if (repeatStack.length) {
+              p = repeatStack.pop();
+              if (p[0] === REP_START || p[0] === BAR) {
                 if (p[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
                   loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
                   repeatCount[sequencer.length - 1] = DEF_REP_NUM;
@@ -893,7 +897,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                 if (voltaArr.length > 0) {
                   voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
                 }
-                break;
               } else {
                 error.msg = "[Stack Error 1] contains wrong matching tokens ".concat(p, " for ").concat(tokens[i]);
                 return;
@@ -913,11 +916,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             }
             var _p = void 0;
             var _updateLoop = false;
-            while (stack.length) {
-              _p = stack.pop();
-              if (_p === BAR) {
-                continue;
-              } else if (_p[0] === DBL_REP_START || _p[0] === BAR) {
+            if (repeatStack.length) {
+              _p = repeatStack.pop();
+              if (_p[0] === DBL_REP_START || _p[0] === BAR) {
                 if (_p[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
                   loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
                   repeatCount[sequencer.length - 1] = DEF_REP_NUM;
@@ -929,7 +930,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                 if (voltaArr.length > 0) {
                   voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
                 }
-                break;
               } else {
                 error.msg = "[Stack Error 2] contains wrong matching tokens ".concat(_p, " for ").concat(tokens[i]);
                 return;
@@ -949,11 +949,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             }
             var _p2 = void 0;
             var _updateLoop2 = false;
-            while (stack.length) {
-              _p2 = stack.pop();
-              if (_p2 === BAR) {
-                continue;
-              } else if (_p2[0] === REP_START || _p2[0] === BAR) {
+            if (repeatStack.length) {
+              _p2 = repeatStack.pop();
+              if (_p2[0] === REP_START || _p2[0] === BAR) {
                 if (_p2[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
                   loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
                   repeatCount[sequencer.length - 1] = DEF_REP_NUM;
@@ -965,7 +963,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                 if (voltaArr.length > 0) {
                   voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
                 }
-                break;
               } else {
                 error.msg = "[Stack Error 3] contains wrong matching tokens ".concat(_p2, " for ").concat(tokens[i]);
                 return;
@@ -978,7 +975,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
               }
             }
-            stack.push([REP_START, sequencer.length, DEF_REP_NUM]);
+            repeatStack.push([REP_START, sequencer.length, DEF_REP_NUM]);
             continue;
           } else if (tokens[i] === DBL_BTB_REP) {
             if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
@@ -986,11 +983,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             }
             var _p3 = void 0;
             var _updateLoop3 = false;
-            while (stack.length) {
-              _p3 = stack.pop();
-              if (_p3 === BAR) {
-                continue;
-              } else if (_p3[0] === DBL_REP_START || _p3[0] === BAR) {
+            if (repeatStack.length) {
+              _p3 = repeatStack.pop();
+              if (_p3[0] === DBL_REP_START || _p3[0] === BAR) {
                 if (_p3[0] === BAR && voltaArr.length > 1 && voltaArr[voltaArr.length - 1][1] == voltaArr[voltaArr.length - 2][1]) {
                   loopBackIndex[sequencer.length - 1] = voltaArr[voltaArr.length - 1][1];
                   repeatCount[sequencer.length - 1] = DEF_REP_NUM;
@@ -1002,7 +997,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                 if (voltaArr.length > 0) {
                   voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
                 }
-                break;
               } else {
                 error.msg = "[Stack Error 4] contains wrong matching tokens ".concat(_p3, " for ").concat(tokens[i]);
                 return;
@@ -1015,7 +1009,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
               }
             }
-            stack.push([DBL_REP_START, sequencer.length, DEF_REP_NUM]);
+            repeatStack.push([DBL_REP_START, sequencer.length, DEF_REP_NUM]);
             continue;
           }
         }
@@ -1023,9 +1017,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         var match_rep_num = tokens[i].match(REP_NUM);
         if (match_rep_num) {
           beatCount = beatCount - jump;
-          var _p4 = stack.pop();
-          if (_p4 === undefined || length >= 2 && tokens[i - 1] !== REP_START && tokens[i - 1] !== DBL_REP_START && _p4 && _p4.length !== 3) {
-            error.msg = "[REPEAT NUMBER ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
+          var _p4 = repeatStack.pop();
+          if (_p4 === undefined || length >= 2 && tokens[i - 1] !== REP_START && tokens[i - 1] !== DBL_REP_START && _p4.length !== 3 || _p4[1] === 0 && sequencer.length !== 0) {
+            error.msg = "[REPEAT MULTIPLIER ERROR] Invalid token at position ".concat(i + 1, ": \"").concat(tokens[i], "\"");
             return;
           }
           var num = Number(match_rep_num[1]);
@@ -1034,7 +1028,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             return;
           }
           _p4[2] = num - 1;
-          stack.push(_p4);
+          repeatStack.push(_p4);
           continue;
         }
         var match_skip_num = tokens[i].match(SKIP_NUM);
