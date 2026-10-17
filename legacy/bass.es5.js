@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "9.0.0";
+  var VERSION = "9.0.1";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -276,7 +276,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "" + "\n";
     manual += "2. Chord" + "\n";
     manual += "A chord is a group of three or more notes played at the same time." + "\n";
-    manual += "For example, chord C (C major) consists of C,E,G. " + "\n";
+    manual += "For example, chord C (C major) consists of C,E,G ; " + "\n";
     manual += "chord C/E (C major / bass E) consists of C,E,G with a bass note E. " + "\n";
     manual += "Currently, the BASS system supports the following chord type notations: " + "\n";
     manual += "C (C Major), Cm (C Minor), Caug (C Augmented), Cdim (C Diminished), " + "\n";
@@ -471,7 +471,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "will play G G C C E E F F (no change 1st time through), then it will play G G C C E E C E F like above." + "\n";
     manual += "Please note that these special roadmap markers should be used with caution to avoid any confusion." + "\n";
     manual += "Currently, these symbols can only be used once in the BASS system." + "\n";
-    manual += "During playback, it is is called [Poof Mode Playing] " + "\n";
+    manual += "During playback, it is is called [Puff Mode Playing] " + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";

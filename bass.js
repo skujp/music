@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "9.0.0";
+const VERSION = "9.0.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -163,7 +163,7 @@ function help() {
     manual += "" + "\n";
     manual += "2. Chord" + "\n";
     manual += "A chord is a group of three or more notes played at the same time." + "\n";
-    manual += "For example, chord C (C major) consists of C,E,G. " + "\n";
+    manual += "For example, chord C (C major) consists of C,E,G ; " + "\n";
     manual += "chord C/E (C major / bass E) consists of C,E,G with a bass note E. " + "\n";
     manual += "Currently, the BASS system supports the following chord type notations: " + "\n";
     manual += "C (C Major), Cm (C Minor), Caug (C Augmented), Cdim (C Diminished), " + "\n";
@@ -358,7 +358,7 @@ function help() {
     manual += "will play G G C C E E F F (no change 1st time through), then it will play G G C C E E C E F like above."+"\n";
     manual += "Please note that these special roadmap markers should be used with caution to avoid any confusion."+"\n";
     manual += "Currently, these symbols can only be used once in the BASS system."+"\n";
-    manual += "During playback, it is is called [Poof Mode Playing] "+"\n";
+    manual += "During playback, it is is called [Puff Mode Playing] "+"\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";

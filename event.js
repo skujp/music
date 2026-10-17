@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "9.0.0";
+    // VERSION = "9.0.1";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
@@ -134,7 +134,7 @@ function initEvents() {
         
         if (sequencer) {
             if (bass.getRoadmapMode()) {
-                oops(`🎧 🐉 [Poof Mode Playing]  | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'show');
+                oops(`🎧 🐉 [Puff Mode Playing]  | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'show');
             } else if (bass.hasComment()) {
                 oops(`🎧 🤔 [Vi-De Mode Playing] | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'warning');
             } else {
