@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "9.0.1";
+  var VERSION = "9.0.2";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -451,16 +451,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "Please note that, sometimes playback does not echo any sound due to the " + "\n";
     manual += "commented sheet music containing only BM / chords. " + "\n";
     manual += "For example, | <- D D D D | -> / / / / || " + "\n";
-    manual += "During playback, it is called [Vi-De Mode Playing]" + "\n";
     manual += "" + "\n";
     manual += "18. Roadmap Symbols" + "\n";
     manual += "In a sheet music, there are special symbols which designate to change the music flow such as:" + "\n";
     manual += "(D.C.) : Go back to the start" + "\n";
-    manual += "(D.S.) : Go to SEGNO marker ($)" + "\n";
-    manual += "(DC.AL.CODA) : Go back to the start, play until (TO.CODA) marker, then jump to CODA marker (+)" + "\n";
-    manual += "(DS.AL.CODA) : Go to SEGNO marker ($), play until (TO.CODA) marker, then jump to CODA marker (+)" + "\n";
-    manual += "(DC.AL.FINE) : Go back to the start, play until (FINE) marker, then end the music" + "\n";
-    manual += "(DS.AL.FINE) : Go to SEGNO marker ($), play until (FINE) marker, then end the music" + "\n";
+    manual += "(D.S.) : Go to SEGNO symbol ($)" + "\n";
+    manual += "(DC.AL.CODA) : Go back to the start, play until (TO.CODA) symbol, then jump to CODA symbol (+)" + "\n";
+    manual += "(DS.AL.CODA) : Go to SEGNO symbol ($), play until (TO.CODA) symbol, then jump to CODA symbol (+)" + "\n";
+    manual += "(DC.AL.FINE) : Go back to the start, play until (FINE) symbol, then end the music" + "\n";
+    manual += "(DS.AL.FINE) : Go to SEGNO symbol ($), play until (FINE) symbol, then end the music" + "\n";
     manual += "In the BASS system, they are called roadmap symbols." + "\n";
     manual += "By default, when encountering those symbols, it will immediately change the music direction." + "\n";
     manual += "For example, 2/4 | G G | C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F ||" + "\n";
@@ -469,9 +468,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "In such cases, they need to set the special control variable Poof:OnRepeat (see section IV). " + "\n";
     manual += "For example, Poof:OnRepeat 2/4 | G G | C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :||" + "\n";
     manual += "will play G G C C E E F F (no change 1st time through), then it will play G G C C E E C E F like above." + "\n";
-    manual += "Please note that these special roadmap markers should be used with caution to avoid any confusion." + "\n";
+    manual += "Please note that these special roadmap symbols should be used with CAUTION to avoid any confusion." + "\n";
     manual += "Currently, these symbols can only be used once in the BASS system." + "\n";
-    manual += "During playback, it is is called [Puff Mode Playing] " + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
