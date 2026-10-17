@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "8.1.0";
+  var VERSION = "9.0.0";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -125,7 +125,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     getDuration: getDuration,
     getGuitarNote: getGuitarNote,
     getVersion: getVersion,
-    hasComment: hasComment
+    hasComment: hasComment,
+    getRoadmapMode: getRoadmapMode,
+    poof: poof,
+    setPoof: setPoof
   });
   var BPM = {
     _val: 90,
@@ -155,6 +158,19 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var AUX = /^\(([^)]+)\)$/;
   var CMT_START = "<-";
   var CMT_END = "->";
+  var _CODA_ = "CODA";
+  var _TO_ = "TO.";
+  var _AL_ = "AL.";
+  var FINE = "FINE";
+  var SEGNO = "$";
+  var CODA = "+";
+  var DC = "D.C.";
+  var DS = "D.S.";
+  var TOCODA = _TO_ + _CODA_;
+  var DCALCODA = DC + _AL_ + _CODA_;
+  var DSALCODA = DS + _AL_ + _CODA_;
+  var DCALFINE = DC + _AL_ + FINE;
+  var DSALFINE = DS + _AL_ + FINE;
   var MAX_SHEET_LENGTH = 3000;
   var FAKE = "G";
   var DEF_OCTAVE = 4;
@@ -187,13 +203,16 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";
   var SAVE_AS_TYPES = new Set(["PDF", "BASS"]);
   var BASSBOARD_DB_FIELD = new Set(["Contributor", "Title"]);
-  var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative)(:)(.+)$/;
+  var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Poof)(:)(.+)$/;
   var taskDropper = null;
   var validArgs = new WeakSet();
   var _sheetMusic;
   var _cmtActive = false;
   var cmtExist = _cmtActive;
   var notes = _initMusicMajorScale();
+  var roadmapMode = null;
+  var MAX_ROADMAP_VISITED = 333;
+  var DEF_ROADMAP_VISITED = 1;
   function _initMusicMajorScale() {
     var baseNotes = {
       1: 'C',
@@ -281,11 +300,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "For example, 3/4 | A B C | D E / | " + "\n";
     manual += "If the sheet music does not start with a time signature, by default the " + "\n";
     manual += "time signature is 4/4. For example, | F D A C | B A B A |" + "\n";
-    manual += "Please note, time signature in the BASS system has more varieties than common sheet music. " + "\n";
+    manual += "Please note, time signature in the BASS system has more varieties than common " + "\n";
+    manual += "sheet music. " + "\n";
     manual += "For example, the nominator part represents the number of beats in a bar. " + "\n";
-    manual += "The denominator part is a power of two, representing a fraction of a whole note for calculating the actual sheet music speed." + "\n";
-    manual += "For example, 8/16 means there are 8 beats in a bar, and music speed will be a tempo adjusted based on the 16th note." + "\n";
-    manual += "So do not be surprised if you see a time signature such as 123/256 in the BASS system :)" + "\n";
+    manual += "The denominator part is a power of two, representing a fraction of a whole note " + "\n";
+    manual += "for calculating the actual sheet music speed." + "\n";
+    manual += "For example, 8/16 means there are 8 beats in a bar, and music speed will be a " + "\n";
+    manual += "tempo adjusted based on the 16th note." + "\n";
+    manual += "So do not be surprised if you see a time signature such as " + "\n";
+    manual += "123/256 in the BASS system :)" + "\n";
     manual += "" + "\n";
     manual += "5. Time Measure" + "\n";
     manual += "Time Measure (or Bar) is a small container of time that holds " + "\n";
@@ -298,21 +321,24 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "cannot go over the nominator beats of time signature." + "\n";
     manual += "For example, A A | D / D / | Amaj7 / Amaj7 / || is accepted " + "\n";
     manual += "with a leading tone A A (2 beats)." + "\n";
-    manual += "Please note, without a leading tone, an opening section usually starts with a | or |: or ||: " + "\n";
-    manual += "Double bar symbol || is currently not supported in opening section to avoid any confusion with the ending section. " + "\n";
+    manual += "Please note, without a leading tone, an opening section usually " + "\n";
+    manual += "starts with a | or |: or ||: " + "\n";
+    manual += "Double bar symbol || is currently not supported in opening section to avoid any " + "\n";
+    manual += "confusion with the ending section. " + "\n";
     manual += "" + "\n";
     manual += "7. Repeat Section" + "\n";
     manual += "A repeat section (or loop) is a section which is played again and again." + "\n";
-    manual += "The loop usually looks like this |:   :|  or ||:    :|| or special loop back from beginning " + "\n";
-    manual += "such as |    :| and |    :|| " + "\n";
+    manual += "The loop usually looks like this |:   :|  or ||:    :|| or special loop back " + "\n";
+    manual += "from beginning such as |    :| and |    :|| " + "\n";
     manual += "In some cases, it can use back to back loop symbol :|: or :||: " + "\n";
     manual += "For example, |:   :|:   :| or ||:   :||:   :||" + "\n";
     manual += "By default, repeat section will loop for 1 time (2x), but it is up to the user to " + "\n";
     manual += "modify using repeat multipliers such as (3x), (4x), etc." + "\n";
     manual += "For example, |: (4x)  F  /  / C  |  B  /  /  A  :| means " + "\n";
     manual += "loop 4 times over the 2 bars of chords." + "\n";
-    manual += "In the BASS system, if there is no matching opening repeat symbols, it will go back to the beginning. " + "\n";
-    manual += "For example, 2/4 | C D | F G :| A B :| G G ||, each time seeing a repeat symbol :| it will go back to the beginning. " + "\n";
+    manual += "In the BASS system, if there is no matching opening repeat symbols, it will " + "\n";
+    manual += "go back to the beginning. For example, 2/4 | C D | F G :| A B :| G G ||, each time " + "\n";
+    manual += "seeing a repeat symbol :| it will go back to the beginning. " + "\n";
     manual += "" + "\n";
     manual += "8. Branching Section" + "\n";
     manual += "A branching section (or volta bracket) is used to skip from one section to another" + "\n";
@@ -320,17 +346,21 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "followed by a number and a dot. For example: [1. [2. [3. [123. , etc." + "\n";
     manual += "Below is a section of a sheet music which will skip [1. and jump to [2. after repeat. " + "\n";
     manual += "4/4 |: A A A A | [1. B B B B :| [2. C C C C | D D D D |" + "\n";
-    manual += "Please note, BASS implements positional volta brackets, including uses beyond common music notation. " + "\n";
-    manual += "For example: 3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B || ", manual += "After the 1st repeat, it will skip [40. bar to the next bar [20. " + "\n";
+    manual += "Please note, BASS implements positional volta brackets, including uses beyond " + "\n";
+    manual += "common music notation. For example: " + "\n";
+    manual += "3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B || " + "\n";
+    manual += "After the 1st repeat, it will skip [40. bar to the next bar [20. " + "\n";
     manual += "After the 2nd repeat, it will skip [40. bar and [20. bar to the next bar [30. " + "\n";
-    manual += "Please note, the branching section relies on repeat symbols :| or :|| to move back to the closest " + "\n";
-    manual += "matching |: or ||: . If not finding a match, it will go back to the beginning of the sheet music. " + "\n";
-    manual += "Also, colliding numbers for branching section are allowed but NOT RECOMMENDED for the clarity of a music sheet. " + "\n";
-    manual += "For example, instead of writing 3/4 | C C C | [1. D D D :| [1. E E E || , it is better to replace " + "\n";
-    manual += "the second [1. as [2. or so ... " + "\n";
+    manual += "Please note, the branching section relies on repeat symbols :| or :|| to move back " + "\n";
+    manual += "to the closest matching |: or ||: . If not finding a match, it will go back to the " + "\n";
+    manual += "beginning of the sheet music. Also, colliding numbers for branching section " + "\n";
+    manual += "are allowed but NOT RECOMMENDED for the clarity of a music sheet. " + "\n";
+    manual += "For example, instead of writing 3/4 | C C C | [1. D D D :| [1. E E E || , it is better " + "\n";
+    manual += " to replace the second [1. as [2. or so ... " + "\n";
     manual += "A final note for branching section is it can coexist with multipliers in repeat section. " + "\n";
     manual += "However, it will override the default behavior of multipliers in repeat section. " + "\n";
-    manual += "So for example, 2/4 | (123x) A A | [1. B B :| C C || will completely ignore (123x) on the second repeat. " + "\n";
+    manual += "So for example, 2/4 | (123x) A A | [1. B B :| C C || will completely ignore (123x) " + "\n";
+    manual += " on the second repeat. " + "\n";
     manual += "" + "\n";
     manual += "9. Ending Section" + "\n";
     manual += "A sheet music must end with either a single bar character | or " + "\n";
@@ -338,8 +368,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "If it ends with a || , the system will stop playing (no loop back)." + "\n";
     manual += "Otherwise, the system by default will keep looping back from the beginning " + "\n";
     manual += "even without the user's intervention." + "\n";
-    manual += "Please note, if it ends with :| or :|| it will loop back according to user's intention first " + "\n";
-    manual += "before the default system loop back kicks in. For the case of :||, it will stop eventually." + "\n";
+    manual += "Please note, if it ends with :| or :|| it will loop back according to user's " + "\n";
+    manual += "intention first before the default system loop back kicks in. " + "\n";
+    manual += "For the case of :||, it will stop eventually." + "\n";
     manual += "" + "\n";
     manual += "10. Classical Rule" + "\n";
     manual += "If there is a leading tone, the following rule will be applied: " + "\n";
@@ -386,21 +417,26 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "16. Section Marker (#)" + "\n";
     manual += "A group of bars can be marked with a section marker such as (A), (B), (C), etc." + "\n";
     manual += "Inside the parenthesis, it must be a single uppercase letter A-Z. " + "\n";
-    manual += "Once a section marker is defined, it can be used later in the sheet music to repeat that section." + "\n";
-    manual += "For example, 3/4 | (A) F G A | B C D | (B) E F G | (C) D E F | (Bx3) || " + "\n";
+    manual += "Once a section marker is defined, it can be used later in the sheet music to repeat " + "\n";
+    manual += "that section. For example, 3/4 | (A) F G A | B C D | (B) E F G | (C) D E F | (Bx3) || " + "\n";
     manual += "means the last bar will repeat the section marked with (B) three times." + "\n";
-    manual += "Please note, the section marker must be defined before it is used." + "\n";
-    manual += "For example, 3/4 | D D D | (Mx2) G G G | will raise an error because (M) is not defined before it is used." + "\n";
+    manual += "Please note, the section marker must be defined " + "\n";
+    manual += "before it is used. For example, 3/4 | D D D | (Mx2) G G G | will raise an error because " + "\n";
+    manual += "(M) is not defined before it is used." + "\n";
     manual += "Another example, 4/4 |: (3x) (T) C D E F :| (G) G A B C | (Tx2) || " + "\n";
-    manual += "means the last bar will repeat 2 times the first bar (including 3x), so it will be played 6 times in total." + "\n";
-    manual += "By default, the marker works by scanning until the next marker is found to determine the section to repeat. " + "\n";
-    manual += "If it doesn't find any marker, it will scan until the end of the sheet music." + "\n";
+    manual += "means the last bar will repeat 2 times the first bar (including 3x), so it will be played " + "\n";
+    manual += "6 times in total. By default, the marker works by scanning until the next marker is " + "\n";
+    manual += "found to determine the section to repeat. If it doesn't find any marker, it will scan " + "\n";
+    manual += "until the end of the sheet music." + "\n";
     manual += "For example, 4/4 | C D E F | (Z) G A B C | D E F G | (Zx1) || " + "\n";
     manual += "means the last bar will repeat 1 time the section marked with (Z) which is G A B C | D E F G |" + "\n";
-    manual += "Please note, there are 3 types of notations often used in section marker. For example: (Z), (Zx2), and (Z*2)," + "\n";
-    manual += "in which (Z) is the section marker definition, (Zx2) is the section marker usage with repeat 2 times, including multipliers. " + "\n";
+    manual += "Please note, there are 3 types of notations often used in section marker. " + "\n";
+    manual += "For example: (Z), (Zx2), and (Z*2)," + "\n";
+    manual += "in which (Z) is the section marker definition, (Zx2) is the section marker usage with " + "\n";
+    manual += "repeat 2 times, including multipliers. " + "\n";
     manual += "and (Z*2) is the section marker usage with repeat 2 times excluding multipliers." + "\n";
-    manual += "For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) || will play the last bar 9 times in total because of the multiplier (3x)," + "\n";
+    manual += "For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) || will play the last bar 9 times " + "\n";
+    manual += "in total because of the multiplier (3x)," + "\n";
     manual += "whereas 3/4 | A A A |: (3x) (Q) B B B :| (Q*3) || will play the last bar 3 times only." + "\n";
     manual += "Please note, (Zx2) also works with branching section, preserving the branching behavior." + "\n";
     manual += "whereas, (Z*2) will ignore branching behavior." + "\n";
@@ -408,11 +444,34 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "17. Commented Out Section" + "\n";
     manual += "Commented out section (or Vi-De) is a special marked section NOT to be played in a sheet music. " + "\n";
     manual += "The commented opening symbol (Vi) is <- and the closing (De) is -> " + "\n";
-    manual += "They are usually set after the opening section of a sheet music (see section 6). " + "\n";
-    manual += "For example, 2/4 | G G | <- A A | B B | -> D D | <- E E |  -> F F || will only play | G G | D D | F F || " + "\n";
+    manual += "They are usually set after the opening section of a sheet music (see section I.6). " + "\n";
+    manual += "For example, 2/4 | G G | <- A A | B B | -> D D | <- E E |  -> F F || " + "\n";
+    manual += "will only play | G G | D D | F F || " + "\n";
     manual += "This Vi-De mode can be useful to test playing only specific parts of the sheet music. " + "\n";
-    manual += "Please note that, sometimes playback does not echo any sound due to the commented sheet music containing only BM / chords. " + "\n";
+    manual += "Please note that, sometimes playback does not echo any sound due to the " + "\n";
+    manual += "commented sheet music containing only BM / chords. " + "\n";
     manual += "For example, | <- D D D D | -> / / / / || " + "\n";
+    manual += "During playback, it is called [Vi-De Mode Playing]" + "\n";
+    manual += "" + "\n";
+    manual += "18. Roadmap Symbols" + "\n";
+    manual += "In a sheet music, there are special symbols which designate to change the music flow such as:" + "\n";
+    manual += "(D.C.) : Go back to the start" + "\n";
+    manual += "(D.S.) : Go to SEGNO marker ($)" + "\n";
+    manual += "(DC.AL.CODA) : Go back to the start, play until (TO.CODA) marker, then jump to CODA marker (+)" + "\n";
+    manual += "(DS.AL.CODA) : Go to SEGNO marker ($), play until (TO.CODA) marker, then jump to CODA marker (+)" + "\n";
+    manual += "(DC.AL.FINE) : Go back to the start, play until (FINE) marker, then end the music" + "\n";
+    manual += "(DS.AL.FINE) : Go to SEGNO marker ($), play until (FINE) marker, then end the music" + "\n";
+    manual += "In the BASS system, they are called roadmap symbols." + "\n";
+    manual += "By default, when encountering those symbols, it will immediately change the music direction." + "\n";
+    manual += "For example, 2/4 | G G | C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F ||" + "\n";
+    manual += "will play G G C C E E C E F" + "\n";
+    manual += "Some musicians would prefer to apply those symbols from the second time after repeat." + "\n";
+    manual += "In such cases, they need to set the special control variable Poof:OnRepeat (see section IV). " + "\n";
+    manual += "For example, Poof:OnRepeat 2/4 | G G | C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :||" + "\n";
+    manual += "will play G G C C E E F F (no change 1st time through), then it will play G G C C E E C E F like above." + "\n";
+    manual += "Please note that these special roadmap markers should be used with caution to avoid any confusion." + "\n";
+    manual += "Currently, these symbols can only be used once in the BASS system." + "\n";
+    manual += "During playback, it is is called [Poof Mode Playing] " + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
@@ -453,20 +512,27 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "Chord:" + "\n";
     manual += "m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug" + "\n";
     manual += "" + "\n";
-    manual += "Other:" + "\n";
+    manual += "Annotation:" + "\n";
     manual += "(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) " + "\n";
     manual += "(allegro) (moderato) (adagio) (lyrics_separated_by_underscores) ..." + "\n";
     manual += "" + "\n";
-    manual += "Marker:" + "\n";
+    manual += "Section Marker:" + "\n";
     manual += "(#) (#x<number>) (#*<number>)" + "\n";
     manual += "" + "\n";
     manual += "Comment (Vi-De):" + "\n";
     manual += "<- ->" + "\n";
     manual += "" + "\n";
+    manual += "Roadmap:" + "\n";
+    manual += "(FINE) ($) (+) (TO.CODA) (D.C.)" + "\n";
+    manual += "(D.S.) (D.C.AL.CODA) (D.S.AL.CODA)" + "\n";
+    manual += "(D.C.AL.FINE) (D.S.AL.FINE)" + "\n";
+    manual += "" + "\n";
+    manual += "||||||" + "\n";
     manual += "Remark:   " + "\n";
     manual += "... means et cetera" + "\n";
     manual += "# means any uppercase letter A-Z" + "\n";
     manual += "<number> means any non-negative integer" + "\n";
+    manual += "roadmap symbols are all uppercase" + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
@@ -503,10 +569,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "Original:Yes            means it is your original work" + "\n";
     manual += "Contributor:<name>      for example, Contributor:Newbie_Composer. Required field when saving to .bass" + "\n";
     manual += "Derivative:Yes          means it is an arrangement from others' original work" + "\n";
-    manual += "URL:<address>           for example, URL:https://youtube.com/yourmusicchannel. Optional but recommended when saving to .bass" + "\n";
+    manual += "URL:<address>           for example, URL:https://youtube.com/yourmusicchannel. " + "\n";
+    manual += "Optional but recommended when saving to .bass" + "\n";
     manual += "Misc:<anything>         for example, Misc:anything_you_want_to_write_here_seperated_by_underscore_character" + "\n";
+    manual += "Poof:OnRepeat           activate roadmap symbols only after the music has been played one time through" + "\n";
     manual += "" + "\n";
-    manual += "(*) Octave: notation is to set the BASS default system octave, which is not the same as the musical instrument's current octave." + "\n";
+    manual += "(*) Octave: notation is to set the BASS default system octave, which is not the same as " + "\n";
+    manual += "the musical instrument's current octave." + "\n";
     manual += "By default, the BASS system covers the bass clef, and other instruments cover the treble clef." + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
@@ -517,13 +586,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     manual += "Users can save to .bass file and send it to this email: bassthemusic101 |at| gmail |dot| com" + "\n";
     manual += "Certain phrases are required in order to save to .bass file such as Title:, Contributor:, or URL:" + "\n";
     manual += "(see section IV)." + "\n";
-    manual += "Note, any music (chords, rhythms, melody) is allowed, but lyrics and URLs will be checked for explicit content prior to posting." + "\n";
+    manual += "Note, any music (chords, rhythms, melody) is allowed, but lyrics and URLs will be checked for " + "\n";
+    manual += "explicit content prior to posting." + "\n";
     manual += "" + "\n";
     manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
     manual += "" + "\n";
     manual += "VI. QWERTY KEYBOARD" + "\n";
     manual += "" + "\n";
-    manual += "Piano notes are mapped to the qwerty row, and number row of a common computer keyboard. For example: q,w,e,r,t,2,3..." + "\n";
+    manual += "Piano notes are mapped to the qwerty row, and number row of a common computer keyboard. " + "\n";
+    manual += "For example: q,w,e,r,t,2,3..." + "\n";
     manual += "Guitar notes are mapped to the next row." + "\n";
     manual += "For example, a,s,d,f,g for frets, and h,j,k,l,;,' for strings 6 to 1." + "\n";
     manual += "" + "\n";
@@ -672,9 +743,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   function buildSequencer() {
     var sheetMusic = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : EMPTY;
     var pulseFlag = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : PULSE_FLAG;
+    var poofRepeat = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : DEF_ROADMAP_VISITED;
     _sheetMusic = {};
     _cmtActive = false;
     cmtExist = _cmtActive;
+    roadmapMode = null;
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
       error.msg = "[SHEET MUSIC ERROR] sheet music length exceeds limit";
       return;
@@ -686,6 +759,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var seperateBarTokens = new Set([BAR]);
     var pulseBarTokens = new Set([BM]);
     var repeatPreviousBarTokens = new Set([BAR_REPEAT]);
+    var roadmapTokens = new Set([FINE, SEGNO, CODA, TOCODA, DC, DS, DCALCODA, DSALCODA, DCALFINE, DSALFINE]);
     var validTokens = new Set([].concat(_toConsumableArray(openingTokens), _toConsumableArray(closingTokens), _toConsumableArray(repeatTokens), _toConsumableArray(seperateBarTokens), _toConsumableArray(pulseBarTokens), _toConsumableArray(repeatPreviousBarTokens)));
     var tokens = sheetMusic.trim().split(/\s+/);
     var length = tokens.length;
@@ -721,6 +795,12 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           return;
         }
         pulseFlag = PULSE_FLAG;
+      } else if (setFunc == 'setPoof') {
+        var _status = this[setFunc](arg);
+        if (_status !== undefined) {
+          return;
+        }
+        poofRepeat = DEF_ROADMAP_VISITED;
       } else {
         ctrlVars.push([setFunc, arg]);
       }
@@ -757,6 +837,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var end = END;
     var voltaMap = {};
     var voltaArr = [];
+    var roadmap = {};
+    var roadmapVisited = {};
+    var roadmapRank = [null, null, null, null, null];
     var openingClassicalCount = 0;
     var sectionMarker = [];
     var markerIndex = {};
@@ -1149,6 +1232,59 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             beatCount = beats;
             continue;
           }
+          if (roadmapTokens.has(match_aux[1])) {
+            if (match_aux[1] in roadmap) {
+              error.msg = "[ROADMAP DUPLICATE ERROR] too many roadmap markers: ".concat(tokens[i]);
+              return;
+            }
+            roadmap[match_aux[1]] = sequencer.length;
+            roadmapVisited[match_aux[1]] = poofRepeat;
+            if (sequencer.length in roadmap) {
+              error.msg = "[ROADMAP EXIST ERROR] too many existing roadmap markers at position ".concat(i);
+              return;
+            }
+            roadmap[sequencer.length] = match_aux[1];
+            if (match_aux[1] === DC || match_aux[1] === DCALCODA || match_aux[1] === DCALFINE) {
+              if (roadmapMode) {
+                error.msg = "[ROADMAP DC DACAPO ERROR] too many dc dacapo repeats: ".concat(DC, " ").concat(DCALCODA, " ").concat(DCALFINE);
+                return;
+              }
+              roadmapMode = match_aux[1];
+              roadmapRank[0] = match_aux[1];
+            } else if (match_aux[1] === DS || match_aux[1] === DSALCODA || match_aux[1] === DSALFINE) {
+              if (roadmapMode) {
+                error.msg = "[ROADMAP DS SEGNO ERROR] too many ds segno repeats: ".concat(DS, " ").concat(DSALCODA, " ").concat(DSALFINE);
+                return;
+              }
+              roadmapMode = match_aux[1];
+              roadmapRank[0] = match_aux[1];
+            }
+            if (match_aux[1] === SEGNO) {
+              if (roadmapRank[1]) {
+                error.msg = "[ROADMAP SEGNO ERROR] too many $ symbols repeats";
+                return;
+              }
+              roadmapRank[1] = match_aux[1];
+            } else if (match_aux[1] === TOCODA) {
+              if (roadmapRank[2]) {
+                error.msg = "[ROADMAP TOCODA ERROR] too many TO.CODA symbols repeats";
+                return;
+              }
+              roadmapRank[2] = match_aux[1];
+            } else if (match_aux[1] === CODA) {
+              if (roadmapRank[3]) {
+                error.msg = "[ROADMAP + ERROR] too many + symbols repeats";
+                return;
+              }
+              roadmapRank[3] = match_aux[1];
+            } else if (match_aux[1] === FINE) {
+              if (roadmapRank[4]) {
+                error.msg = "[ROADMAP FINE ERROR] too many FINE symbols repeats";
+                return;
+              }
+              roadmapRank[4] = match_aux[1];
+            }
+          }
           continue;
         }
         var _chord = getChordNotes(tokens[i]);
@@ -1196,9 +1332,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         }
       }
     }
-    var result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr];
+    var result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank];
     validArgs.add(result);
     PULSE_FLAG = true;
+    DEF_ROADMAP_VISITED = 1;
     return result;
   }
   function _freq(note) {
@@ -1485,7 +1622,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function _playSequencer() {
     _playSequencer = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(sequencerObj) {
-      var sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, _sequencerObj, _sequencerObj$, problem, _problem5, _taskDropper, signal, i, n, timeout, tempRepeatCount, j, len;
+      var sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank, _sequencerObj, _sequencerObj$, problem, _problem5, _taskDropper, signal, i, n, timeout, tempRepeatCount, j, len, tempRoadmapVisited, tempRank, f;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
@@ -1495,8 +1632,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             end = END;
             voltaMap = {};
             voltaArr = [];
+            roadmap = {};
+            roadmapVisited = {};
+            roadmapRank = [];
             if (validArgs.has(sequencerObj)) {
-              _sequencerObj = _slicedToArray(sequencerObj, 6);
+              _sequencerObj = _slicedToArray(sequencerObj, 9);
               sequencer = _sequencerObj[0];
               loopBackIndex = _sequencerObj[1];
               repeatCount = _sequencerObj[2];
@@ -1504,6 +1644,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
               end = _sequencerObj$ === void 0 ? END : _sequencerObj$;
               voltaMap = _sequencerObj[4];
               voltaArr = _sequencerObj[5];
+              roadmap = _sequencerObj[6];
+              roadmapVisited = _sequencerObj[7];
+              roadmapRank = _sequencerObj[8];
               validArgs.delete(sequencerObj);
               problem = "Sequencer object will be removed from WeakSet right after playing";
               oops(problem, 'warning', FULL_ASYNC_DEBUG_MODE);
@@ -1534,7 +1677,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             return _delay(DEF_MSEC, signal);
           case 3:
             if (!(!signal.aborted && timeout < MAX_TIMEOUT)) {
-              _context3.n = 13;
+              _context3.n = 17;
               break;
             }
             timeout += 1;
@@ -1542,45 +1685,66 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             for (j = 0, len = voltaArr.length; j < len; j++) {
               voltaArr[j][0] = false;
             }
+            tempRoadmapVisited = JSON.parse(JSON.stringify(roadmapVisited));
+            tempRank = _toConsumableArray(roadmapRank);
           case 4:
             if (!(i < n)) {
-              _context3.n = 12;
+              _context3.n = 14;
               break;
             }
             if (!signal.aborted) {
               _context3.n = 5;
               break;
             }
-            return _context3.a(3, 12);
+            return _context3.a(3, 14);
           case 5:
-            if (!(i in voltaMap)) {
-              _context3.n = 9;
-              break;
-            }
-            if (voltaArr[voltaMap[i]][0]) {
+            if (!(i in roadmap)) {
               _context3.n = 7;
               break;
             }
-            _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
-            _context3.n = 6;
-            return _delay(DEF_MSEC, signal);
+            f = poof(sequencer, roadmap, roadmapVisited, roadmapRank, i);
+            if (!(f >= 0)) {
+              _context3.n = 6;
+              break;
+            }
+            i = f;
+            return _context3.a(3, 4);
           case 6:
+            if (!(f == -8 || f == -3)) {
+              _context3.n = 7;
+              break;
+            }
+            oops(getErrorMsg(), 'error');
+            return _context3.a(2);
+          case 7:
+            if (!(i in voltaMap)) {
+              _context3.n = 11;
+              break;
+            }
+            if (voltaArr[voltaMap[i]][0]) {
+              _context3.n = 9;
+              break;
+            }
+            _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
+            _context3.n = 8;
+            return _delay(DEF_MSEC, signal);
+          case 8:
             voltaArr[voltaMap[i]][0] = true;
             i += 1;
-            _context3.n = 8;
+            _context3.n = 10;
             break;
-          case 7:
+          case 9:
             while (i < n && i in voltaMap && voltaArr[voltaMap[i]][0]) {
               i = voltaArr[voltaMap[i]][2];
             }
-          case 8:
-            _context3.n = 11;
-            break;
-          case 9:
-            _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
-            _context3.n = 10;
-            return _delay(DEF_MSEC, signal);
           case 10:
+            _context3.n = 13;
+            break;
+          case 11:
+            _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
+            _context3.n = 12;
+            return _delay(DEF_MSEC, signal);
+          case 12:
             if (i in loopBackIndex) {
               if (repeatCount[i] > 0) {
                 repeatCount[i] -= 1;
@@ -1594,16 +1758,24 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             } else {
               i += 1;
             }
-          case 11:
+          case 13:
             _context3.n = 4;
             break;
-          case 12:
-            if (end && (!(n - 1 in repeatCount) || repeatCount[n - 1] == 0)) {
-              stopSequencer();
+          case 14:
+            if (!(end && (!(n - 1 in repeatCount) || repeatCount[n - 1] == 0))) {
+              _context3.n = 15;
+              break;
             }
+            oops('♪ ♫ 👏 Whoohoo! 👏 ♫ ♪ ', 'info');
+            return _context3.a(2);
+          case 15:
+            roadmapRank = tempRank;
+            roadmapVisited = tempRoadmapVisited;
+            oops('👏🎺🎉Encore, back for more!🎉🎺👏', 'info');
+          case 16:
             _context3.n = 3;
             break;
-          case 13:
+          case 17:
             return _context3.a(2);
         }
       }, _callee3);
@@ -1758,6 +1930,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return problem;
     }
   }
+  function setPoof(d) {
+    if (d == "OnRepeat") {
+      DEF_ROADMAP_VISITED = 0;
+    } else {
+      var problem = "[POOF ERROR] To make roadmap markers start working from second repeat, use phrase Poof:OnRepeat";
+      error.msg = problem;
+      return problem;
+    }
+  }
   function getSustain() {
     return PULSE_FLAG;
   }
@@ -1829,5 +2010,60 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function hasComment() {
     return cmtExist;
+  }
+  function getRoadmapMode() {
+    return roadmapMode;
+  }
+  function poof(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
+    if (!(i in roadmap) || !sequencer || sequencer.length <= 0) {
+      return -4;
+    }
+    while (roadmapRank.length && !roadmapRank[0]) {
+      roadmapRank.shift();
+    }
+    if (roadmapRank.length == 0) {
+      return -7;
+    }
+    var PF = roadmap[i];
+    if (roadmapVisited[PF] === 0) {
+      roadmapVisited[PF] += 1;
+      return -1;
+    } else if (roadmapVisited[PF] === MAX_ROADMAP_VISITED) {
+      return -2;
+    }
+    roadmapVisited[PF] += 1;
+    var cmode = getRoadmapMode();
+    if (!cmode || PF === SEGNO && !cmode.includes(DS) || PF === CODA && !cmode.includes(_CODA_) || PF === TOCODA && !cmode.includes(_CODA_) || PF !== SEGNO && PF !== CODA && PF !== TOCODA && !cmode.includes(PF)) {
+      error.msg = "[ROADMAP RUNTIME ERROR] Please read for symbol (".concat(PF, ") usage");
+      return -3;
+    }
+    if (PF === roadmapRank[0]) {
+      roadmapRank.shift();
+      if (PF === FINE) {
+        return sequencer.length;
+      } else if (PF === SEGNO) {
+        return roadmap[SEGNO];
+      } else if (PF === CODA) {
+        return roadmap[CODA];
+      } else if (PF === TOCODA) {
+        if (!(CODA in roadmap)) {
+          error.msg = "[ROADMAP RUNTIME ERROR] CODA symbol ".concat(CODA, " not found");
+          return -8;
+        }
+        return roadmap[CODA];
+      } else if (PF === DC || PF === DCALCODA || PF === DCALFINE) {
+        return 0;
+      } else if (PF === DS || PF === DSALCODA || PF === DSALFINE) {
+        if (!(SEGNO in roadmap)) {
+          error.msg = "[ROADMAP RUNTIME ERROR] SEGNO symbol ".concat(SEGNO, " not found");
+          return -8;
+        }
+        return roadmap[SEGNO];
+      } else {
+        return -5;
+      }
+    } else {
+      return -6;
+    }
   }
 })(typeof window !== "undefined" ? window : void 0);

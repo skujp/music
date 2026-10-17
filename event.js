@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "8.0.0";
+    // VERSION = "9.0.0";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
@@ -133,10 +133,12 @@ function initEvents() {
         const sequencer = bass.buildSequencer(sheetContent);
         
         if (sequencer) {
-            if (!bass.hasComment()) {
-                oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
-            } else {
+            if (bass.getRoadmapMode()) {
+                oops(`🎧 🐉 [Poof Mode Playing]  | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'show');
+            } else if (bass.hasComment()) {
                 oops(`🎧 🤔 [Vi-De Mode Playing] | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'warning');
+            } else {
+                oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
             }
             bass.playSequencer(sequencer).catch((e) => {
                 if (e.name !== 'AbortError') {
