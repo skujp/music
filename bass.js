@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "9.1.2";
+const VERSION = "9.1.3";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -314,7 +314,7 @@ a sheet music. The commented opening symbol (Vi) is <- and the closing (De) is
 -> They are usually set after the opening section of a sheet music (section
 I.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will
 only play | G G | D D | F F || This Vi-De mode can be useful to test playing
-only specific parts of the sheet music. Please note that, sometimes playback
+only specific parts of the sheet music. Please note that, in some cases playback
 does not echo any sound due to the commented sheet music containing only BM /
 chords. For example, | <- D D D D | -> / / / / ||
 
@@ -331,9 +331,9 @@ CODA symbol (+)
 music
 (DS.AL.FINE) : Go to SEGNO symbol ($), play until (FINE) symbol, then end the
 music
-By default, in the BASS system during playback, when encountering these symbols,
-it will immediately change the music direction. For example, 2/4 | G G | C ($) C
-| E (TO.CODA) E | (D.S.AL.CODA) F (+) F || will play G G C C E E C E F.
+By default, in the BASS system during playback, it will immediately change the
+music direction upon encountering these symbols. For example, 2/4 | G G | C ($)
+C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F || will play G G C C E E C E F.
 Sometimes, musicians would prefer to apply those symbols from the second time
 after music repeat instead. In such cases, they must set the special control
 directive Poof:OnRepeat (section IV). For example, Poof:OnRepeat 2/4 | G G | C
