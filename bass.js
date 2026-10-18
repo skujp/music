@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "9.0.2";
+const VERSION = "9.1.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -139,370 +139,357 @@ function setFullAsyncDebug(f) {
     FULL_ASYNC_DEBUG_MODE = f;
 }
 function help() {
-    let manual = "";
-    manual += `| Rev ${VERSION} |`;
-    manual += "" + "\n\n";
-    manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    manual += "" + "\n";
-    manual += "I. INTRODUCTION" + "\n";
-    manual += "" + "\n";
-    manual += "BASS, pronounced /beɪs/, spelled /B-A-S-S/ all uppercase, is a musical chord" + "\n";
-    manual += "notation system. Derived from the word 'bass clef' of a piano instrument, " + "\n";
-    manual += "it uses common musical symbols often found in a sheet music." + "\n";
-    manual += "Anyone can use the BASS system to try new chord progressions, compose, " + "\n";
-    manual += "or learn music. The world is your oyster!!!" + "\n";
-    manual += "" + "\n";
-    manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    manual += "" + "\n";
-    manual += "II. THE BASICS" + "\n";
-    manual += "" + "\n";
-    manual += "1. Note" + "\n";
-    manual += "A musical note is a single, basic building block of music." + "\n";
-    manual += "For a piano common musical scale, it can be written as:" + "\n";
-    manual += "C, C#, Db, D, D#, Eb, E, F, F#, Gb, G, G#, Ab, A, A#, Bb, B." + "\n";
-    manual += "" + "\n";
-    manual += "2. Chord" + "\n";
-    manual += "A chord is a group of three or more notes played at the same time." + "\n";
-    manual += "For example, chord C (C major) consists of C,E,G ; " + "\n";
-    manual += "chord C/E (C major / bass E) consists of C,E,G with a bass note E. " + "\n";
-    manual += "Currently, the BASS system supports the following chord type notations: " + "\n";
-    manual += "C (C Major), Cm (C Minor), Caug (C Augmented), Cdim (C Diminished), " + "\n";
-    manual += "Cmaj7 (C Major 7), C7 (C Dominant 7), Cm7 (C Minor 7), " + "\n";
-    manual += "Cmmaj7 (C Minor-Major 7), Cm7b5 (C Half-Diminished)," + "\n";
-    manual += "C7b5 (C Dominant-seventh flat five), Cdim7 (C Fully Diminished)," + "\n";
-    manual += "Csus2 (C Suspended 2), Csus4 (C Suspended 4), Cadd9 (C Add 9), " + "\n";
-    manual += "C5 (C Power Chord), Cmaj9 (C Major 9), C6 (C Major 6), C9 (C 9), " + "\n";
-    manual += "C/E (C with E in the bass), Cmaug (C Minor Augmented)." + "\n";
-    manual += "" + "\n";
-    manual += "3. Sheet Music" + "\n";
-    manual += "A sheet music is a written or printed guide for musicians." + "\n";
-    manual += "In the BASS system, a chord (NOT note) is the basic unit of a sheet music." + "\n";
-    manual += "For example, 4/4 | C C C C || means " + "\n";
-    manual += "to play chord C Major four times (NOT single C note four times)." + "\n";
-    manual += "" + "\n";
-    manual += "4. Time Signature" + "\n";
-    manual += "A time signature is a musical notation symbol made of two stacked " + "\n";
-    manual += "numbers telling about the rhythm of a song such as: 4/4, 3/4, 6/8, etc. " + "\n";
-    manual += "Time signature is usually written in the beginning of a sheet music." + "\n";
-    manual += "For example, 3/4 | A B C | D E / | " + "\n";
-    manual += "If the sheet music does not start with a time signature, by default the " + "\n";
-    manual += "time signature is 4/4. For example, | F D A C | B A B A |" + "\n";
-    manual += "Please note, time signature in the BASS system has more varieties than common " + "\n";
-    manual += "sheet music. " + "\n";
-    manual += "For example, the nominator part represents the number of beats in a bar. " + "\n";
-    manual += "The denominator part is a power of two, representing a fraction of a whole note " + "\n";
-    manual += "for calculating the actual sheet music speed." + "\n";
-    manual += "For example, 8/16 means there are 8 beats in a bar, and music speed will be a " + "\n"; 
-    manual += "tempo adjusted based on the 16th note." + "\n";
-    manual += "So do not be surprised if you see a time signature such as " + "\n"; 
-    manual += "123/256 in the BASS system :)" + "\n";
-    manual += "" + "\n";
-    manual += "5. Time Measure" + "\n";
-    manual += "Time Measure (or Bar) is a small container of time that holds " + "\n";
-    manual += "a specific number of beats. For example, the following bar " + "\n";
-    manual += "contains 3 beats: | / / / |, this bar contains 0 beat: |     | " + "\n";
-    manual += "" + "\n";
-    manual += "6. Opening Section" + "\n";
-    manual += "An opening section begins the sheet music. It may or may not have a leading tone." + "\n";
-    manual += "If it has a leading tone, the number of opening beats " + "\n";
-    manual += "cannot go over the nominator beats of time signature." + "\n";
-    manual += "For example, A A | D / D / | Amaj7 / Amaj7 / || is accepted " + "\n";
-    manual += "with a leading tone A A (2 beats)." + "\n";
-    manual += "Please note, without a leading tone, an opening section usually " + "\n"; 
-    manual += "starts with a | or |: or ||: " + "\n";
-    manual += "Double bar symbol || is currently not supported in opening section to avoid any " + "\n"; 
-    manual += "confusion with the ending section. " + "\n";
-    manual += "" + "\n";
-    manual += "7. Repeat Section" + "\n";
-    manual += "A repeat section (or loop) is a section which is played again and again." + "\n";
-    manual += "The loop usually looks like this |:   :|  or ||:    :|| or special loop back " + "\n";
-    manual += "from beginning such as |    :| and |    :|| " + "\n";
-    manual += "In some cases, it can use back to back loop symbol :|: or :||: " + "\n";
-    manual += "For example, |:   :|:   :| or ||:   :||:   :||" + "\n";
-    manual += "By default, repeat section will loop for 1 time (2x), but it is up to the user to " + "\n";
-    manual += "modify using repeat multipliers such as (3x), (4x), etc." + "\n";
-    manual += "For example, |: (4x)  F  /  / C  |  B  /  /  A  :| means " + "\n";
-    manual += "loop 4 times over the 2 bars of chords." + "\n";
-    manual += "In the BASS system, if there is no matching opening repeat symbols, it will " + "\n";
-    manual += "go back to the beginning. For example, 2/4 | C D | F G :| A B :| G G ||, each time " + "\n";
-    manual += "seeing a repeat symbol :| it will go back to the beginning. " + "\n";
-    manual += "" + "\n";
-    manual += "8. Branching Section" + "\n";
-    manual += "A branching section (or volta bracket) is used to skip from one section to another" + "\n";
-    manual += "of a sheet music AFTER REPEAT. It is written as an open bracket " + "\n";
-    manual += "followed by a number and a dot. For example: [1. [2. [3. [123. , etc." + "\n";
-    manual += "Below is a section of a sheet music which will skip [1. and jump to [2. after repeat. " + "\n";
-    manual += "4/4 |: A A A A | [1. B B B B :| [2. C C C C | D D D D |" + "\n";
-    manual += "Please note, BASS implements positional volta brackets, including uses beyond " + "\n";
-    manual += "common music notation. For example: " + "\n";
-    manual += "3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B || " + "\n";
-    manual += "After the 1st repeat, it will skip [40. bar to the next bar [20. " + "\n";
-    manual += "After the 2nd repeat, it will skip [40. bar and [20. bar to the next bar [30. " + "\n";
-    manual += "Please note, the branching section relies on repeat symbols :| or :|| to move back " + "\n";
-    manual += "to the closest matching |: or ||: . If not finding a match, it will go back to the " + "\n";
-    manual += "beginning of the sheet music. Also, colliding numbers for branching section " + "\n";
-    manual += "are allowed but NOT RECOMMENDED for the clarity of a music sheet. " + "\n";
-    manual += "For example, instead of writing 3/4 | C C C | [1. D D D :| [1. E E E || , it is better " + "\n";
-    manual += " to replace the second [1. as [2. or so ... " + "\n";
-    manual += "A final note for branching section is it can coexist with multipliers in repeat section. " + "\n";
-    manual += "However, it will override the default behavior of multipliers in repeat section. " + "\n"; 
-    manual += "So for example, 2/4 | (123x) A A | [1. B B :| C C || will completely ignore (123x) " + "\n";
-    manual += " on the second repeat. " + "\n";
-    manual += "" + "\n";
-    manual += "9. Ending Section" + "\n";
-    manual += "A sheet music must end with either a single bar character | or " + "\n";
-    manual += "a double bar character ||" + "\n";
-    manual += "If it ends with a || , the system will stop playing (no loop back)." + "\n";
-    manual += "Otherwise, the system by default will keep looping back from the beginning " + "\n";
-    manual += "even without the user's intervention." + "\n";
-    manual += "Please note, if it ends with :| or :|| it will loop back according to user's " + "\n";
-    manual += "intention first before the default system loop back kicks in. " + "\n";
-    manual += "For the case of :||, it will stop eventually." + "\n";
-    manual += "" + "\n";
-    manual += "10. Classical Rule" + "\n";
-    manual += "If there is a leading tone, the following rule will be applied: " + "\n";
-    manual += "The number of opening beats and ending beats must equal the  " + "\n";
-    manual += "nominator beats in time signature." + "\n";
-    manual += "" + "\n";
-    manual += "11. Tempo" + "\n";
-    manual += "Tempo is the speed or pace at which a piece of music is played." + "\n";
-    manual += "It is the number of beats per minutes (bpm) set up before " + "\n";
-    manual += "playing the sheet music. In the BASS system, by default bpm is set to 90, " + "\n";
-    manual += "assuming quarter note is in time signature. " + "\n";
-    manual += "The user can change it manually. See section IV for more details." + "\n";
-    manual += "Please note that, tempo will be adjusted based on time signature to " + "\n";
-    manual += "result in the actual sheet music speed. " + "\n";
-    manual += "" + "\n";
-    manual += "12. Octave" + "\n";
-    manual += "An octave is the distance between two musical notes that share the " + "\n";
-    manual += "same name (like two different C notes). " + "\n";
-    manual += "It is exactly eight steps apart on a common musical scale." + "\n";
-    manual += "In the BASS system, octave ranges can be from 0 to 8 " + "\n";
-    manual += "where 0 is the lowest bass, and 8 is the highest bass." + "\n";
-    manual += "By default, it uses octave 4 similar to the concept of " + "\n";
-    manual += "middle C in a piano. User can change it manually. " + "\n";
-    manual += "See section IV for more details." + "\n";
-    manual += "" + "\n";
-    manual += "13. Space" + "\n";
-    manual += "Every musical symbol must be separated by a blank space. " + "\n";
-    manual += "The recommended space is 1 blank character between two musical symbols." + "\n";
-    manual += "For example, one blank space between two opening notes in the following, " + "\n";
-    manual += "2/4   D D | F         F | " + "\n";
-    manual += "" + "\n";
-    manual += "14. Pulse /" + "\n";
-    manual += "A pulse / means the user can either play the previous note or sustain (legato) it." + "\n";
-    manual += "By default, the BASS system will play the previous note (staccato)." + "\n";
-    manual += "For example, | B A / | will play B, A, A" + "\n";
-    manual += "Please note, a pulse / is different than a slash / in a slash chord." + "\n";
-    manual += "For example, A/E means A Major chord with a E at the bass." + "\n";
-    manual += "To sustain, use command Sustain:Yes at the beginning of the sheet music (see Section IV)." + "\n";
-    manual += "" + "\n";
-    manual += "15. Duplicate %" + "\n";
-    manual += "A duplicate % means repeat playing the previous bar." + "\n";
-    manual += "For example, | A B C | % || will play A, B, C, A, B, C" + "\n";
-    manual += "" + "\n";
-    manual += "16. Section Marker (#)" + "\n";
-    manual += "A group of bars can be marked with a section marker such as (A), (B), (C), etc." + "\n";
-    manual += "Inside the parenthesis, it must be a single uppercase letter A-Z. " + "\n";
-    manual += "Once a section marker is defined, it can be used later in the sheet music to repeat " + "\n";
-    manual += "that section. For example, 3/4 | (A) F G A | B C D | (B) E F G | (C) D E F | (Bx3) || " + "\n";
-    manual += "means the last bar will repeat the section marked with (B) three times." + "\n";
-    manual += "Please note, the section marker must be defined " + "\n";
-    manual += "before it is used. For example, 3/4 | D D D | (Mx2) G G G | will raise an error because " + "\n";
-    manual += "(M) is not defined before it is used." + "\n";
-    manual += "Another example, 4/4 |: (3x) (T) C D E F :| (G) G A B C | (Tx2) || " + "\n";
-    manual += "means the last bar will repeat 2 times the first bar (including 3x), so it will be played " + "\n";
-    manual += "6 times in total. By default, the marker works by scanning until the next marker is " + "\n";
-    manual += "found to determine the section to repeat. If it doesn't find any marker, it will scan " + "\n";
-    manual += "until the end of the sheet music." + "\n";
-    manual += "For example, 4/4 | C D E F | (Z) G A B C | D E F G | (Zx1) || " + "\n";
-    manual += "means the last bar will repeat 1 time the section marked with (Z) which is G A B C | D E F G |" + "\n";
-    manual += "Please note, there are 3 types of notations often used in section marker. " + "\n";
-    manual += "For example: (Z), (Zx2), and (Z*2)," + "\n";
-    manual += "in which (Z) is the section marker definition, (Zx2) is the section marker usage with " + "\n";
-    manual += "repeat 2 times, including multipliers. " + "\n";
-    manual += "and (Z*2) is the section marker usage with repeat 2 times excluding multipliers." + "\n";
-    manual += "For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) || will play the last bar 9 times " + "\n";
-    manual += "in total because of the multiplier (3x)," + "\n";
-    manual += "whereas 3/4 | A A A |: (3x) (Q) B B B :| (Q*3) || will play the last bar 3 times only." + "\n";
-    manual += "Please note, (Zx2) also works with branching section, preserving the branching behavior." + "\n";
-    manual += "whereas, (Z*2) will ignore branching behavior." + "\n";
-    manual += "" + "\n";
-    manual += "17. Commented Out Section" + "\n";
-    manual += "Commented out section (or Vi-De) is a special marked section NOT to be played in a sheet music. " + "\n";
-    manual += "The commented opening symbol (Vi) is <- and the closing (De) is -> " + "\n";
-    manual += "They are usually set after the opening section of a sheet music (see section I.6). " + "\n";
-    manual += "For example, 2/4 | G G | <- A A | B B | -> D D | <- E E |  -> F F || " + "\n";
-    manual += "will only play | G G | D D | F F || " + "\n";
-    manual += "This Vi-De mode can be useful to test playing only specific parts of the sheet music. " + "\n";
-    manual += "Please note that, sometimes playback does not echo any sound due to the " + "\n";
-    manual += "commented sheet music containing only BM / chords. " + "\n";
-    manual += "For example, | <- D D D D | -> / / / / || " + "\n";
-    manual += "" + "\n";
-    manual += "18. Roadmap Symbols" + "\n";
-    manual += "In a sheet music, there are special symbols which designate to change the music flow such as:"+"\n";
-    manual += "(D.C.) : Go back to the start"+"\n";
-    manual += "(D.S.) : Go to SEGNO symbol ($)"+"\n";
-    manual += "(DC.AL.CODA) : Go back to the start, play until (TO.CODA) symbol, then jump to CODA symbol (+)"+"\n";
-    manual += "(DS.AL.CODA) : Go to SEGNO symbol ($), play until (TO.CODA) symbol, then jump to CODA symbol (+)"+"\n";
-    manual += "(DC.AL.FINE) : Go back to the start, play until (FINE) symbol, then end the music"+"\n";
-    manual += "(DS.AL.FINE) : Go to SEGNO symbol ($), play until (FINE) symbol, then end the music"+"\n";
-    manual += "In the BASS system, they are called roadmap symbols."+"\n";
-    manual += "By default, when encountering those symbols, it will immediately change the music direction."+"\n";
-    manual += "For example, 2/4 | G G | C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F ||"+"\n";
-    manual += "will play G G C C E E C E F"+"\n";
-    manual += "Some musicians would prefer to apply those symbols from the second time after repeat."+"\n";
-    manual += "In such cases, they need to set the special control variable Poof:OnRepeat (see section IV). "+"\n";
-    manual += "For example, Poof:OnRepeat 2/4 | G G | C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :||"+"\n";
-    manual += "will play G G C C E E F F (no change 1st time through), then it will play G G C C E E C E F like above."+"\n";
-    manual += "Please note that these special roadmap symbols should be used with CAUTION to avoid any confusion."+"\n";
-    manual += "Currently, these symbols can only be used once in the BASS system."+"\n";
-    manual += "" + "\n";
-    manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    manual += "" + "\n";
-    manual += "III. THE CHORD-BASED NOTATION SYSTEM" + "\n";
-    manual += "" + "\n";
-    manual += "Time Signature:" + "\n";
-    manual += "3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 6/16 32/64 8/128 123/512 ..." + "\n";
-    manual += " " + "\n";
-    manual += "Bar:" + "\n";
-    manual += "|" + "\n";
-    manual += "" + "\n";
-    manual += "Opening (incl. repeat):" + "\n";
-    manual += "| |: ||:" + "\n";
-    manual += "" + "\n";
-    manual += "Closing (incl. repeat):" + "\n";
-    manual += "| || :| :||" + "\n";
-    manual += "" + "\n";
-    manual += "Repeat:" + "\n";
-    manual += ":|" + "\n";
-    manual += ":||" + "\n";
-    manual += "|:  :|  " + "\n";
-    manual += "||:  :||  " + "\n";
-    manual += "|:      :|:    :|" + "\n";
-    manual += "||:    :||:    :||" + "\n";
-    manual += "" + "\n";
-    manual += "Multiplier:" + "\n";
-    manual += "(1x) (2x) (3x) (4x) (5x) ..." + "\n";
-    manual += "" + "\n";
-    manual += "Branching (Volta):" + "\n";
-    manual += "[1. [2. [3. [4. [99. [101. [123. ..." + "\n";
-    manual += "" + "\n";
-    manual += "Pulse:" + "\n";
-    manual += "/" + "\n";
-    manual += "" + "\n";
-    manual += "Duplicate:" + "\n";
-    manual += "%" + "\n";
-    manual += "" + "\n";
-    manual += "Chord:" + "\n";
-    manual += "m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug" + "\n";
-    manual += "" + "\n";
-    manual += "Annotation:" + "\n";
-    manual += "(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) " + "\n";
-    manual += "(allegro) (moderato) (adagio) (lyrics_separated_by_underscores) ..." + "\n";
-    manual += "" + "\n";
-    manual += "Section Marker:" + "\n";
-    manual += "(#) (#x<number>) (#*<number>)" + "\n";
-    manual += "" + "\n";
-    manual += "Comment (Vi-De):" + "\n";
-    manual += "<- ->" + "\n";
-    manual += "" + "\n";
-    manual += "Roadmap:" + "\n";
-    manual += "(FINE) ($) (+) (TO.CODA) (D.C.)" + "\n";
-    manual += "(D.S.) (D.C.AL.CODA) (D.S.AL.CODA)" + "\n";
-    manual += "(D.C.AL.FINE) (D.S.AL.FINE)" + "\n";
-    manual += "" + "\n";
-    manual += "||||||" + "\n"; 
-    manual += "Remark:   " + "\n";
-    manual += "... means et cetera" + "\n";
-    manual += "# means any uppercase letter A-Z" + "\n";
-    manual += "<number> means any non-negative integer" + "\n";
-    manual += "roadmap symbols are all uppercase" + "\n";
-    manual += "" + "\n";
-    manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    manual += "" + "\n";
-    manual += "IV. SPECIAL NOTATIONS" + "\n";
-    manual += "" + "\n";
-    manual += "The following notations are separate from the core " + "\n";
-    manual += "musical notation system above." + "\n";
-    manual += "They are case-sensitive and used for special purposes such as " + "\n";
-    manual += "changing music tempo, tuning middle C, or save the sheet music to PDF or BASS files." + "\n";
-    manual += "Please note, they must be written at the beginning of the sheet music." + "\n";
-    manual += "Also, any value after the double dot character (:) can not have any blank space." + "\n";
-    manual += "It is recommended to use the underscore character (_). For example, " + "\n"; 
-    manual += "Composer:Loremipsum_Dolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Ninja_Chkft" + "\n";
-    manual += "" + "\n";
-    manual += "Tempo:<number>          for example, Tempo:100 to set BPM=100" + "\n";
-    manual += "Octave:<number>         for example, Octave:5 set middle C to C5 (*)" + "\n";
-    manual += "SaveAs:PDF              pop up print dialog box for saving as pdf file" + "\n";
-    manual += "SaveAs:BASS             save sheet music to .bass format for listing on bassboard chart" + "\n";
-    manual += "Sustain:Yes             disable playing previous BM chord /" + "\n";
-    manual += "Sustain:No              enable playing previous BM chord /" + "\n";
-    manual += "Title:<songtitle>       for example, Title:My_awesome_melody. Required field when saving to .bass" + "\n";
-    manual += "Artist:<name>           for example, Artist:The_BASS" + "\n";
-    manual += "Musician:<name>         for example, Musician:BeatBox" + "\n";
-    manual += "Composer:<name>         for example, Composer:RHYTHM" + "\n";
-    manual += "Arranger:<name>         for example, Arranger:Chorder" + "\n";
-    manual += "Singer:<name>           for example, Singer:Unknown" + "\n";
-    manual += "Writer:<name>           for example, Writer:Folklore" + "\n";
-    manual += "Author:<name>           for example, Author:Unknown" + "\n";
-    manual += "Song:<name>             for example, Song:Hip_And_Hop" + "\n";
-    manual += "Performer:<name>        for example, Performer:Super-nova" + "\n";
-    manual += "Genre:<type>            for example, Genre:Rap" + "\n";
-    manual += "Cover:Yes               means it is a cover" + "\n";
-    manual += "Remix:Yes               means it is a remix" + "\n";
-    manual += "Original:Yes            means it is your original work" + "\n";
-    manual += "Contributor:<name>      for example, Contributor:Newbie_Composer. Required field when saving to .bass" + "\n";
-    manual += "Derivative:Yes          means it is an arrangement from others' original work" + "\n";
-    manual += "URL:<address>           for example, URL:https://youtube.com/yourmusicchannel. " + "\n";
-    manual += "Optional but recommended when saving to .bass" + "\n";
-    manual += "Misc:<anything>         for example, Misc:anything_you_want_to_write_here_seperated_by_underscore_character" + "\n";
-    manual += "Poof:OnRepeat           activate roadmap symbols only after the music has been played one time through" + "\n";
-    manual += "" + "\n";
-    manual += "(*) Octave: notation is to set the BASS default system octave, which is not the same as " + "\n";
-    manual += "the musical instrument's current octave." + "\n";
-    manual += "By default, the BASS system covers the bass clef, and other instruments cover the treble clef." + "\n";
-    manual += "" + "\n";
-    manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    manual += "" + "\n";
-    manual += "V. BASSBOARD CHART" + "\n";
-    manual += "" + "\n";
-    manual += "It is a collection of sheet music where users can contribute to." + "\n";
-    manual += "Users can save to .bass file and send it to this email: bassthemusic101 |at| gmail |dot| com" + "\n";
-    manual += "Certain phrases are required in order to save to .bass file such as Title:, Contributor:, or URL:" + "\n";
-    manual += "(see section IV)." + "\n";
-    manual += "Note, any music (chords, rhythms, melody) is allowed, but lyrics and URLs will be checked for " + "\n";
-    manual += "explicit content prior to posting." + "\n";
-    manual += "" + "\n";
-    manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    manual += "" + "\n";
-    manual += "VI. QWERTY KEYBOARD" + "\n";
-    manual += "" + "\n";
-    manual += "Piano notes are mapped to the qwerty row, and number row of a common computer keyboard. " + "\n";
-    manual += "For example: q,w,e,r,t,2,3..." + "\n";
-    manual += "Guitar notes are mapped to the next row." + "\n";
-    manual += "For example, a,s,d,f,g for frets, and h,j,k,l,;,' for strings 6 to 1." + "\n";
-    manual += "" + "\n";
-    manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    manual += "" + "\n";
-    manual += "VII. DISCLAIMER" + "\n";
-    manual += "" + "\n";
-    manual += "The BASS system is written by a music enthusiast to help you learn rhythms, " + "\n"; 
-    manual += "chords, and very basic compositions. It is by no means to replace a " + "\n";
-    manual += "trained professional who can guide you through your complete music endeavor. " + "\n";
-    manual += "If you are a strictly classically trained musician, this system may not be the right fit for you. " + "\n";
-    manual += "Well, enjoy and have fun! :)" + "\n";
-    manual += "" + "\n";
-    manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    manual += "" + "\n";
-    manual += "VIII. SOURCE" + "\n";
-    manual += "" + "\n";
-    manual += "The BASS source code is below. The library file is bass.js" + "\n";
-    manual += "" + "\n";
-    manual += "https://github.com/skujp/music" + "\n";
-    manual += "" + "\n";
-    manual += "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" + "\n";
-    error.msg = `Loading manual...`;
+const manual = 
+`| Rev ${VERSION} |
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+I. INTRODUCTION
+
+BASS, pronounced /beɪs/, spelled /B-A-S-S/ all uppercase, is a musical chord
+notation system. Derived from the word 'bass clef' of a piano instrument, it
+uses common musical symbols often found in a sheet music. Anyone can use the
+BASS system to try new chord progressions, compose, or learn music. The world is
+your oyster!!!
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+II. THE BASICS
+
+1. Note
+A musical note is a single, basic building block of music. For a piano common
+musical scale, it can be written as: C C# Db D D# Eb E F F# Gb G G# Ab A A# Bb
+B.
+
+2. Chord
+A chord is a group of three or more notes played at the same time. For example,
+chord C (C major) consists of C E G. Chord C/E (C major / bass E) consists of C
+E G with a bass note E. Currently, the BASS system supports the following chord
+type notations: C (C Major), Cm (C Minor), Caug (C Augmented), Cdim (C
+Diminished), Cmaj7 (C Major 7), C7 (C Dominant 7), Cm7 (C Minor 7), Cmmaj7 (C
+Minor-Major 7), Cm7b5 (C Half-Diminished), C7b5 (C Dominant-seventh flat five),
+Cdim7 (C Fully Diminished), Csus2 (C Suspended 2), Csus4 (C Suspended 4), Cadd9
+(C Add 9), C5 (C Power Chord), Cmaj9 (C Major 9), C6 (C Major 6), C9 (C 9), C/E
+(C with E in the bass), Cmaug (C Minor Augmented).
+
+3. Sheet Music
+A sheet music is a written or printed guide for musicians. In the BASS system, a
+chord (NOT note) is the basic unit of a sheet music. For example, 4/4 | C C C C
+|| means to play chord C Major four times (NOT single C note four times).
+
+4. Time Signature
+A time signature is a musical notation symbol made of two stacked numbers
+telling about the rhythm of a song such as: 4/4, 3/4, 6/8, etc. Time signature
+is usually written in the beginning of a sheet music. For example, 3/4 | A B C |
+D E / |. If the sheet music does not start with a time signature, by default the
+time signature is 4/4. For example, | F D A C | B A B A |. Please note that,
+time signature in the BASS system has more varieties than common sheet music.
+For example, the nominator part represents the number of beats in a bar. The
+denominator part is a power of two, representing a fraction of a whole note for
+adjusting the actual sheet music speed. For example, 8/16 means there are 8
+beats in a bar, and the actual music speed will be adjusted based on the 16th
+note. This is to accomodate the treble clef parts and other instruments. So do
+not be surprised if you see a time signature such as 123/256 in the BASS system
+:)
+
+5. Time Measure
+Time Measure (or Bar) is a small container of time that holds a specific number
+of beats. For example, the following bar contains 3 beats: | / / / |, this bar
+contains 0 beat: | | Please note that, this Bar refers to time measure, not to
+be confused with single Bar symbol | or double bar symbol ||
+
+6. Opening Section
+An opening section begins the sheet music. It may or may not have a leading
+tone. If it has a leading tone, the number of opening beats can not go over the
+nominator beats of time signature. For example, A A | D / D / | Amaj7 / Amaj7 /
+|| is accepted with a leading tone A A (2 beats). Please note that, without a
+leading tone, an opening section usually starts with a | or |: or ||: Besides, a
+double bar symbol || is currently not supported in opening section to avoid any
+confusion with the ending section.
+
+7. Repeat Section
+A repeat section (or loop) is a section which is played again and again. The
+loop usually looks like this |: :| or ||: :|| or a loop back from beginning such
+as | :| and | :|| In some cases, it can use back to back loop :|: or :||:
+symbols. For example, |: :|: :| or ||: :||: :|| By default, repeat section will
+loop for 1 time (2x), but it is up to the user to modify it using repeat
+multipliers such as (3x), (4x), etc. For example, |: (4x) F / / C | B / / A :|
+means loop 4 times over the 2 bars of chords. In the BASS system, if there is no
+matching opening repeat symbols, it will go back to the beginning. For example,
+2/4 | C D | F G :| A B :| G G ||, each time seeing a repeat symbol :| it will go
+back to the beginning.
+
+8. Branching Section
+A branching section (or volta bracket) is used to skip from one section to
+another of a sheet music AFTER REPEAT. It is written as an open bracket followed
+by a number and a dot. For example, [1. [2. [3. [123. , etc. The next example is
+a section of a sheet music which will skip [1. and jump to [2. after repeat: 4/4
+|: A A A A | [1. B B B B :| [2. C C C C | D D D D | Please note that, the BASS
+system implements positional volta brackets, which include usages beyond common
+music notation. For example, 3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F
+F F :| [30. B B B || After the 1st repeat, it will skip [40. bar to the next bar
+[20. After the 2nd repeat, it will skip [40. bar and [20. bar to the next bar
+[30. Please note that, the branching section relies on repeat symbols :| or :||
+to move back to the closest matching |: or ||: If not finding a match, it will
+go back to the beginning of the sheet music. Also, colliding numbers for
+branching section are allowed but NOT RECOMMENDED for the clarity of a music
+sheet. For example, instead of writing 3/4 | C C C | [1. D D D :| [1. E E E ||
+it is recommended to replace the second [1. as [2. or so. Last, branching
+section can coexist with multipliers from repeat sections. However, it will
+override the default behavior of multipliers in repeat sections. For example,
+2/4 | (123x) A A | [1. B B :| C C || will ignore (123x) on the second repeat.
+
+9. Ending Section
+A sheet music must end with either a single bar | or a double bar || symbol. If
+it ends with a || symbol, the system will stop playing (no loop back).
+Otherwise, the system by default will keep looping back from the beginning even
+without the user's intervention. Please note that, if it ends with :| or :||
+symbol, it will loop back according to music sheet movement direction before the
+default system loop back kicks in. For the case of :|| symbol, it will stop
+eventually.
+
+10. Classical Rule
+If there is a leading tone, this classical rule will be applied: The number of
+opening beats and ending beats must equal the nominator beats in time signature.
+
+11. Tempo
+Tempo is the speed or pace at which a piece of music is played. It is the number
+of beats per minutes (bpm) set up before playing the sheet music. In the BASS
+system, by default it is set to 90, assuming quarter note is in time signature
+(4/4). The user can change tempo manually. Please note that, the actual final
+sheet music speed will be adjusted based on time signature (section IV).
+
+12. Octave
+An octave is the distance between two musical notes that share the same name
+(like two different C notes). It is exactly eight steps apart on a common
+musical scale. In the BASS system, octave ranges can be from 0 to 8 where 0 is
+the lowest bass, and 8 is the highest bass. By default, it uses octave 4 similar
+to the concept of middle C in a piano. User can change it manually (section IV).
+
+13. Space
+Every musical symbol must be separated by a blank space. The recommended space
+is 1 blank symbol between two musical symbols. For example, one blank space
+between two opening notes in this sheet music 2/4 D D | F F |
+
+14. Pulse /
+A pulse / means the user can either play the previous note or sustain it
+(legato). By default, the BASS system will play the previous note (staccato).
+For example, | B A / | will play B A A chords. Please note that, a pulse / is
+different than a slash / in a slash chord. For example, A/E means A major chord
+with a E at the bass. To sustain, set control directive Sustain:Yes at the
+beginning of the sheet music (section IV).
+
+15. Duplicate %
+A duplicate % means repeat playing the previous bar. For example, | A B C | % ||
+will play A B C A B C
+
+16. Section Marker (#)
+A group of bars can be marked with a section marker such as (A) (B) (C), etc.
+Inside the parenthesis, it must be a single uppercase letter from A to Z. Once a
+section marker is defined, it can be used later in the sheet music to repeat
+that section. For example, 3/4 | (A) F G A | B C D | (B) E F G | (C) D E F |
+(Bx3) || means the last bar will repeat the section marked with (B) three times.
+Please note that, the section marker must be defined before used. For example,
+3/4 | D D D | (Mx2) G G G | will raise an error because (M) is not defined
+before it is used. Another example, 4/4 |: (3x) (T) C D E F :| (G) G A B C |
+(Tx2) || means the last bar will repeat 2 times the first bar (including 3x), so
+it will be played in total 6 times. By default, the marker works by scanning
+until the next marker is available to determine which section to repeat. If it
+doesn't find any marker, it will scan until the end of the sheet music. For
+example, 4/4 | C D E F | (Z) G A B C | D E F G | (Zx1) || means the last bar
+will do a 1 time repeat for section (Z), which is G A B C | D E F G | Please
+note that, there are 3 types of notations often used in section marker (section
+III). For example, (Z), (Zx2), and (Z*2), in which (Z) is the section marker
+definition, (Zx2) is the section marker usage with 2 times repeat (INCLUDING
+multipliers), and (Z*2) is the section marker usage with 2 times repeat
+(EXCLUDING multipliers). For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) ||
+will play the last bar 9 times in total because of the multiplier (3x), whereas
+3/4 | A A A |: (3x) (Q) B B B :| (Q*3) || will play the last bar 3 times only.
+Please note that, (Zx2) also works with branching section, preserving the
+branching behavior, whereas (Z*2) will ignore branching behavior.
+
+17. Commented Out Section
+Commented out section (or Vi-De) is a special marked section NOT to be played in
+a sheet music. The commented opening symbol (Vi) is <- and the closing (De) is
+-> They are usually set after the opening section of a sheet music (section
+I.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will
+only play | G G | D D | F F || This Vi-De mode can be useful to test playing
+only specific parts of the sheet music. Please note that, sometimes playback
+does not echo any sound due to the commented sheet music containing only BM /
+chords. For example, | <- D D D D | -> / / / / ||
+
+18. Roadmap Symbols
+In a sheet music, there are special symbols ('roadmap symbols') which designate
+to change the music flow such as:
+(D.C.) : Go back to the beginning
+(D.S.) : Go to SEGNO symbol ($)
+(DC.AL.CODA) : Go back to the beginning, play until (TO.CODA) symbol, then jump
+to CODA symbol (+)
+(DS.AL.CODA) : Go to SEGNO symbol ($), play until (TO.CODA) symbol, then jump to
+CODA symbol (+)
+(DC.AL.FINE) : Go back to the beginning, play until (FINE) symbol, then end the
+music
+(DS.AL.FINE) : Go to SEGNO symbol ($), play until (FINE) symbol, then end the
+music
+By default, in the BASS system during playback, when encountering these symbols,
+it will immediately change the music direction. For example, 2/4 | G G | C ($) C
+| E (TO.CODA) E | (D.S.AL.CODA) F (+) F || will play G G C C E E C E F.
+Sometimes, musicians would prefer to apply those symbols from the second time
+after music repeat instead. In such cases, they must set the special control
+directive Poof:OnRepeat (section IV). For example, Poof:OnRepeat 2/4 | G G | C
+($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :|| will play G G C C E E F F the
+1st time through, then play G G C C E E C E F like before. Please note that
+these special roadmap symbols should be used with CAUTION to avoid any confusion
+in the sheet music. Also, they can be applied for only ONE TIME during the whole
+playback in the BASS system.
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+III. THE CHORD-BASED NOTATION SYSTEM
+
+Time Signature:
+3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 6/16 32/64 8/128
+123/512 ...
+
+Bar:
+|
+
+Opening (incl. repeat):
+| |: ||:
+
+Closing (incl. repeat):
+| || :| :||
+
+Repeat:
+:|
+:||
+|: :|
+||: :||
+|: :|: :|
+||: :||: :||
+
+Multiplier:
+(1x) (2x) (3x) (4x) (5x) ...
+
+Branching (Volta):
+[1. [2. [3. [4. [99. [101. [123. ...
+
+Pulse:
+/
+
+Duplicate:
+%
+
+Chord:
+m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug
+
+Annotation:
+(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) (allegro)
+(moderato) (adagio) (lyrics_separated_by_underscores) ...
+
+Section Marker:
+(#) (#x<number>) (#*<number>)
+
+Comment (Vi-De):
+<- ->
+
+Roadmap:
+(FINE) ($) (+) (TO.CODA) (D.C.) (D.S.) (D.C.AL.CODA) (D.S.AL.CODA) (D.C.AL.FINE)
+(D.S.AL.FINE)
+
+||||||
+Remark:
+... means et cetera
+# means any uppercase letter A-Z
+<number> means any non-negative integer
+roadmap symbols are all uppercase
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+IV. SPECIAL NOTATIONS
+
+The following notations are separate from the core musical notation system. They
+are case-sensitive and used for special purposes such as changing music tempo,
+tuning middle C, or save the sheet music to PDF or BASS files. Please note that,
+they must be written at the beginning of the sheet music. Also, any value after
+the double dot symbol (:) can not have any blank space. In the BASS system, it
+is recommended to use the underscore _ symbol. For example, Composer:Loremipsum_
+Dolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Ninja_Chkft
+
+Tempo:<number> for example, Tempo:100 to set BPM=100
+Octave:<number> for example, Octave:5 to set middle C to C5
+SaveAs:PDF to save as pdf file using default host system
+SaveAs:BASS to save as .bass file
+Sustain:Yes to disable playing previous BM chord /
+Sustain:No to enable playing previous BM chord /
+Title:<name> for example, Title:My_awesome_melody, required for .bass
+Artist:<name> for example, Artist:The_BASS
+Musician:<name> for example, Musician:BeatBox
+Composer:<name> for example, Composer:RHYTHME
+Arranger:<name> for example, Arranger:ChoRder
+Singer:<name> for example, Singer:Unknown
+Writer:<name> for example, Writer:Folklore
+Author:<name> for example, Author:Unknown
+Song:<name> for example, Song:Hip_And_Hop
+Performer:<name> for example, Performer:Super-nova
+Genre:<type> for example, Genre:Rap
+Cover:Yes to confirm it is a cover
+Remix:Yes to confirm it is a remix
+Original:Yes to confirm it is your original masterpiece
+Contributor:<name> for example, Contributor:Newbie_Composer, required for .bass
+Derivative:Yes to confirm it is an arrangement from others' masterpiece
+URL:<address> URL:https://youtube.com/yourmusicchannel, optional but recommended
+for .bass
+Misc:<anything> for example, Misc:anything_seperated_by_underscore
+Poof:OnRepeat to activate roadmap symbols only after the music is repeated
+
+Please note that, when setting Octave:<number> above, it is to set the BASS
+default system octave. It is not the same as the default octave used in other
+instruments for treble clef parts.
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+V. BASSBOARD CHART
+
+This section is also seperate from the core musical notation system. It serves
+as a demo collection of sheet music where users can contribute to. To be listed
+on the chart, please save to .bass file and send it to this email:
+bassthemusic101 |at| gmail |dot| com. Please note that, certain settings are
+required in order to save to .bass such as Title: Contributor: or URL: (section
+IV). Last, any music (chords, rhythms, melody) is allowed, but lyrics and URLs
+will be checked for explicit content prior to posting. A masterpiece with
+clarity is always appreciated! :)
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+VI. QWERTY KEYBOARD
+
+For the treble clef parts of the BASS system:
+- Piano notes are mapped to qwerty and number row of a QWERTY computer keyboard.
+For example, q,w,e,r,t,2,3...
+- Guitar notes are mapped to next rows. For example, a s d f g for frets and h j
+k l ; ' for strings 6 to 1.
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+VII. DISCLAIMER
+
+The BASS system is written by a music enthusiast to help you learn rhythms,
+chords, and very basic compositions. It is by no means to replace a trained
+professional who can guide you through your complete music endeavor. If you are
+a strictly classically trained musician, this system may not be the right fit
+for you. Well, enjoy and have fun! :)
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+VIII. SOURCE
+
+The BASS source code is as below. The library file is bass.js
+
+https://github.com/skujp/music
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| 
+    `;
     return manual;
 }
 function getErrorMsg() {
