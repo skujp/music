@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "9.1.1";
+const VERSION = "9.1.2";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -440,7 +440,7 @@ Contributor:<name> for example, Contributor:Newbie_Composer, required for .bass
 Derivative:Yes to confirm it is an arrangement from others' masterpiece
 URL:<address> URL:https://youtube.com/yourmusicchannel, optional but recommended
 for .bass
-Misc:<anything> for example, Misc:anything_seperated_by_underscore
+Misc:<anything> for example, Misc:anything_separated_by_underscore
 Poof:OnRepeat to activate roadmap symbols only after the music is repeated
 
 Please note that, when setting Octave:<number> above, it is to set the BASS
@@ -451,7 +451,7 @@ instruments for treble clef parts.
 
 V. BASSBOARD CHART
 
-This section is also seperate from the core musical notation system. It serves
+This section is also separate from the core musical notation system. It serves
 as a demo collection of sheet music where users can contribute to. To be listed
 on the chart, please save to .bass file and send it to this email:
 bassthemusic101 |at| gmail |dot| com. Please note that, certain settings are
