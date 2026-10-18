@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "9.1.0";
+  var VERSION = "9.1.1";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -869,13 +869,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           }
           if (roadmapTokens.has(match_aux[1])) {
             if (match_aux[1] in roadmap) {
-              error.msg = "[ROADMAP DUPLICATE ERROR] too many roadmap markers: ".concat(tokens[i]);
+              error.msg = "[ROADMAP DUPLICATE ERROR] too many roadmap symbols: (".concat(tokens[i], ")");
               return;
             }
             roadmap[match_aux[1]] = sequencer.length;
             roadmapVisited[match_aux[1]] = poofRepeat;
             if (sequencer.length in roadmap) {
-              error.msg = "[ROADMAP EXIST ERROR] too many existing roadmap markers at position ".concat(i);
+              error.msg = "[ROADMAP EXIST ERROR] too many existing roadmap symbols at position ".concat(i);
               return;
             }
             roadmap[sequencer.length] = match_aux[1];
@@ -896,25 +896,25 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             }
             if (match_aux[1] === SEGNO) {
               if (roadmapRank[1]) {
-                error.msg = "[ROADMAP SEGNO ERROR] too many $ symbols repeats";
+                error.msg = "[ROADMAP SEGNO ERROR] too many ($) symbols repeats";
                 return;
               }
               roadmapRank[1] = match_aux[1];
             } else if (match_aux[1] === TOCODA) {
               if (roadmapRank[2]) {
-                error.msg = "[ROADMAP TOCODA ERROR] too many TO.CODA symbols repeats";
+                error.msg = "[ROADMAP TOCODA ERROR] too many (TO.CODA) symbols repeats";
                 return;
               }
               roadmapRank[2] = match_aux[1];
             } else if (match_aux[1] === CODA) {
               if (roadmapRank[3]) {
-                error.msg = "[ROADMAP + ERROR] too many + symbols repeats";
+                error.msg = "[ROADMAP + ERROR] too many (+) symbols repeats";
                 return;
               }
               roadmapRank[3] = match_aux[1];
             } else if (match_aux[1] === FINE) {
               if (roadmapRank[4]) {
-                error.msg = "[ROADMAP FINE ERROR] too many FINE symbols repeats";
+                error.msg = "[ROADMAP FINE ERROR] too many (FINE) symbols repeats";
                 return;
               }
               roadmapRank[4] = match_aux[1];
@@ -1569,7 +1569,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     if (d == "OnRepeat") {
       DEF_ROADMAP_VISITED = 0;
     } else {
-      var problem = "[POOF ERROR] To make roadmap markers start working from second repeat, use phrase Poof:OnRepeat";
+      var problem = "[POOF ERROR] To make roadmap symbols start working from second repeat, use phrase Poof:OnRepeat";
       error.msg = problem;
       return problem;
     }
@@ -1682,7 +1682,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         return roadmap[CODA];
       } else if (PF === TOCODA) {
         if (!(CODA in roadmap)) {
-          error.msg = "[ROADMAP RUNTIME ERROR] CODA symbol ".concat(CODA, " not found");
+          error.msg = "[ROADMAP RUNTIME ERROR] CODA symbol (".concat(CODA, ") not found");
           return -8;
         }
         return roadmap[CODA];
@@ -1690,7 +1690,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         return 0;
       } else if (PF === DS || PF === DSALCODA || PF === DSALFINE) {
         if (!(SEGNO in roadmap)) {
-          error.msg = "[ROADMAP RUNTIME ERROR] SEGNO symbol ".concat(SEGNO, " not found");
+          error.msg = "[ROADMAP RUNTIME ERROR] SEGNO symbol (".concat(SEGNO, ") not found");
           return -8;
         }
         return roadmap[SEGNO];

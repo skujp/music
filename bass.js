@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "9.1.0";
+const VERSION = "9.1.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -1096,13 +1096,13 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, poofRepeat =
                 } 
                 if (roadmapTokens.has(match_aux[1])) {
                     if (match_aux[1] in roadmap) {
-                        error.msg = `[ROADMAP DUPLICATE ERROR] too many roadmap markers: ${tokens[i]}`;
+                        error.msg = `[ROADMAP DUPLICATE ERROR] too many roadmap symbols: (${tokens[i]})`;
                         return;
                     }
                     roadmap[match_aux[1]] = sequencer.length;
                     roadmapVisited[match_aux[1]] = poofRepeat; 
                     if (sequencer.length in roadmap) {
-                        error.msg = `[ROADMAP EXIST ERROR] too many existing roadmap markers at position ${i}`;
+                        error.msg = `[ROADMAP EXIST ERROR] too many existing roadmap symbols at position ${i}`;
                         return;
                     }
                     roadmap[sequencer.length] = match_aux[1];
@@ -1123,25 +1123,25 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, poofRepeat =
                     }
                     if (match_aux[1] === SEGNO) {
                         if (roadmapRank[1]) {
-                            error.msg = `[ROADMAP SEGNO ERROR] too many $ symbols repeats`;
+                            error.msg = `[ROADMAP SEGNO ERROR] too many ($) symbols repeats`;
                             return;
                         }
                         roadmapRank[1] = match_aux[1];
                     } else if (match_aux[1] === TOCODA) {
                         if (roadmapRank[2]) {
-                            error.msg = `[ROADMAP TOCODA ERROR] too many TO.CODA symbols repeats`;
+                            error.msg = `[ROADMAP TOCODA ERROR] too many (TO.CODA) symbols repeats`;
                             return;
                         }
                         roadmapRank[2] = match_aux[1];
                     } else if (match_aux[1] === CODA) {
                         if (roadmapRank[3]) {
-                            error.msg = `[ROADMAP + ERROR] too many + symbols repeats`;
+                            error.msg = `[ROADMAP + ERROR] too many (+) symbols repeats`;
                             return;
                         }
                         roadmapRank[3] = match_aux[1];
                     } else if (match_aux[1] === FINE) {
                          if (roadmapRank[4]) {
-                            error.msg = `[ROADMAP FINE ERROR] too many FINE symbols repeats`;
+                            error.msg = `[ROADMAP FINE ERROR] too many (FINE) symbols repeats`;
                             return;
                         }
                         roadmapRank[4] = match_aux[1];
@@ -1599,7 +1599,7 @@ function setPoof(d) {
     if (d == "OnRepeat") {
         DEF_ROADMAP_VISITED = 0;
     } else {
-        const problem = `[POOF ERROR] To make roadmap markers start working from second repeat, use phrase Poof:OnRepeat`;
+        const problem = `[POOF ERROR] To make roadmap symbols start working from second repeat, use phrase Poof:OnRepeat`;
         error.msg = problem;
         return problem;
     }
@@ -1711,7 +1711,7 @@ function poof(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
             return roadmap[CODA];
         } else if (PF === TOCODA) {
             if (!(CODA in roadmap)) {
-                error.msg = `[ROADMAP RUNTIME ERROR] CODA symbol ${CODA} not found`;
+                error.msg = `[ROADMAP RUNTIME ERROR] CODA symbol (${CODA}) not found`;
                 return -8;
             } 
             return roadmap[CODA];
@@ -1719,7 +1719,7 @@ function poof(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
             return 0;
         } else if (PF === DS || PF === DSALCODA || PF === DSALFINE) {
             if (!(SEGNO in roadmap)) {
-                error.msg = `[ROADMAP RUNTIME ERROR] SEGNO symbol ${SEGNO} not found`;
+                error.msg = `[ROADMAP RUNTIME ERROR] SEGNO symbol (${SEGNO}) not found`;
                 return -8;
             }
             return roadmap[SEGNO];
