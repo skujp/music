@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "9.1.3";
+const VERSION = "9.1.4";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -40,7 +40,7 @@ attach(TheBass, {setFullAsyncDebug, getFullAsyncDebugMode, oops,
                  setSaveAs, setSustain, getSustain, 
                  getInstrument, setInstrument,
                  getDuration, getGuitarNote, getVersion, hasComment,
-                 getRoadmapMode, poof, setPoof 
+                 getRoadmapStatus, getRoadmap, setRoadmap 
                 });    
 const BPM = {                                                           
     _val: 90,                                                           
@@ -112,7 +112,7 @@ var MAX_SECTION_REP = 51;
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var SAVE_AS_TYPES = new Set(["PDF","BASS"]);                            
 var BASSBOARD_DB_FIELD = new Set(["Contributor","Title"]);              
-var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Poof)(:)(.+)$/;
+var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap)(:)(.+)$/;
 var taskDropper = null;                                                 
 var validArgs = new WeakSet();                                          
 var _sheetMusic;                                                        
@@ -336,7 +336,7 @@ music direction upon encountering these symbols. For example, 2/4 | G G | C ($)
 C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F || will play G G C C E E C E F.
 Sometimes, musicians would prefer to apply those symbols from the second time
 after music repeat instead. In such cases, they must set the special control
-directive Poof:OnRepeat (section IV). For example, Poof:OnRepeat 2/4 | G G | C
+directive Roadmap:OnRepeat (section IV). For example, Roadmap:OnRepeat 2/4 | G G | C
 ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :|| will play G G C C E E F F the
 1st time through, then play G G C C E E C E F like before. Please note that
 these special roadmap symbols should be used with CAUTION to avoid any confusion
@@ -441,7 +441,7 @@ Derivative:Yes to confirm it is an arrangement from others' masterpiece
 URL:<address> URL:https://youtube.com/yourmusicchannel, optional but recommended
 for .bass
 Misc:<anything> for example, Misc:anything_separated_by_underscore
-Poof:OnRepeat to activate roadmap symbols only after the music is repeated
+Roadmap:OnRepeat to activate roadmap symbols only after the music is repeated
 
 Please note that, when setting Octave:<number> above, it is to set the BASS
 default system octave. It is not the same as the default octave used in other
@@ -488,8 +488,7 @@ The BASS source code is as below. The library file is bass.js
 
 https://github.com/skujp/music
 
-|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| 
-    `;
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||`;
     return manual;
 }
 function getErrorMsg() {
@@ -601,7 +600,7 @@ function getChordNotes(chord=FAKE) {
     } 
     return [noteNames, null]; 
 };
-function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, poofRepeat = DEF_ROADMAP_VISITED) {
+function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepeat = DEF_ROADMAP_VISITED) {
     _sheetMusic = {};
     _cmtActive = false;
     cmtExist = _cmtActive;
@@ -654,12 +653,12 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, poofRepeat =
                 return;
             }
             pulseFlag = PULSE_FLAG;        
-        } else if (setFunc == 'setPoof') {    
+        } else if (setFunc == 'setRoadmap') {    
             let status = this[setFunc](arg);  
             if (status !== undefined) {    
                 return;
             }
-            poofRepeat = DEF_ROADMAP_VISITED; 
+            roadmapRepeat = DEF_ROADMAP_VISITED; 
         } else {
             ctrlVars.push([setFunc,arg]);     
         }
@@ -1100,7 +1099,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, poofRepeat =
                         return;
                     }
                     roadmap[match_aux[1]] = sequencer.length;
-                    roadmapVisited[match_aux[1]] = poofRepeat; 
+                    roadmapVisited[match_aux[1]] = roadmapRepeat; 
                     if (sequencer.length in roadmap) {
                         error.msg = `[ROADMAP EXIST ERROR] too many existing roadmap symbols at position ${i}`;
                         return;
@@ -1435,7 +1434,7 @@ async function playSequencer(sequencerObj) {
     while (i < n) {
       if (signal.aborted) break;
       if (i in roadmap) {
-        let f = poof(sequencer, roadmap, roadmapVisited, roadmapRank, i);
+        let f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
         if (f >= 0) {
             i = f;
             continue;
@@ -1595,11 +1594,11 @@ function setSustain(d) {
         return problem;
     }
 }
-function setPoof(d) {
-    if (d == "OnRepeat") {
+function setRoadmap(d) {
+    if (d === "OnRepeat") {
         DEF_ROADMAP_VISITED = 0;
     } else {
-        const problem = `[POOF ERROR] To make roadmap symbols start working from second repeat, use phrase Poof:OnRepeat`;
+        const problem = `[ROADMAP ERROR] To make roadmap symbols start working from second repeat, use phrase Roadmap:OnRepeat`;
         error.msg = problem;
         return problem;
     }
@@ -1669,10 +1668,10 @@ function getVersion() {
 function hasComment() {
     return cmtExist;
 }
-function getRoadmapMode() {
+function getRoadmapStatus() {
     return roadmapMode;
 }
-function poof(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
+function getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
     if (!(i in roadmap) || !(sequencer) || (sequencer.length <= 0)) {
         return -4;
     }
@@ -1690,7 +1689,7 @@ function poof(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
         return -2;
     }
     roadmapVisited[PF] += 1;
-    let cmode = getRoadmapMode();
+    let cmode = getRoadmapStatus();
     if ((!cmode) ||
         ( 
           (PF === SEGNO && !cmode.includes(DS)) || 
