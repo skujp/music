@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "9.1.4";
+const VERSION = "9.2.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -140,7 +140,7 @@ function setFullAsyncDebug(f) {
 }
 function help() {
 const manual = 
-`| Rev ${VERSION} |
+`| Rev 9.2.0 |
 
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
@@ -336,12 +336,16 @@ music direction upon encountering these symbols. For example, 2/4 | G G | C ($)
 C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F || will play G G C C E E C E F.
 Sometimes, musicians would prefer to apply those symbols from the second time
 after music repeat instead. In such cases, they must set the special control
-directive Roadmap:OnRepeat (section IV). For example, Roadmap:OnRepeat 2/4 | G G | C
-($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :|| will play G G C C E E F F the
-1st time through, then play G G C C E E C E F like before. Please note that
+directive Roadmap:OnRepeat (section IV). For example, Roadmap:OnRepeat 2/4 | G G
+| C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :|| will play G G C C E E F F 
+the 1st time through, then play G G C C E E C E F like before. Please note that
 these special roadmap symbols should be used with CAUTION to avoid any confusion
 in the sheet music. Also, they can be applied for only ONE TIME during the whole
-playback in the BASS system.
+playback in the BASS system. Last, if these symbols are located right before the
+music ends, they will be played after repeats (if any). For example,
+| A A A A (FINE) ||: B B B B (D.C.AL.FINE) :|| will play A A A A B B B B, then
+repeat B B B B, then go back to the beginning with (D.C.AL.FINE), and finally
+play A A A A, ending there at (FINE).
 
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
@@ -744,6 +748,65 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
             if (tokens[i] == CMT_START) {
                 _cmtActive = true;
                 cmtExist = true;
+                continue;
+            }
+        }
+        if (i < length - 1 && (seperateBarTokens.has(tokens[i+1]) || 
+                               closingTokens.has(tokens[i+1])     ||
+                               repeatTokens.has(tokens[i+1]))) {
+            const rs = tokens[i].slice(1,-1);
+            if (roadmapTokens.has(rs)) {
+                if (rs in roadmap) {
+                    error.msg = `[ROADMAP DUPLICATE EDGE ERROR] too many roadmap symbols: (${tokens[i]})`;
+                    return;
+                }
+                roadmap[rs] = sequencer.length;
+                roadmapVisited[rs] = roadmapRepeat; 
+                if (sequencer.length in roadmap) {
+                    error.msg = `[ROADMAP EXIST EDGE ERROR] too many existing roadmap symbols at position ${i}`;
+                    return;
+                }
+                roadmap[sequencer.length] = rs;
+                if (rs === DC || rs === DCALCODA || rs === DCALFINE) {
+                    if (roadmapMode) {
+                        error.msg = `[ROADMAP DC DACAPO EDGE ERROR] too many dc dacapo repeats: ${DC} ${DCALCODA} ${DCALFINE}`;
+                        return;
+                    }
+                    roadmapMode = rs;
+                    roadmapRank[0] = rs;
+                } else if (rs === DS || rs === DSALCODA || rs === DSALFINE) {
+                    if (roadmapMode) {
+                        error.msg = `[ROADMAP DS SEGNO EDGE ERROR] too many ds segno repeats: ${DS} ${DSALCODA} ${DSALFINE}`;
+                        return;
+                    }
+                    roadmapMode = rs;
+                    roadmapRank[0] = rs;
+                }
+                if (rs === SEGNO) {
+                    if (roadmapRank[1]) {
+                        error.msg = `[ROADMAP SEGNO EDGE ERROR] too many ($) symbols repeats`;
+                        return;
+                    }
+                    roadmapRank[1] = rs;
+                } else if (rs === TOCODA) {
+                    if (roadmapRank[2]) {
+                        error.msg = `[ROADMAP TOCODA EDGE ERROR] too many (TO.CODA) symbols repeats`;
+                        return;
+                    }
+                    roadmapRank[2] = rs;
+                } else if (rs === CODA) {
+                    if (roadmapRank[3]) {
+                        error.msg = `[ROADMAP + EDGE ERROR] too many (+) symbols repeats`;
+                        return;
+                    }
+                    roadmapRank[3] = rs;
+                } else if (rs === FINE) {
+                        if (roadmapRank[4]) {
+                        error.msg = `[ROADMAP FINE EDGE ERROR] too many (FINE) symbols repeats`;
+                        return;
+                    }
+                    roadmapRank[4] = rs;
+                }
                 continue;
             }
         }
@@ -1469,6 +1532,16 @@ async function playSequencer(sequencerObj) {
             }
         } else {
             i += 1;
+        }
+      }
+      if (i === n && n in roadmap) {
+        let f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
+        if (f >= 0) {
+            i = f;
+            continue;
+        } else if (f == -8 || f == -3) {
+            oops(getErrorMsg(), 'error');
+            return;
         }
       }
     }
