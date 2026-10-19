@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "9.1.4";
+    // VERSION = "9.1.5";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
@@ -124,6 +124,7 @@ function initEvents() {
 
     const songList = document.getElementById(SONGLIST);
 
+    sheetMusic.spellcheck = false;
     sheetMusic.value = bass.getSampleTestCase();
 
     var adjustPtr = gNote1;
