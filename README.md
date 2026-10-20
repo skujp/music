@@ -1,4 +1,4 @@
-bass.js (<!--version-->v9.2.0<!--/version-->)
+bass.js (<!--version-->v9.3.0<!--/version-->)
 =======
 
 A music sequencer library, written in javascript.
