@@ -146,7 +146,7 @@ function setFullAsyncDebug(f) {
 }
 function help() {
 const manual = 
-`| Rev 9.2.0 |
+`| Rev ${VERSION} |
 
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
