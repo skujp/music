@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "10.0.1";
+const VERSION = "10.1.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -144,6 +144,7 @@ function setDebug(f) {
 function setFullAsyncDebug(f) {
     FULL_ASYNC_DEBUG_MODE = f;
 }
+
 function help() {
 const manual = 
 `| Rev ${VERSION} |
@@ -194,7 +195,7 @@ For example, the nominator part represents the number of beats in a bar. The
 denominator part is a power of two, representing a fraction of a whole note for
 adjusting the actual sheet music speed. For example, 8/16 means there are 8
 beats in a bar, and the actual music speed will be adjusted based on the 16th
-note. This is to accomodate the treble clef parts and other instruments. So do
+note. This is to accommodate the treble clef parts and other instruments. So do
 not be surprised if you see a time signature such as 123/256 in the BASS system
 :)
 
@@ -286,16 +287,17 @@ Every musical symbol must be separated by a blank space. The recommended space
 is 1 blank character between two musical symbols. For example, one blank space
 between two opening notes in this sheet music 2/4 D D | F F |
 
-14. Pulse /
-A pulse / means the user can either play the previous note or sustain it
-(legato). By default, the BASS system will play the previous note (staccato).
-For example, | B A / | will play B A A chords. Please note that, a pulse / is
-different than a slash / in a slash chord. For example, A/E means A major chord
-with a E at the bass. To sustain, add system setting Sustain:Yes at the
-beginning of the sheet music (section IV).
+14. Rhythm Slash /
+In the BASS system, a rhythm slash / (or BM) represents one beat in a bar.
+By default, it plays by repeating a previous chord. For example, 3/4 | A B / | 
+will play A B B. To turn off the default play, musicians can set Sustain:Yes
+at the beginning of the sheet music (section IV). For example,
+Sustain:Yes 3/4 | A B / | will play A B only and silent on the last chord /.
+Please note that this rhythm slash / symbol should not be mistaken with / in
+a slash chord (section II.2)
 
 15. Duplicate %
-A duplicate % means repeat playing the previous bar. For example,
+A duplicate symbol % means to repeat playing the previous bar. For example,
 3/4 | A B C | % || will play A B C A B C
 
 16. Section Marker (#)
@@ -331,7 +333,7 @@ I.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will
 only play | G G | D D | F F || This Vi-De mode can be useful to test playing
 only specific parts of the sheet music. Please note that, in some cases playback
 does not echo any sound due to the commented sheet music containing only
-sustained / chords. For example, | <- D D D D | -> / / / / ||
+sustained chords. For example, | <- D D D D | -> / / / / ||
 
 18. Roadmap Symbols
 In a sheet music, there are special symbols ('roadmap symbols') which designate
@@ -393,7 +395,7 @@ Multiplier:
 Branching (Volta):
 [1. [2. [3. [4. [99. [101. [123. ...
 
-Pulse:
+Rhythm Slash (BM):
 /
 
 Duplicate:
