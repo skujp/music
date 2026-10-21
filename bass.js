@@ -624,12 +624,15 @@ function getChordNotes(chord=FAKE) {
     } 
     return [noteNames, null]; 
 };
-function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
+function buildSequencer(sheetMusic = EMPTY, pulseFlag = null) {
     _sheetMusic = {};
     _cmtActive = false;
     cmtExist = _cmtActive;
     roadmapMode = null;
-    PULSE_FLAG = true;       
+    PULSE_FLAG = true;
+    if (pulseFlag === null) {
+        pulseFlag = PULSE_FLAG;
+    } 
     DEF_ROADMAP_VISITED = 1; 
     CLASSICAL = true;        
     if (sheetMusic.length > MAX_SHEET_LENGTH) {

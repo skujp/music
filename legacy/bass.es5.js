@@ -387,12 +387,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   ;
   function buildSequencer() {
     var sheetMusic = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : EMPTY;
-    var pulseFlag = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : PULSE_FLAG;
+    var pulseFlag = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     _sheetMusic = {};
     _cmtActive = false;
     cmtExist = _cmtActive;
     roadmapMode = null;
     PULSE_FLAG = true;
+    if (pulseFlag === null) {
+      pulseFlag = PULSE_FLAG;
+    }
     DEF_ROADMAP_VISITED = 1;
     CLASSICAL = true;
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
