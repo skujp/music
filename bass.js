@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "10.0.0";
+const VERSION = "10.0.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -202,16 +202,16 @@ not be surprised if you see a time signature such as 123/256 in the BASS system
 Time Measure (or Bar) is a small container of time that holds a specific number
 of beats. For example, the following bar contains 3 beats: | / / / |, this bar
 contains 0 beat: | | Please note that, this Bar refers to time measure, not to
-be mistaken with single Bar symbol | or double Bar symbol ||
+be mistaken with single Bar symbol | or double Bar symbol || (section III).
 
 6. Opening Section
 An opening section begins the sheet music. It may or may not have a leading
 tone. If it has a leading tone, the number of opening beats can not go over the
 nominator beats of time signature. For example, A A | D / D / | Amaj7 / Amaj7 /
 || is accepted with a leading tone A A (2 beats). Please note that, without a
-leading tone, an opening section usually starts with a | or |: or ||: or || 
-Please note that, in a music sheet which has a leading tone, the beginning of 
-the music sheet counts from the start of the leading tone. 
+leading tone, an opening section usually starts with a | or |: or ||: or ||
+Also, in the BASS system, if a music sheet has a leading tone, its beginning is
+counted from the onset of that leading tone.
 
 7. Repeat Section
 A repeat section (or loop) is a section which is played again and again. The
@@ -221,18 +221,23 @@ symbols. For example, |: :|: :| or ||: :||: :|| By default, repeat section will
 loop for 1 time (2x), but it is up to the user to modify it using repeat
 multipliers such as (3x), (4x), etc. For example, |: (4x) F / / C | B / / A :|
 means loop 4 times over the 2 bars of chords. In the BASS system, if there is no
-matching opening repeat symbols, it will go back to the beginning. For example,
-2/4 | C D | F G :| A B :| G G ||, each time seeing a repeat symbol :| it will go
-back to the beginning.
+matching opening repeat symbols, it will go back to the beginning by default.
+For example, 2/4 | C D | F G :| A B :| G G || will go back to the beginning
+three times in total, resulted in ( C D F G ) ( C D F G ) ( A B ) 
+( C D F G A B ) ( C D F G A B ) ( G G ).
 
 8. Branching Section
-A branching section (or volta bracket) is used to skip from one section to
+A branching section (or Volta Bracket) is used to skip from one section to
 another of a sheet music AFTER REPEAT. It is written as an open bracket followed
 by a number and a dot. For example, [1. [2. [3. [123. , etc. The next example is
 a section of a sheet music which will skip [1. and jump to [2. after repeat: 4/4
 |: A A A A | [1. B B B B :| [2. C C C C | D D D D | Please note that, the BASS
 system implements positional volta brackets, which include usages beyond common
-music notation. For example, 3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F
+music notation. For example, 2/4 |: A A | [1. B B | C C :| D D | [2. E E || will
+play A A B B C C, then go back to beginning and play A A, then jump to D D, and
+end with E E. Notice that it does not jump to [2. like standard common musical
+notation and this is expected in the BASS system, allowing more leeway for 
+musicians. Another example, 3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F
 F F :| [30. B B B || After the 1st repeat, it will skip [40. bar to the next bar
 [20. After the 2nd repeat, it will skip [40. bar and [20. bar to the next bar
 [30. Please note that, the branching section relies on repeat symbols :| or :||
@@ -273,11 +278,12 @@ An octave is the distance between two musical notes that share the same name
 musical scale. In the BASS system, octave ranges can be from 0 to 8 where 0 is
 the lowest bass, and 8 is the highest bass. By default, it uses octave 4 similar
 to the concept of middle C in a piano. User can change it manually by adding
-system setting Octave:<number> at the beginning of the sheet music (section IV).
+system setting 'Octave:<number>' at the beginning of the sheet music (section
+IV).
 
 13. Space
 Every musical symbol must be separated by a blank space. The recommended space
-is 1 blank symbol between two musical symbols. For example, one blank space
+is 1 blank character between two musical symbols. For example, one blank space
 between two opening notes in this sheet music 2/4 D D | F F |
 
 14. Pulse /
@@ -285,11 +291,11 @@ A pulse / means the user can either play the previous note or sustain it
 (legato). By default, the BASS system will play the previous note (staccato).
 For example, | B A / | will play B A A chords. Please note that, a pulse / is
 different than a slash / in a slash chord. For example, A/E means A major chord
-with a E at the bass. To sustain, add system setting Sustain:Yes at the beginning 
-of the sheet music (section IV).
+with a E at the bass. To sustain, add system setting Sustain:Yes at the
+beginning of the sheet music (section IV).
 
 15. Duplicate %
-A duplicate % means repeat playing the previous bar. For example, 
+A duplicate % means repeat playing the previous bar. For example,
 3/4 | A B C | % || will play A B C A B C
 
 16. Section Marker (#)
@@ -324,8 +330,8 @@ a sheet music. The commented opening symbol (Vi) is <- and the closing (De) is
 I.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will
 only play | G G | D D | F F || This Vi-De mode can be useful to test playing
 only specific parts of the sheet music. Please note that, in some cases playback
-does not echo any sound due to the commented sheet music containing only BM /
-chords. For example, | <- D D D D | -> / / / / ||
+does not echo any sound due to the commented sheet music containing only
+sustained / chords. For example, | <- D D D D | -> / / / / ||
 
 18. Roadmap Symbols
 In a sheet music, there are special symbols ('roadmap symbols') which designate
@@ -345,17 +351,16 @@ music direction upon encountering these symbols. For example, 2/4 | G G | C ($)
 C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F || will play G G C C E E C E F.
 Sometimes, musicians would prefer to apply those symbols from the second time
 after music repeat instead. In such cases, they must use the system setting
-'Roadmap:OnRepeat' (section IV). For example, Roadmap:OnRepeat 2/4 | G G 
-| C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :|| will play G G C C E E F F 
+'Roadmap:OnRepeat' (section IV). For example, Roadmap:OnRepeat 2/4 | G G
+| C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :|| will play G G C C E E F F
 the 1st time through, then play G G C C E E C E F like before. Please note that
-these special roadmap symbols should be used with CAUTION to avoid any confusion
-in the sheet music. Also, they can be applied for only ONE TIME during the whole
+these special roadmap symbols should be used carefully to avoid any confusion
+in the sheet music. Also, they can be applied for ONLY ONE TIME during the whole
 playback in the BASS system. Last, if these symbols are located right before any
 repeat symbols, they will be played after all the repeats. For example,
 | A A A A (FINE) ||: B B B B (D.C.AL.FINE) :|| will play A A A A B B B B, then
 repeat B B B B, then go back to the beginning with (D.C.AL.FINE), and finally
-play A A A A, ending there at (FINE). Again, use these symbols sparingly and with 
-caution.
+play A A A A, ending there at (FINE).
 
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
@@ -365,11 +370,11 @@ Time Signature:
 3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 6/16 32/64 8/128
 123/512 ...
 
-Bar:
-|
+Bar (incl. double):
+| ||
 
 Opening (incl. repeat):
-| || |: ||: 
+| || |: ||:
 
 Closing (incl. repeat):
 | || :| :||
@@ -434,8 +439,8 @@ Tempo:<number> for example, Tempo:100 to set BPM=100
 Octave:<number> for example, Octave:5 to set middle C to C5
 SaveAs:PDF to save as pdf file using default host system
 SaveAs:BASS to save as .bass file
-Sustain:Yes to disable playing previous BM chord /
-Sustain:No to enable playing previous BM chord /
+Sustain:Yes to stop playing previous chord when seeing / symbol 
+Sustain:No to repeat playing previous chord when seeing / symbol (default)
 Title:<name> for example, Title:My_awesome_melody, required for .bass
 Artist:<name> for example, Artist:The_BASS
 Musician:<name> for example, Musician:BeatBox
@@ -456,7 +461,7 @@ URL:<address> URL:https://youtube.com/yourmusicchannel, optional but recommended
 for .bass
 Misc:<anything> for example, Misc:anything_separated_by_underscore
 Roadmap:OnRepeat to activate roadmap symbols only after the music is repeated
-Classical:Yes to activate classical rule check (default setting)
+Classical:Yes to activate classical rule check (default)
 Classical:No to deactivate classical rule check
 
 Please note that, when setting Octave:<number> above, it is to set the BASS
@@ -473,7 +478,7 @@ on the chart, please save to .bass file and send it to this email:
 bassthemusic101 |at| gmail |dot| com. Please note that, certain settings are
 required in order to save to .bass such as Title: Contributor: or URL: (section
 IV). Last, any music (chords, rhythms, melody) is allowed, but lyrics and URLs
-will be checked for explicit content prior to posting. A masterpiece with
+will be reviewed for explicit content prior to posting. A masterpiece with
 clarity is always appreciated! :)
 
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -738,7 +743,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
     var currentSection = 0;        
     if (!tokens[index] || !openingTokens.has(tokens[index])) {
         error.msg = `After time signature should be a symbol starting with | but found ${tokens[index]}`;
-        error.msg = `Do you have a opening sections instead?`;
+        error.msg = `Assume a leading tone is in use...`;
         while (index - offset_beats <= beats) { 
             if (openingTokens.has(tokens[index])) { 
                 break;
@@ -1425,7 +1430,7 @@ async function _saveSheetMusicToBASS() {
   for (const field of BASSBOARD_DB_FIELD) {
     const lc_field = field.toLowerCase();
     if (!(lc_field in _sheetMusic)) {
-        const problem = `[SaveAs ERROR] To save to .bass, you must use control phrase ${field}: (URL: is optional)`;
+        const problem = `[SaveAs .bass ERROR] Setting ${field}: is required, URL: is optional but recommended`;
         return problem;
     }
   }
@@ -1448,7 +1453,9 @@ async function _saveSheetMusicToBASS() {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (isIOS) {
-      const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+      const utf8Bytes = new TextEncoder().encode(jsonString);
+      const binaryString = Array.from(utf8Bytes, (byte) => String.fromCharCode(byte)).join("");
+      const base64Data = btoa(binaryString);
       const dataUri = `data:application/octet-stream;base64,${base64Data}`;
       const a = document.createElement('a');
       a.href = dataUri;
@@ -1484,9 +1491,7 @@ async function _saveSheetMusicToPDF() {
     iframe.style.border = 'none';
     document.body.appendChild(iframe);
     const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open();
-    doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
-    doc.close();
+    doc.documentElement.innerHTML = '<head></head><body></body>';
     const style = doc.createElement('style');
     style.textContent = `
         body, pre {
@@ -1636,7 +1641,7 @@ async function playSequencer(sequencerObj) {
 }
 async function setSaveAs(option) {
     if (!SAVE_AS_TYPES.has(option)) {
-        const problem =`[SaveAs ERROR] Control phrase SaveAs: must be followed by one of the following terms: ${[...SAVE_AS_TYPES]}`;
+        const problem =`[SaveAs ERROR] Setting SaveAs: must be followed by one of the following terms: ${[...SAVE_AS_TYPES]}`;
         return problem;
     }
     if (typeof(global) !== "object" || global !== window) {
