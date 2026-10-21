@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "9.3.0";
+const VERSION = "10.0.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -40,7 +40,8 @@ attach(TheBass, {setFullAsyncDebug, getFullAsyncDebugMode, oops,
                  setSaveAs, setSustain, getSustain, 
                  getInstrument, setInstrument,
                  getDuration, getGuitarNote, getVersion, hasComment,
-                 getRoadmapStatus, getRoadmap, setRoadmap 
+                 getRoadmapStatus, getRoadmap, setRoadmap, 
+                 setClassical, getClassical 
                 });    
 const BPM = {                                                           
     _val: 90,                                                           
@@ -104,8 +105,7 @@ var END = false;
 var SMP_SEQUENCER = [[['F','A','C'],'C'],[['A','C','E'],'E']];          
 var DEF_REP_NUM = 1;                                                    
 var DEF_TIME_SIGNATURE = '4/4';                                         
-var DEF_BEAT_JUMP = 1;                                                  
-var CLASSICAL_CHECK = true;                                             
+var CLASSICAL = true;                                                   
 var MAX_VOLTA = 11;                                                     
 var MAX_TIMEOUT = 50;                                                   
 var MAX_REPEAT_MULTIPLIER = MAX_TIMEOUT*3;                              
@@ -118,7 +118,7 @@ var MAX_SECTION_REP = 51;
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var SAVE_AS_TYPES = new Set(["PDF","BASS"]);                            
 var BASSBOARD_DB_FIELD = new Set(["Contributor","Title"]);              
-var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap)(:)(.+)$/;
+var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
 var taskDropper = null;                                                 
 var validArgs = new WeakSet();                                          
 var _sheetMusic;                                                        
@@ -202,16 +202,16 @@ not be surprised if you see a time signature such as 123/256 in the BASS system
 Time Measure (or Bar) is a small container of time that holds a specific number
 of beats. For example, the following bar contains 3 beats: | / / / |, this bar
 contains 0 beat: | | Please note that, this Bar refers to time measure, not to
-be confused with single Bar symbol | or double bar symbol ||
+be mistaken with single Bar symbol | or double Bar symbol ||
 
 6. Opening Section
 An opening section begins the sheet music. It may or may not have a leading
 tone. If it has a leading tone, the number of opening beats can not go over the
 nominator beats of time signature. For example, A A | D / D / | Amaj7 / Amaj7 /
 || is accepted with a leading tone A A (2 beats). Please note that, without a
-leading tone, an opening section usually starts with a | or |: or ||: Besides, a
-double bar symbol || is currently not supported in opening section to avoid any
-confusion with the ending section.
+leading tone, an opening section usually starts with a | or |: or ||: or || 
+Please note that, in a music sheet which has a leading tone, the beginning of 
+the music sheet counts from the start of the leading tone. 
 
 7. Repeat Section
 A repeat section (or loop) is a section which is played again and again. The
@@ -251,12 +251,14 @@ it ends with a || symbol, the system will stop playing (no loop back).
 Otherwise, the system by default will keep looping back from the beginning even
 without the user's intervention. Please note that, if it ends with :| or :||
 symbol, it will loop back according to music sheet movement direction before the
-default system loop back kicks in. For the case of :|| symbol, it will stop
+default system loop back begins. For the case of :|| symbol, it will stop
 eventually.
 
 10. Classical Rule
 If there is a leading tone, this classical rule will be applied: The number of
 opening beats and ending beats must equal the nominator beats in time signature.
+To turn this rule off, add system setting 'Classical:No' at the beginning of the
+sheet music (section IV).
 
 11. Tempo
 Tempo is the speed or pace at which a piece of music is played. It is the number
@@ -270,7 +272,8 @@ An octave is the distance between two musical notes that share the same name
 (like two different C notes). It is exactly eight steps apart on a common
 musical scale. In the BASS system, octave ranges can be from 0 to 8 where 0 is
 the lowest bass, and 8 is the highest bass. By default, it uses octave 4 similar
-to the concept of middle C in a piano. User can change it manually (section IV).
+to the concept of middle C in a piano. User can change it manually by adding
+system setting Octave:<number> at the beginning of the sheet music (section IV).
 
 13. Space
 Every musical symbol must be separated by a blank space. The recommended space
@@ -282,12 +285,12 @@ A pulse / means the user can either play the previous note or sustain it
 (legato). By default, the BASS system will play the previous note (staccato).
 For example, | B A / | will play B A A chords. Please note that, a pulse / is
 different than a slash / in a slash chord. For example, A/E means A major chord
-with a E at the bass. To sustain, set control directive Sustain:Yes at the
-beginning of the sheet music (section IV).
+with a E at the bass. To sustain, add system setting Sustain:Yes at the beginning 
+of the sheet music (section IV).
 
 15. Duplicate %
-A duplicate % means repeat playing the previous bar. For example, | A B C | % ||
-will play A B C A B C
+A duplicate % means repeat playing the previous bar. For example, 
+3/4 | A B C | % || will play A B C A B C
 
 16. Section Marker (#)
 A group of bars can be marked with a section marker such as (A) (B) (C), etc.
@@ -314,8 +317,8 @@ will play the last bar 9 times in total because of the multiplier (3x), whereas
 Please note that, (Zx2) also works with branching section, preserving the
 branching behavior, whereas (Z*2) will ignore branching behavior.
 
-17. Commented Out Section
-Commented out section (or Vi-De) is a special marked section NOT to be played in
+17. Commented Section
+Commented section (or Vi-De) is a special marked section NOT to be played in
 a sheet music. The commented opening symbol (Vi) is <- and the closing (De) is
 -> They are usually set after the opening section of a sheet music (section
 I.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will
@@ -341,17 +344,18 @@ By default, in the BASS system during playback, it will immediately change the
 music direction upon encountering these symbols. For example, 2/4 | G G | C ($)
 C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F || will play G G C C E E C E F.
 Sometimes, musicians would prefer to apply those symbols from the second time
-after music repeat instead. In such cases, they must set the special control
-directive Roadmap:OnRepeat (section IV). For example, Roadmap:OnRepeat 2/4 | G G
+after music repeat instead. In such cases, they must use the system setting
+'Roadmap:OnRepeat' (section IV). For example, Roadmap:OnRepeat 2/4 | G G 
 | C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :|| will play G G C C E E F F 
 the 1st time through, then play G G C C E E C E F like before. Please note that
 these special roadmap symbols should be used with CAUTION to avoid any confusion
 in the sheet music. Also, they can be applied for only ONE TIME during the whole
-playback in the BASS system. Last, if these symbols are located right before the
-music ends, they will be played after repeats (if any). For example,
+playback in the BASS system. Last, if these symbols are located right before any
+repeat symbols, they will be played after all the repeats. For example,
 | A A A A (FINE) ||: B B B B (D.C.AL.FINE) :|| will play A A A A B B B B, then
 repeat B B B B, then go back to the beginning with (D.C.AL.FINE), and finally
-play A A A A, ending there at (FINE).
+play A A A A, ending there at (FINE). Again, use these symbols sparingly and with 
+caution.
 
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
@@ -365,7 +369,7 @@ Bar:
 |
 
 Opening (incl. repeat):
-| |: ||:
+| || |: ||: 
 
 Closing (incl. repeat):
 | || :| :||
@@ -393,10 +397,6 @@ Duplicate:
 Chord:
 m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug
 
-Annotation:
-(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) (allegro)
-(moderato) (adagio) (lyrics_separated_by_underscores) ...
-
 Section Marker:
 (#) (#x<number>) (#*<number>)
 
@@ -406,6 +406,10 @@ Comment (Vi-De):
 Roadmap:
 (FINE) ($) (+) (TO.CODA) (D.C.) (D.S.) (D.C.AL.CODA) (D.S.AL.CODA) (D.C.AL.FINE)
 (D.S.AL.FINE)
+
+Annotation:
+(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) (allegro)
+(moderato) (adagio) (lyrics_separated_by_underscores) ...
 
 ||||||
 Remark:
@@ -435,7 +439,7 @@ Sustain:No to enable playing previous BM chord /
 Title:<name> for example, Title:My_awesome_melody, required for .bass
 Artist:<name> for example, Artist:The_BASS
 Musician:<name> for example, Musician:BeatBox
-Composer:<name> for example, Composer:RHYTHME
+Composer:<name> for example, Composer:RHYTHM
 Arranger:<name> for example, Arranger:ChoRder
 Singer:<name> for example, Singer:Unknown
 Writer:<name> for example, Writer:Folklore
@@ -452,6 +456,8 @@ URL:<address> URL:https://youtube.com/yourmusicchannel, optional but recommended
 for .bass
 Misc:<anything> for example, Misc:anything_separated_by_underscore
 Roadmap:OnRepeat to activate roadmap symbols only after the music is repeated
+Classical:Yes to activate classical rule check (default setting)
+Classical:No to deactivate classical rule check
 
 Please note that, when setting Octave:<number> above, it is to set the BASS
 default system octave. It is not the same as the default octave used in other
@@ -505,8 +511,11 @@ function getErrorMsg() {
     return error.msg;
 }
 function getChordNotes(chord=FAKE) {
-    const chordRegex = /^([A-G])(#|b)?(m|maj|min|dim|aug|sus|maug)?(add|maj)?(\d*)?((b)(\d+))?(\/([A-G])(#|b)?)?\s*$/;
     chord = chord.trim();
+    if (chord === BM) {
+        return BM;
+    }
+    const chordRegex = /^([A-G])(#|b)?(m|maj|min|dim|aug|sus|maug)?(add|maj)?(\d*)?((b)(\d+))?(\/([A-G])(#|b)?)?\s*$/;
     const match = chord.match(chordRegex);
     if (!match) {
         error.msg = `Invalid chord: ${chord}`;
@@ -610,17 +619,20 @@ function getChordNotes(chord=FAKE) {
     } 
     return [noteNames, null]; 
 };
-function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepeat = DEF_ROADMAP_VISITED) {
+function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG) {
     _sheetMusic = {};
     _cmtActive = false;
     cmtExist = _cmtActive;
     roadmapMode = null;
+    PULSE_FLAG = true;       
+    DEF_ROADMAP_VISITED = 1; 
+    CLASSICAL = true;        
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
         error.msg = `[SHEET MUSIC ERROR] sheet music length exceeds limit`;
         return;
     }
     var timeSignature = DEF_TIME_SIGNATURE; 
-    const openingTokens = new Set([BAR, REP_START, DBL_REP_START]);
+    const openingTokens = new Set([BAR, REP_START, DBL_REP_START, DBL_BAR]);
     const closingTokens = new Set([DBL_BAR, DBL_REP_END]);
     const repeatTokens = new Set([REP_START, REP_END, DBL_REP_START, DBL_REP_END, BTB_REP, DBL_BTB_REP]);
     const seperateBarTokens = new Set([BAR]);
@@ -632,15 +644,22 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
     const tokens = sheetMusic.trim().split(SPACE);
     const length = tokens.length;
     if (length > 0 && !tokens[length-1].endsWith(BAR)) {
-        error.msg = `[SHEET MUSIC ERROR] Last ending token must be | or :| or || or :||. Currently it is: ${tokens[length-1]}`;
+        error.msg = `[SHEET MUSIC ENDING ERROR] Ending symbol must be | or :| or || or :||`;
         return;
     }
     var index = 0;
     let ctrlVars = [];
     let match;
+    let dupFuncs = new Set();
     let offset_beats = 0; 
     while (index < length && (match = tokens[index].match(CTRL_FUNCS))) {
         let func = match[1];
+        if (!dupFuncs.has(func)) {
+            dupFuncs.add(func);
+        } else {
+            error.msg = `[SYSTEM SETTING ERROR] Duplicated setting: ${func}`;
+            return;
+        }
         let arg = match[3];
         let setFunc = 'set' + func;
         if (typeof this[setFunc] !== 'function') {
@@ -668,7 +687,11 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
             if (status !== undefined) {    
                 return;
             }
-            roadmapRepeat = DEF_ROADMAP_VISITED; 
+        } else if (setFunc == 'setClassical') {
+            let status = this[setFunc](arg);  
+            if (status !== undefined) {    
+                return;
+            }
         } else {
             ctrlVars.push([setFunc,arg]);     
         }
@@ -685,11 +708,15 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
             index++;
             offset_beats += 1;
         } else {
-            error.msg = `[TIME SIGNATURE WARNING] Time Signature token invalid at position ${index + 1}: ${tokens[index]}`;
-            error.msg = `Using default time signature instead: ${timeSignature}`;
+            error.msg = `[TIME SIGNATURE WARNING] Invalid time signature at position ${index + 1}: ${tokens[index]}`;
+            error.msg = `Switch to default time signature: ${timeSignature}`;
         }
     } else {
-        error.msg = `[SHEET MUSIC ERROR] Empty Sheet Music Error`;
+        error.msg = `[SHEET MUSIC ERROR] A sheet music can not be empty`;
+        return;
+    }
+    if (beats == 0) {
+        error.msg = `[TIME SIGNATURE ERROR] Time signature nominator must be more than 0`;
         return;
     }
     const reshake = BPM.val;
@@ -710,8 +737,8 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
     var markerIndex = {};          
     var currentSection = 0;        
     if (!tokens[index] || !openingTokens.has(tokens[index])) {
-        error.msg = `Expected a bar line or repeat start token after time signature, but found: ${tokens[index]}`;
-        error.msg = `Assuming opening sections exists`;
+        error.msg = `After time signature should be a symbol starting with | but found ${tokens[index]}`;
+        error.msg = `Do you have a opening sections instead?`;
         while (index - offset_beats <= beats) { 
             if (openingTokens.has(tokens[index])) { 
                 break;
@@ -720,13 +747,17 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
             if (chord) {
                 sequencer.push(chord); 
                 openingClassicalCount++ ; 
+                if (openingClassicalCount > beats) {
+                    error.msg = `[OPENING ERROR] opening beats (${openingClassicalCount}) > time signature beats (${beats}) is not accepted`;
+                    return;
+                }
             } else {
                 return;
             }
             index++;   
         }
     }
-    if (tokens[index] == BAR) {
+    if (tokens[index] == BAR || tokens[index] == DBL_BAR) {
         repeatStackMap[sequencer.length] = repeatStack.length;
         repeatStack.push([tokens[index], 0, DEF_REP_NUM]);
     } else if (tokens[index] == DBL_REP_START || tokens[index] == REP_START) {
@@ -738,7 +769,6 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
     }
     index++;
     var beatCount = 0; 
-    var jump = DEF_BEAT_JUMP;
     var maxsequencerlength = MAX_SHEET_LENGTH * MAX_SECTION_REP; 
     for (let i = index; i < length; i++) {
         if (sequencer.length > maxsequencerlength) {
@@ -767,7 +797,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
                     return;
                 }
                 roadmap[rs] = sequencer.length;
-                roadmapVisited[rs] = roadmapRepeat; 
+                roadmapVisited[rs] = DEF_ROADMAP_VISITED; 
                 if (sequencer.length in roadmap) {
                     error.msg = `[ROADMAP EXIST ERROR 1] too many existing roadmap symbols at position ${i}`;
                     return;
@@ -845,42 +875,52 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
                 } 
             }
         }
-        beatCount = beatCount + jump;
+        beatCount = beatCount + 1;
+        if (i == length - 1) {
+            if (openingClassicalCount && (beatCount + openingClassicalCount - 1 !== beats)) {
+                if (CLASSICAL) {
+                    error.msg = `[CLASSICAL RULE ERROR 1] Opening beats (${openingClassicalCount}) + ending beats (${beatCount - 1}) not equal to time signature beats (${beats})`;
+                    return;
+                }
+            }
+            if (openingClassicalCount === 0 && (beatCount !== beats + 1)) {
+                error.msg = `[ENDING BAR BEAT ERROR 1] Ending bar beats (${beatCount-1}) not equal to time signature beats (${beats})`;
+                return;
+            }
+            if (openingClassicalCount > 0 && beatCount == 1) {
+                if (!CLASSICAL) {
+                    error.msg = `[ENDING BAR BEAT ERROR 2] Ending bar beats (${beatCount-1}) is not accepted in this time signature`;
+                    return;
+                }
+            }
+            if (openingClassicalCount === beats && beatCount === 1) {
+                error.msg = `[ENDING BAR BEAT ERROR 3] Ending bar beats (${beatCount-1}) is not accepted in this time signature`;
+                return;
+            }
+        } 
         if (beatCount > beats) {
             if (!seperateBarTokens.has(tokens[i]) && 
                 !closingTokens.has(tokens[i]) && 
                 !repeatTokens.has(tokens[i])) {
-                    error.msg = `[Bar Beat Count Error 1] Invalid token at position ${i + 1}: ${tokens[i]}`;
+                    error.msg = `[BAR BEAT COUNT ERROR 1] Invalid token at position ${i + 1}: ${tokens[i]}`;
                     return;
             }
             beatCount = 0;
-        } else { 
-            if (i == length - 1) { 
-                if (tokens[i] == DBL_BAR || tokens[i] == DBL_REP_END) { 
-                    let totalBeats = openingClassicalCount + beatCount - 1;
-                    if (openingClassicalCount > 0 && CLASSICAL_CHECK && totalBeats !== beats) { 
-                        error.msg = `[CLASSICAL BEAT ERROR 1] Opening and Closing Bar Beat Count must add up to number of beats in time signature, currenly: ${totalBeats}. Required: ${beats}`;
-                        return;
-                    }
-                } else { 
-                    if (openingClassicalCount > 0) { 
-                        error.msg = `[CLASSICAL BEAT ERROR 2] There is no ending music but there is opening section`;
-                        return;
-                    } else if (seperateBarTokens.has(tokens[i]) || repeatTokens.has(tokens[i])) {
-                        error.msg = `[Bar Beat Count Error 2] Invalid token at position ${i + 1}: ${tokens[i]}`;
-                        return;
-                    } else {
-                        error.msg = `<<< Bypass Classical Rule Check >>> for token at position ${i + 1}: ${tokens[i]}`;
-                    }
-                }
-            } else if (seperateBarTokens.has(tokens[i]) || 
-                closingTokens.has(tokens[i]) || 
-                repeatTokens.has(tokens[i])) {
-                    error.msg = `[Bar Beat Count Error 3] Invalid token at position ${i + 1}: ${tokens[i]}`;
-                    return;
-            }
         }
         if (validTokens.has(tokens[i])) {
+            if ((i < length - 1) && 
+                (
+                 (beatCount == 1 && tokens[i] !== BM && tokens[i] !== BAR_REPEAT) ||
+                 (beatCount > 1 && tokens[i] !== BM)
+                )
+               ) {
+                    error.msg = `[BAR BEAT COUNT ERROR 2] Invalid token at position ${i + 1}: ${tokens[i]}`;
+                    return;
+            }
+            if (i == length - 1 && openingClassicalCount && sequencer.length == beats && beatCount - 1 < beats) {
+                error.msg = `[BAR BEAT COUNT ERROR 3] Invalid token at position ${i + 1}: ${tokens[i]}`;
+                return;
+            }
             if (pulseBarTokens.has(tokens[i])) {    
                 if (pulseFlag) {
                     let repeatChord = sequencer[sequencer.length - 1];
@@ -1056,7 +1096,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
         } else { 
             const match_rep_num = tokens[i].match(REP_NUM);
             if (match_rep_num) {
-                beatCount = beatCount - jump;
+                beatCount = beatCount - 1;
                 let p = repeatStack.pop();
                 if ((p === undefined) || 
                     (length >= 2 && tokens[i-1] !== REP_START && tokens[i-1] !== DBL_REP_START && p.length !== 3) ||
@@ -1075,7 +1115,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
             }
             const match_skip_num = tokens[i].match(SKIP_NUM);
             if (match_skip_num) {
-                beatCount = beatCount - jump;
+                beatCount = beatCount - 1;
                 voltaMap[sequencer.length] = voltaArr.length;
                 voltaArr.push([false, 0, tokens.length]);   
                 if (voltaArr.length > 1) {
@@ -1089,7 +1129,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
             }
             const match_aux = tokens[i].match(AUX);
             if (match_aux) {
-                beatCount = beatCount - jump;
+                beatCount = beatCount - 1;
                 error.msg = `Found an auxiliary token: ${tokens[i]}`;
                 if (match_aux[1].match(SEC_MAR)) {
                     if (match_aux[1] in markerIndex) {
@@ -1197,7 +1237,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
                         return;
                     }
                     roadmap[match_aux[1]] = sequencer.length;
-                    roadmapVisited[match_aux[1]] = roadmapRepeat; 
+                    roadmapVisited[match_aux[1]] = DEF_ROADMAP_VISITED; 
                     if (sequencer.length in roadmap) {
                         error.msg = `[ROADMAP EXIST ERROR 2] too many existing roadmap symbols at position ${i}`;
                         return;
@@ -1262,17 +1302,15 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
             return;
         }        
     } 
+    if (sequencer.length < beats) {
+        error.msg = `[TIME SIGNATURE ERROR] Nominator beats (${beats}) unreached`;
+        return;
+    }
     if (length > 0 ) {
         let te = tokens[length - 1];
         if (te.slice(-2) === DBL_BAR) {
             end = true;        
         }    
-    }
-    error.msg = `Opening classical count (if any): ${openingClassicalCount}`;
-    error.msg = `Current last beat count: ${beatCount}`;
-    if (CLASSICAL_CHECK && !openingClassicalCount && beatCount != 0) {
-        error.msg = `[CLASSICAL BEAT ERROR 3] There is no opening beats or ending number of beats in the last bar is not correct`;
-        return;
     }
     _sheetMusic.content = sheetMusic;
     for (let [func, arg] of ctrlVars) {
@@ -1297,8 +1335,6 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = PULSE_FLAG, roadmapRepea
     }
     const result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank];
     validArgs.add(result); 
-    PULSE_FLAG = true;       
-    DEF_ROADMAP_VISITED = 1; 
     return result; 
 }
 function _freq(note, octave = DEF_OCTAVE) {
@@ -1704,7 +1740,7 @@ function setSustain(d) {
     } else if (d == "No") {
         PULSE_FLAG = true; 
     } else {
-        const problem = `[SUSTAIN ERROR] To sustain BM / character, must use control phrase Sustain:Yes or Sustain:No`;
+        const problem = `[SUSTAIN SETTING ERROR] Sustain can only be set with :Yes or :No`;
         error.msg = problem;
         return problem;
     }
@@ -1713,10 +1749,24 @@ function setRoadmap(d) {
     if (d === "OnRepeat") {
         DEF_ROADMAP_VISITED = 0;
     } else {
-        const problem = `[ROADMAP ERROR] To make roadmap symbols start working from second repeat, use phrase Roadmap:OnRepeat`;
+        const problem = `[ROADMAP SETTING ERROR] Roadmap can only be set with :OnRepeat`;
         error.msg = problem;
         return problem;
     }
+}
+function setClassical(d) {
+    if (d == "No") {
+        CLASSICAL = false;
+    } else if (d == "Yes") {
+        CLASSICAL = true;
+    } else {
+        const problem = `[CLASSICAL SETTING ERROR] Classical can only be set with :Yes or :No`;
+        error.msg = problem;
+        return problem;
+    }
+}
+function getClassical() {
+    return CLASSICAL;
 }
 function getSustain() {
     return PULSE_FLAG;
