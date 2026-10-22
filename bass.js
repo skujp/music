@@ -218,12 +218,12 @@ A repeat section (or loop) is a section which is played again and again. The
 loop usually looks like this |: :| or ||: :|| or a loop back from beginning such
 as | :| and | :|| In some cases, it can use back to back loop :|: or :||:
 symbols. For example, |: :|: :| or ||: :||: :|| By default, repeat section will
-loop for 1 time (2x), but it is up to the user to modify it using repeat
+loop for 1 time (2x), but it is up to the musician to modify it using repeat
 multipliers such as (3x), (4x), etc. For example, |: (4x) F / / C | B / / A :|
 means loop 4 times over the 2 bars of chords. In the BASS system, if there is no
 matching opening repeat symbols, it will go back to the beginning by default.
 For example, 2/4 | C D | F G :| A B :| G G || will go back to the beginning
-three times in total, resulted in ( C D F G ) ( C D F G ) ( A B ) 
+three times in total, resulted in ( C D F G ) ( C D F G ) ( A B )
 ( C D F G A B ) ( C D F G A B ) ( G G ).
 
 8. Branching Section
@@ -233,63 +233,66 @@ by a number and a dot. For example, [1. [2. [3. [123. , etc. The next example is
 a section of a sheet music which will skip [1. and jump to [2. after repeat: 4/4
 |: A A A A | [1. B B B B :| [2. C C C C | D D D D | Please note that, the BASS
 system implements positional volta brackets, which include usages beyond common
-music notation. For example, 
-Classical:No 2/4 |: A A | [1. B B | C C :| D D | [2. E E || will play 
-A A B B C C, then go back to beginning and play A A, then jump to D D, and end 
+music notation. For example,
+Classical:No 2/4 |: A A | [1. B B | C C :| D D | [2. E E || will play
+A A B B C C, then go back to beginning and play A A, then jump to D D, and end
 with E E. Notice that it does not jump to [2. like standard common musical
-notation and this is expected in the BASS system, allowing more leeway for 
-musicians. This usage only works when 'Classical:No' setting is set at the 
-beginning of the sheet music (section IV). Another example, 
-3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B || 
-After the 1st repeat, it will skip [40. bar to the next bar [20. After the 2nd 
-repeat, it will skip [40. bar and [20. bar to the next bar [30. Please note that, 
-the branching section relies on repeat symbols :| or :|| to move back to the 
-closest matching |: or ||: If not finding a match, it will go back to the 
-beginning of the sheet music. Also, colliding numbers for branching section are 
-allowed but NOT RECOMMENDED for the clarity of a music sheet. For example, 
-instead of writing 3/4 | C C C | [1. D D D :| [1. E E E || it is recommended 
-to replace the second [1. as [2. or so. Last, branching section can coexist with 
-multipliers from repeat sections. However, it will override the default behavior 
-of multipliers in repeat sections. For example, 
+notation and this is expected in the BASS system, allowing more leeway for
+musicians. This usage only works when 'Classical:No' setting is set at the
+beginning of the sheet music (section IV). Another example,
+3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B ||
+After the 1st repeat, it will skip [40. bar to the next bar [20. After the 2nd
+repeat, it will skip [40. bar and [20. bar to the next bar [30. Please note
+that,
+the branching section relies on repeat symbols :| or :|| to move back to the
+closest matching |: or ||: If not finding a match, it will go back to the
+beginning of the sheet music. Also, colliding numbers for branching section are
+allowed but NOT RECOMMENDED for the clarity of a music sheet. For example,
+instead of writing 3/4 | C C C | [1. D D D :| [1. E E E || it is recommended
+to replace the second [1. as [2. or so. Last, branching section can coexist with
+multipliers from repeat sections. However, it will override the default behavior
+of multipliers in repeat sections. For example,
 2/4 | (123x) A A | [1. B B :| C C || will ignore (123x) on the second repeat.
-Last, it is generally recommended to use consecutive numbers in branching section 
-for the clarity of the sheet music. For example, instead of having this 
+Last, it is generally recommended to use consecutive numbers in branching
+section for the clarity of the sheet music. For example, instead of having this
 2/4 | D E | [1. F G :| [300. A A ||, it is more common to do this:
-2/4 | D E | [1. F G :| [2.   A A ||
+2/4 | D E | [1. F G :| [2. A A ||
 
 9. Ending Section
 A sheet music must end with either a single bar | or a double bar || symbol. If
 it ends with a || symbol, the system will stop playing (no loop back).
 Otherwise, the system by default will keep looping back from the beginning even
-without the user's intervention. Please note that, if it ends with :| or :||
+without the musician's intervention. Please note that, if it ends with :| or :||
 symbol, it will loop back according to music sheet movement direction before the
 default system loop back begins. For the case of :|| symbol, it will stop
 eventually.
 
 10. Classical Rule
-By default, the BASS system implements several classical rule checks to make sure
-the sheet music follow common classical standard. For example: if there is a 
-leading tone in the sheet music (section 6), this rule will be applied: 'The 
-number of opening beats and ending beats must equal the nominator beats in time 
-signature'. Another example is: there should not be a gap in volta brackets 
-(section II.8). However, musicians can bypass this classical rule check by adding 
-system setting 'Classical:No' at the beginning of the sheet music (section IV).
+By default, the BASS system implements several classical rule checks to make
+sure
+the sheet music follow common classical standard. For example: if there is a
+leading tone in the sheet music (section 6), this rule will be applied: 'The
+number of opening beats and ending beats must equal the nominator beats in time
+signature'. Another example is: there should not be a gap in volta brackets
+(section II.8). However, musicians can bypass this classical rule check by
+adding system setting 'Classical:No' at the beginning of the sheet music 
+(section IV).
 
 11. Tempo
 Tempo is the speed or pace at which a piece of music is played. It is the number
 of beats per minutes (bpm) set up before playing the sheet music. In the BASS
 system, by default it is set to 90, assuming quarter note is in time signature
-(4/4). The user can change tempo manually. Please note that, the actual final
-sheet music speed will be adjusted based on time signature (section IV).
+(4/4). The musician can change tempo manually. Please note that, the actual
+final sheet music speed will be adjusted based on time signature (section IV).
 
 12. Octave
 An octave is the distance between two musical notes that share the same name
 (like two different C notes). It is exactly eight steps apart on a common
 musical scale. In the BASS system, octave ranges can be from 0 to 8 where 0 is
 the lowest bass, and 8 is the highest bass. By default, it uses octave 4 similar
-to the concept of middle C in a piano. User can change it manually by adding
-system setting 'Octave:<number>' at the beginning of the sheet music (section
-IV).
+to the concept of middle C in a piano. Musicians can change it manually by
+adding system setting 'Octave:<number>' at the beginning of the sheet music 
+(section IV).
 
 13. Space
 Every musical symbol must be separated by a blank space. The recommended space
@@ -298,7 +301,7 @@ between two opening notes in this sheet music 2/4 D D | F F |
 
 14. Rhythm Slash /
 In the BASS system, a rhythm slash / (or BM) represents one beat in a bar.
-By default, it plays by repeating a previous chord. For example, 3/4 | A B / | 
+By default, it plays by repeating a previous chord. For example, 3/4 | A B / |
 will play A B B. To turn off the default play, musicians can set Sustain:Yes
 at the beginning of the sheet music (section IV). For example,
 Sustain:Yes 3/4 | A B / | will play A B only and silent on the last chord /.
@@ -450,7 +453,7 @@ Tempo:<number> for example, Tempo:100 to set BPM=100
 Octave:<number> for example, Octave:5 to set middle C to C5
 SaveAs:PDF to save as pdf file using default host system
 SaveAs:BASS to save as .bass file
-Sustain:Yes to stop playing previous chord when seeing / symbol 
+Sustain:Yes to stop playing previous chord when seeing / symbol
 Sustain:No to repeat playing previous chord when seeing / symbol (default)
 Title:<name> for example, Title:My_awesome_melody, required for .bass
 Artist:<name> for example, Artist:The_BASS
@@ -484,8 +487,8 @@ instruments for treble clef parts.
 V. BASSBOARD CHART
 
 This section is also separate from the core musical notation system. It serves
-as a demo collection of sheet music where users can contribute to. To be listed
-on the chart, please save to .bass file and send it to this email:
+as a demo collection of sheet music where musicians can contribute to. To be
+listed on the chart, please save to .bass file and send it to this email:
 bassthemusic101 |at| gmail |dot| com. Please note that, certain settings are
 required in order to save to .bass such as Title: Contributor: or URL: (section
 IV). Last, any music (chords, rhythms, melody) is allowed, but lyrics and URLs
