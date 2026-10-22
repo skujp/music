@@ -66,7 +66,7 @@ bass.stopSequencer();
 To see the full manual...
 
 ```javascript
-console.log(bass.help());
+console.log('',bass.help());
 ```
 
 Advanced 
