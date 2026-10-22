@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "10.1.1";
+const VERSION = "10.2.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -576,15 +576,12 @@ function getChordNotes(chord=FAKE) {
     } 
     return [noteNames, null]; 
 };
-function buildSequencer(sheetMusic = EMPTY, pulseFlag = null) {
+function buildSequencer(sheetMusic = EMPTY) {
     _sheetMusic = {};
     _cmtActive = false;
     cmtExist = _cmtActive;
     roadmapMode = null;
     PULSE_FLAG = true;       
-    if (pulseFlag === null) {
-        pulseFlag = PULSE_FLAG;
-    } 
     DEF_ROADMAP_VISITED = 1; 
     CLASSICAL = true;        
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
@@ -641,7 +638,6 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = null) {
             if (status !== undefined) {    
                 return;
             }
-            pulseFlag = PULSE_FLAG;        
         } else if (setFunc == 'setRoadmap') {    
             let status = this[setFunc](arg);  
             if (status !== undefined) {    
@@ -882,7 +878,7 @@ function buildSequencer(sheetMusic = EMPTY, pulseFlag = null) {
                 return;
             }
             if (pulseBarTokens.has(tokens[i])) {    
-                if (pulseFlag) {
+                if (PULSE_FLAG) {
                     let repeatChord = sequencer[sequencer.length - 1];
                     if (repeatChord) {
                         sequencer.push(repeatChord); 
