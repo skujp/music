@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "10.1.1";
+  var VERSION = "10.2.1";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -387,15 +387,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   ;
   function buildSequencer() {
     var sheetMusic = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : EMPTY;
-    var pulseFlag = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     _sheetMusic = {};
     _cmtActive = false;
     cmtExist = _cmtActive;
     roadmapMode = null;
     PULSE_FLAG = true;
-    if (pulseFlag === null) {
-      pulseFlag = PULSE_FLAG;
-    }
     DEF_ROADMAP_VISITED = 1;
     CLASSICAL = true;
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
@@ -446,20 +442,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         offset_beats += 1;
         continue;
       }
-      if (setFunc == 'setSustain') {
+      if (setFunc == 'setSustain' || setFunc == 'setRoadmap' || setFunc == 'setClassical') {
         var status = this[setFunc](arg);
         if (status !== undefined) {
-          return;
-        }
-        pulseFlag = PULSE_FLAG;
-      } else if (setFunc == 'setRoadmap') {
-        var _status = this[setFunc](arg);
-        if (_status !== undefined) {
-          return;
-        }
-      } else if (setFunc == 'setClassical') {
-        var _status2 = this[setFunc](arg);
-        if (_status2 !== undefined) {
           return;
         }
       } else {
@@ -684,7 +669,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           return;
         }
         if (pulseBarTokens.has(tokens[i])) {
-          if (pulseFlag) {
+          if (PULSE_FLAG) {
             var repeatChord = sequencer[sequencer.length - 1];
             if (repeatChord) {
               sequencer.push(repeatChord);
@@ -1228,7 +1213,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function _saveSheetMusicToBASS2() {
     _saveSheetMusicToBASS2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var problem, _iterator3, _step3, field, lc_field, _problem4, jsonString, filename, options, handle, writable, isIOS, utf8Bytes, binaryString, base64Data, dataUri, a, blob, url, _a, _t;
+      var problem, _iterator3, _step3, field, lc_field, _problem4, jsonString, filename, options, handle, writable, isIOS, utf8Bytes, binaryString, base64Data, dataUri, a, blob, url, _a, _t, _t2;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -1273,7 +1258,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             jsonString = JSON.stringify(_sheetMusic, null, 2);
             filename = "".concat(_sheetMusic.title, "_by_").concat(_sheetMusic.contributor, ".bass");
             if (!(global === window && 'showSaveFilePicker' in global)) {
-              _context.n = 13;
+              _context.n = 15;
               break;
             }
             options = {
@@ -1285,27 +1270,39 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                 }
               }]
             };
-            _context.n = 9;
-            return global.showSaveFilePicker(options);
-          case 9:
-            handle = _context.v;
+            _context.p = 9;
             _context.n = 10;
-            return handle.createWritable();
+            return global.showSaveFilePicker(options).catch(function (err) {
+              throw new Error("[1] " + err.message);
+            });
           case 10:
-            writable = _context.v;
+            handle = _context.v;
             _context.n = 11;
-            return writable.write(jsonString);
+            return handle.createWritable().catch(function (err) {
+              throw new Error("[2] " + err.message);
+            });
           case 11:
+            writable = _context.v;
             _context.n = 12;
-            return writable.close();
+            return writable.write(jsonString).catch(function (err) {
+              throw new Error("[3] " + err.message);
+            });
           case 12:
-            return _context.a(2);
+            _context.n = 13;
+            return writable.close();
           case 13:
+            return _context.a(2);
+          case 14:
+            _context.p = 14;
+            _t2 = _context.v;
+            return _context.a(2, _t2);
+          case 15:
             isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
             if (!isIOS) {
-              _context.n = 14;
+              _context.n = 16;
               break;
             }
+            console.log('in ios check');
             utf8Bytes = new TextEncoder().encode(jsonString);
             binaryString = Array.from(utf8Bytes, function (byte) {
               return String.fromCharCode(byte);
@@ -1320,7 +1317,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             a.click();
             document.body.removeChild(a);
             return _context.a(2);
-          case 14:
+          case 16:
             blob = new Blob([jsonString], {
               type: 'application/octet-stream'
             });
@@ -1333,10 +1330,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             document.body.removeChild(_a);
             URL.revokeObjectURL(url);
             return _context.a(2);
-          case 15:
+          case 17:
             return _context.a(2);
         }
-      }, _callee, null, [[2, 6, 7, 8]]);
+      }, _callee, null, [[9, 14], [2, 6, 7, 8]]);
     }));
     return _saveSheetMusicToBASS2.apply(this, arguments);
   }
