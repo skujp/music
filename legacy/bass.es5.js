@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "10.2.1";
+  var VERSION = "10.2.3";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -1087,10 +1087,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         var _result = this[_func](_arg);
         _result.then(function (data) {
           if (data) {
-            oops("[Async] [Error] ".concat(data), 'warning');
+            oops("[Async Error 1] ".concat(data), 'warning');
           }
         }).catch(function (exp) {
-          oops("[Async] [Exception] ".concat(exp), 'warning');
+          oops("[Async Error 2] ".concat(exp), 'warning');
         });
       } else {
         error.msg = "func ".concat(_func, " is a synchronous function. Will be invoked like regular function");
@@ -1272,21 +1272,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             };
             _context.p = 9;
             _context.n = 10;
-            return global.showSaveFilePicker(options).catch(function (err) {
-              throw new Error("[1] " + err.message);
-            });
+            return global.showSaveFilePicker(options);
           case 10:
             handle = _context.v;
             _context.n = 11;
-            return handle.createWritable().catch(function (err) {
-              throw new Error("[2] " + err.message);
-            });
+            return handle.createWritable();
           case 11:
             writable = _context.v;
             _context.n = 12;
-            return writable.write(jsonString).catch(function (err) {
-              throw new Error("[3] " + err.message);
-            });
+            return writable.write(jsonString);
           case 12:
             _context.n = 13;
             return writable.close();
@@ -1295,14 +1289,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           case 14:
             _context.p = 14;
             _t2 = _context.v;
-            return _context.a(2, _t2);
+            throw new Error('[_saveSheetMusicToBASS Error] : ' + _t2);
           case 15:
             isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
             if (!isIOS) {
               _context.n = 16;
               break;
             }
-            console.log('in ios check');
             utf8Bytes = new TextEncoder().encode(jsonString);
             binaryString = Array.from(utf8Bytes, function (byte) {
               return String.fromCharCode(byte);
@@ -1587,9 +1580,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function _setSaveAs() {
     _setSaveAs = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(option) {
-      var _problem6, _problem7, result, _result3, problem;
+      var _problem6, _problem7, result, _result3, problem, _t3;
       return _regenerator().w(function (_context4) {
-        while (1) switch (_context4.n) {
+        while (1) switch (_context4.p = _context4.n) {
           case 0:
             if (SAVE_AS_TYPES.has(option)) {
               _context4.n = 1;
@@ -1605,6 +1598,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             _problem7 = "[SaveAs ERROR] Print function is currently supported in browser environment only";
             return _context4.a(2, _problem7);
           case 2:
+            _context4.p = 2;
             if (!(option == "PDF")) {
               _context4.n = 4;
               break;
@@ -1629,10 +1623,17 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             _result3 = _context4.v;
             return _context4.a(2, _result3);
           case 6:
+            _context4.n = 8;
+            break;
+          case 7:
+            _context4.p = 7;
+            _t3 = _context4.v;
+            throw new Error('[setSaveAs Error] ' + _t3);
+          case 8:
             problem = "This SaveAs format is not supported : ".concat(option);
             return _context4.a(2, problem);
         }
-      }, _callee4);
+      }, _callee4, null, [[2, 7]]);
     }));
     return _setSaveAs.apply(this, arguments);
   }

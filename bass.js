@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "10.2.1";
+const VERSION = "10.2.3";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -1344,10 +1344,10 @@ function buildSequencer(sheetMusic = EMPTY) {
             let result = this[func](arg);  
             result.then(function(data) {
                 if (data) {  
-                    oops(`[Async] [Error] ${data}`,'warning');
+                    oops(`[Async Error 1] ${data}`,'warning');
                 } 
             }).catch(function(exp) {
-                oops(`[Async] [Exception] ${exp}`, 'warning');
+                oops(`[Async Error 2] ${exp}`, 'warning');
             });
         } else {
             error.msg = `func ${func} is a synchronous function. Will be invoked like regular function`;
@@ -1443,66 +1443,65 @@ function _playSequencerChord(sequencerChord = BM, octave = DEF_OCTAVE, duration 
     }
 }
 async function _saveSheetMusicToBASS() {
-    if (Object.keys(_sheetMusic).length === 0 && _sheetMusic.constructor === Object) { 
-        const problem = "[SaveAs ERROR] No sheetMusic found when saving sheet music to .bass";
+  if (Object.keys(_sheetMusic).length === 0 && _sheetMusic.constructor === Object) { 
+    const problem = "[SaveAs ERROR] No sheetMusic found when saving sheet music to .bass";
+    return problem;
+  }
+  for (const field of BASSBOARD_DB_FIELD) {
+    const lc_field = field.toLowerCase();
+    if (!(lc_field in _sheetMusic)) {
+        const problem = `[SaveAs .bass ERROR] Setting ${field}: is required, URL: is optional but recommended`;
         return problem;
     }
-    for (const field of BASSBOARD_DB_FIELD) {
-        const lc_field = field.toLowerCase();
-        if (!(lc_field in _sheetMusic)) {
-            const problem = `[SaveAs .bass ERROR] Setting ${field}: is required, URL: is optional but recommended`;
-            return problem;
-        }
-    }
-    const jsonString = JSON.stringify(_sheetMusic, null, 2);
-    const filename = `${_sheetMusic.title}_by_${_sheetMusic.contributor}.bass`;
-    if (global === window && 'showSaveFilePicker' in global) {
-        const options = {
-            suggestedName: filename,
-            types: [{
-                description: 'BASS Music File',
-                accept: { '*/.bass': ['.bass'] }
-            }]
-        };
-        try {
-            const handle = await global.showSaveFilePicker(options).catch(function(err) {throw new Error("[1] " + err.message);});
-            const writable = await handle.createWritable().catch(function(err) {throw new Error("[2] " + err.message);});
-            await writable.write(jsonString).catch(function(err) {throw new Error("[3] " + err.message);});
-            await writable.close();
-            return; 
-        } catch (err) {
-            return err;
-        }
+  }
+  const jsonString = JSON.stringify(_sheetMusic, null, 2);
+  const filename = `${_sheetMusic.title}_by_${_sheetMusic.contributor}.bass`;
+  if (global === window && 'showSaveFilePicker' in global) {
+    const options = {
+        suggestedName: filename,
+        types: [{
+            description: 'BASS Music File',
+            accept: { '*/.bass': ['.bass'] }
+        }]
+    };
+    try {
+        const handle = await global.showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+        await writable.write(jsonString);
+        await writable.close();
+        return;
+    } catch (error) {
+        throw new Error('[_saveSheetMusicToBASS Error] : ' + error);    
+    } 
+  } else {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+        const utf8Bytes = new TextEncoder().encode(jsonString);
+        const binaryString = Array.from(utf8Bytes, (byte) => String.fromCharCode(byte)).join("");
+        const base64Data = btoa(binaryString);
+        const dataUri = `data:application/octet-stream;base64,${base64Data}`;
+        const a = document.createElement('a');
+        a.href = dataUri;
+        a.download = filename;
+        a.target = '_blank'; 
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
     } else {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        if (isIOS) {
-            console.log('in ios check');
-            const utf8Bytes = new TextEncoder().encode(jsonString);
-            const binaryString = Array.from(utf8Bytes, (byte) => String.fromCharCode(byte)).join("");
-            const base64Data = btoa(binaryString);
-            const dataUri = `data:application/octet-stream;base64,${base64Data}`;
-            const a = document.createElement('a');
-            a.href = dataUri;
-            a.download = filename;
-            a.target = '_blank'; 
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            return;
-        } else {
-            const blob = new Blob([jsonString], { type: 'application/octet-stream' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            return; 
-        }
+        const blob = new Blob([jsonString], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return; 
     }
+  }
 }
 async function _saveSheetMusicToPDF() {
     await new Promise(function(resolve) {
@@ -1674,13 +1673,17 @@ async function setSaveAs(option) {
         const problem = `[SaveAs ERROR] Print function is currently supported in browser environment only`;
         return problem;
     }
-    if (option == "PDF") {             
-        let result = await _saveSheetMusicToPDF().catch(function(err) {throw new Error("Save As PDF Exception: " + err.message);});
-        return result;                 
-    } else if (option == "BASS") {     
-        let result = await _saveSheetMusicToBASS().catch(function(err) {throw new Error("Save As BASS Exception: " + err.message);});
-        return result;                 
-    } 
+    try {
+        if (option == "PDF") {             
+            let result = await _saveSheetMusicToPDF().catch(function(err) {throw new Error("Save As PDF Exception: " + err.message);});
+            return result;                 
+        } else if (option == "BASS") {     
+            let result = await _saveSheetMusicToBASS().catch(function(err) {throw new Error("Save As BASS Exception: " + err.message);});
+            return result;                 
+        }
+    } catch (error) {
+        throw new Error('[setSaveAs Error] ' + error);    
+    }     
     const problem = `This SaveAs format is not supported : ${option}`;
     return problem;
 }
