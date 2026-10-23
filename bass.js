@@ -243,9 +243,8 @@ beginning of the sheet music (section IV). Another example,
 3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B ||
 After the 1st repeat, it will skip [40. bar to the next bar [20. After the 2nd
 repeat, it will skip [40. bar and [20. bar to the next bar [30. Please note
-that,
-the branching section relies on repeat symbols :| or :|| to move back to the
-closest matching |: or ||: If not finding a match, it will go back to the
+that, the branching section relies on repeat symbols :| or :|| to move back to 
+the closest matching |: or ||: If not finding a match, it will go back to the
 beginning of the sheet music. Also, colliding numbers for branching section are
 allowed but NOT RECOMMENDED for the clarity of a music sheet. For example,
 instead of writing 3/4 | C C C | [1. D D D :| [1. E E E || it is recommended
@@ -269,14 +268,12 @@ eventually.
 
 10. Classical Rule
 By default, the BASS system implements several classical rule checks to make
-sure
-the sheet music follow common classical standard. For example: if there is a
-leading tone in the sheet music (section 6), this rule will be applied: 'The
+sure the sheet music follow common classical standard. For example: if there is
+a leading tone in the sheet music (section 6), this rule will be applied: 'The
 number of opening beats and ending beats must equal the nominator beats in time
-signature'. Another example is: there should not be a gap in volta brackets
-(section II.8). However, musicians can bypass this classical rule check by
-adding system setting 'Classical:No' at the beginning of the sheet music 
-(section IV).
+signature'. Another example is: in a repeat section, volta brackets should be 
+adjacent. However, musicians can bypass these classical rule checks by adding 
+system setting 'Classical:No' at the beginning of the sheet music (section IV)
 
 11. Tempo
 Tempo is the speed or pace at which a piece of music is played. It is the number
