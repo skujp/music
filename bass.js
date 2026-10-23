@@ -147,19 +147,26 @@ function setFullAsyncDebug(f) {
 function help() {
 const manual = 
 `| Rev ${VERSION} |
+
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
 I. INTRODUCTION
+
 BASS, pronounced /beɪs/, spelled /B-A-S-S/ all uppercase, is a musical chord
 notation system. Derived from the word 'bass clef' of a piano instrument, it
 uses common musical symbols often found in a sheet music. Anyone can use the
 BASS system to try new chord progressions, compose, or learn music. The world is
 your oyster!!!
+
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
 II. THE BASICS
+
 1. Note
 A musical note is a single, basic building block of music. For a piano common
 musical scale, it can be written as: C C# Db D D# Eb E F F# Gb G G# Ab A A# Bb
 B.
+
 2. Chord
 A chord is a group of three or more notes played at the same time. For example,
 chord C (C major) consists of C E G. Chord C/E (C major / bass E) consists of C
@@ -170,10 +177,12 @@ Minor-Major 7), Cm7b5 (C Half-Diminished), C7b5 (C Dominant-seventh flat five),
 Cdim7 (C Fully Diminished), Csus2 (C Suspended 2), Csus4 (C Suspended 4), Cadd9
 (C Add 9), C5 (C Power Chord), Cmaj9 (C Major 9), C6 (C Major 6), C9 (C 9), C/E
 (C with E in the bass), Cmaug (C Minor Augmented).
+
 3. Sheet Music
 A sheet music is a written or printed guide for musicians. In the BASS system, a
 chord (NOT note) is the basic unit of a sheet music. For example, 4/4 | C C C C
 || means to play chord C Major four times (NOT single C note four times).
+
 4. Time Signature
 A time signature is a musical notation symbol made of two stacked numbers
 telling about the rhythm of a song such as: 4/4, 3/4, 6/8, etc. Time signature
@@ -188,11 +197,13 @@ beats in a bar, and the actual music speed will be adjusted based on the 16th
 note. This is to accommodate the treble clef parts and other instruments. So do
 not be surprised if you see a time signature such as 123/256 in the BASS system
 :)
+
 5. Time Measure
 Time Measure (or Bar) is a small container of time that holds a specific number
 of beats. For example, the following bar contains 3 beats: | / / / |, this bar
 contains 0 beat: | | Please note that, this Bar refers to time measure, not to
 be mistaken with single Bar symbol | or double Bar symbol || (section III).
+
 6. Opening Section
 An opening section begins the sheet music. It may or may not have a leading
 tone. If it has a leading tone, the number of opening beats can not go over the
@@ -201,6 +212,7 @@ nominator beats of time signature. For example, A A | D / D / | Amaj7 / Amaj7 /
 leading tone, an opening section usually starts with a | or |: or ||: or ||
 Also, in the BASS system, if a music sheet has a leading tone, its beginning is
 counted from the onset of that leading tone.
+
 7. Repeat Section
 A repeat section (or loop) is a section which is played again and again. The
 loop usually looks like this |: :| or ||: :|| or a loop back from beginning such
@@ -213,6 +225,7 @@ matching opening repeat symbols, it will go back to the beginning by default.
 For example, 2/4 | C D | F G :| A B :| G G || will go back to the beginning
 three times in total, resulted in ( C D F G ) ( C D F G ) ( A B )
 ( C D F G A B ) ( C D F G A B ) ( G G ).
+
 8. Branching Section
 A branching section (or Volta Bracket) is used to skip from one section to
 another of a sheet music AFTER REPEAT. It is written as an open bracket followed
@@ -243,6 +256,7 @@ Last, it is generally recommended to use consecutive numbers in branching
 section for the clarity of the sheet music. For example, instead of having this
 2/4 | D E | [1. F G :| [300. A A ||, it is more common to do this:
 2/4 | D E | [1. F G :| [2. A A ||
+
 9. Ending Section
 A sheet music must end with either a single bar | or a double bar || symbol. If
 it ends with a || symbol, the system will stop playing (no loop back).
@@ -251,6 +265,7 @@ without the musician's intervention. Please note that, if it ends with :| or :||
 symbol, it will loop back according to music sheet movement direction before the
 default system loop back begins. For the case of :|| symbol, it will stop
 eventually.
+
 10. Classical Rule
 By default, the BASS system implements several classical rule checks to make
 sure the sheet music follow common classical standard. For example: if there is
@@ -259,12 +274,14 @@ number of opening beats and ending beats must equal the nominator beats in time
 signature'. Another example is: in a repeat section, volta brackets should be 
 adjacent. However, musicians can bypass these classical rule checks by adding 
 system setting 'Classical:No' at the beginning of the sheet music (section IV)
+
 11. Tempo
 Tempo is the speed or pace at which a piece of music is played. It is the number
 of beats per minutes (bpm) set up before playing the sheet music. In the BASS
 system, by default it is set to 90, assuming quarter note is in time signature
 (4/4). The musician can change tempo manually. Please note that, the actual
 final sheet music speed will be adjusted based on time signature (section IV).
+
 12. Octave
 An octave is the distance between two musical notes that share the same name
 (like two different C notes). It is exactly eight steps apart on a common
@@ -273,10 +290,12 @@ the lowest bass, and 8 is the highest bass. By default, it uses octave 4 similar
 to the concept of middle C in a piano. Musicians can change it manually by
 adding system setting 'Octave:<number>' at the beginning of the sheet music 
 (section IV).
+
 13. Space
 Every musical symbol must be separated by a blank space. The recommended space
 is 1 blank character between two musical symbols. For example, one blank space
 between two opening notes in this sheet music 2/4 D D | F F |
+
 14. Rhythm Slash /
 In the BASS system, a rhythm slash / (or BM) represents one beat in a bar.
 By default, it plays by repeating a previous chord. For example, 3/4 | A B / |
@@ -285,9 +304,11 @@ at the beginning of the sheet music (section IV). For example,
 Sustain:Yes 3/4 | A B / | will play A B only and silent on the last chord /.
 Please note that this rhythm slash / symbol should not be mistaken with / in
 a slash chord (section II.2)
+
 15. Duplicate %
 A duplicate symbol % means to repeat playing the previous bar. For example,
 3/4 | A B C | % || will play A B C A B C
+
 16. Section Marker (#)
 A group of bars can be marked with a section marker such as (A) (B) (C), etc.
 Inside the parenthesis, it must be a single uppercase letter from A to Z. Once a
@@ -312,6 +333,7 @@ will play the last bar 9 times in total because of the multiplier (3x), whereas
 3/4 | A A A |: (3x) (Q) B B B :| (Q*3) || will play the last bar 3 times only.
 Please note that, (Zx2) also works with branching section, preserving the
 branching behavior, whereas (Z*2) will ignore branching behavior.
+
 17. Commented Section
 Commented section (or Vi-De) is a special marked section NOT to be played in
 a sheet music. The commented opening symbol (Vi) is <- and the closing (De) is
@@ -321,6 +343,7 @@ only play | G G | D D | F F || This Vi-De mode can be useful to test playing
 only specific parts of the sheet music. Please note that, in some cases playback
 does not echo any sound due to the commented sheet music containing only
 sustained chords. For example, | <- D D D D | -> / / / / ||
+
 18. Roadmap Symbols
 In a sheet music, there are special symbols ('roadmap symbols') which designate
 to change the music flow such as:
@@ -349,17 +372,24 @@ repeat symbols, they will be played after all the repeats. For example,
 | A A A A (FINE) ||: B B B B (D.C.AL.FINE) :|| will play A A A A B B B B, then
 repeat B B B B, then go back to the beginning with (D.C.AL.FINE), and finally
 play A A A A, ending there at (FINE).
+
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
 III. THE CHORD-BASED NOTATION SYSTEM
+
 Time Signature:
 3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 6/16 32/64 8/128
 123/512 ...
+
 Bar (incl. double):
 | ||
+
 Opening (incl. repeat):
 | || |: ||:
+
 Closing (incl. repeat):
 | || :| :||
+
 Repeat:
 :|
 :||
@@ -367,34 +397,47 @@ Repeat:
 ||: :||
 |: :|: :|
 ||: :||: :||
+
 Multiplier:
 (1x) (2x) (3x) (4x) (5x) ...
+
 Branching (Volta Bracket):
 [1. [2. [3. [4. [99. [101. [123. ...
+
 Rhythm Slash (BM):
 /
+
 Duplicate:
 %
+
 Chord:
 m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug
+
 Section Marker:
 (#) (#x<number>) (#*<number>)
+
 Comment (Vi-De):
 <- ->
+
 Roadmap:
 (FINE) (${SEGNO}) (${CODA}) (TO.CODA) (D.C.) (D.S.) (D.C.AL.CODA) (D.S.AL.CODA) (D.C.AL.FINE)
 (D.S.AL.FINE)
+
 Annotation:
 (intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) (allegro)
 (moderato) (adagio) (lyrics_separated_by_underscores) ...
+
 ||||||
 Remark:
 ... means et cetera
 # means any uppercase letter A-Z
 <number> means any non-negative integer
 roadmap symbols are all uppercase
+
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
 IV. SPECIAL NOTATIONS
+
 The following notations are separate from the core musical notation system. They
 are case-sensitive and used for special purposes such as changing music tempo,
 tuning middle C, or save the sheet music to PDF or BASS files. Please note that,
@@ -402,6 +445,7 @@ they must be written at the beginning of the sheet music. Also, any value after
 the double dot symbol (:) can not have any blank space. In the BASS system, it
 is recommended to use the underscore _ symbol. For example, Composer:Loremipsum_
 Dolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Ninja_Chkft
+
 Tempo:<number> for example, Tempo:100 to set BPM=100
 Octave:<number> for example, Octave:5 to set middle C to C5
 SaveAs:PDF to save as pdf file using default host system
@@ -430,11 +474,15 @@ Misc:<anything> for example, Misc:anything_separated_by_underscore
 Roadmap:OnRepeat to activate roadmap symbols only after the music is repeated
 Classical:Yes to activate classical rule check (default)
 Classical:No to deactivate classical rule check
+
 Please note that, when setting Octave:<number> above, it is to set the BASS
 default system octave. It is not the same as the default octave used in other
 instruments for treble clef parts.
+
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
 V. BASSBOARD CHART
+
 This section is also separate from the core musical notation system. It serves
 as a demo collection of sheet music where musicians can contribute to. To be
 listed on the chart, please save to .bass file and send it to this email:
@@ -443,24 +491,35 @@ required in order to save to .bass such as Title: Contributor: or URL: (section
 IV). Last, any music (chords, rhythms, melody) is allowed, but lyrics and URLs
 will be reviewed for explicit content prior to posting. A masterpiece with
 clarity is always appreciated! :)
+
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
 VI. QWERTY KEYBOARD
+
 For the treble clef parts of the BASS system:
 - Piano notes are mapped to qwerty and number row of a QWERTY computer keyboard.
 For example, q,w,e,r,t,2,3...
 - Guitar notes are mapped to next rows. For example, a s d f g for frets and h j
 k l ; ' for strings 6 to 1.
+
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
 VII. DISCLAIMER
+
 The BASS system is written by a music enthusiast to help you learn rhythms,
 chords, and very basic compositions. It is by no means to replace a trained
 professional who can guide you through your complete music endeavor. If you are
 a strictly classically trained musician, this system may not be the right fit
 for you. Well, enjoy and have fun! :)
+
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
 VIII. SOURCE
+
 The BASS source code is as below. The library file is bass.js
+
 https://github.com/skujp/music
+
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||`;
     return manual;
 }
