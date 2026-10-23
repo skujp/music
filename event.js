@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "9.1.5";
+    // VERSION = "11.0.0";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
@@ -142,9 +142,10 @@ function initEvents() {
                 oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
             }
             bass.playSequencer(sequencer).catch((e) => {
-                if (e.name !== 'AbortError') {
-                    oops(`[Error playing sequencer]: ${e.message}`, 'error');
-                }
+                // if (e.name !== 'AbortError') {
+                //     oops(`[Error playing sequencer]: ${e.message}`, 'error');
+                // }
+                oops(`[IRQ EXCEPTION]: ${e.message}`, 'error');
             });
         } else {
             oops(bass.getErrorMsg(), 'error');  // synchronous

@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "10.4.0";
+const VERSION = "11.0.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -38,8 +38,9 @@ attach(TheBass, {oops,
                  getRoadmapStatus, getRoadmap, setRoadmap, 
                  setClassical, getClassical 
                 });    
+const DEF_BPM = 90; 
 const BPM = {                                                           
-    _val: 90,                                                           
+    _val: DEF_BPM,                                                           
     get val() {
         return this._val;
     },
@@ -114,7 +115,8 @@ var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱C
 var SAVE_AS_TYPES = new Set(["PDF","BASS"]);                            
 var BASSBOARD_DB_FIELD = new Set(["Contributor","Title"]);              
 var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
-var taskDropper = null;                                                 
+var isPlaying = false;
+var currentSequencerRef = null;                                             
 var validArgs = new WeakSet();                                          
 var _sheetMusic;                                                        
 var _cmtActive = false;                                                 
@@ -267,9 +269,10 @@ system setting 'Classical:No' at the beginning of the sheet music (section IV).
 11. Tempo
 Tempo is the speed or pace at which a piece of music is played. It is the number
 of beats per minutes (bpm) set up before playing the sheet music. In the BASS
-system, by default it is set to 90, assuming quarter note is in time signature
-(4/4). Musicians can change tempo manually. Please note that, the actual final 
-sheet music speed will be adjusted based on time signature (section II.4).
+system, by default it is set to ${DEF_BPM}, assuming quarter note is in time 
+signature (4/4). Musicians can change tempo manually. Please note that, the 
+actual final sheet music speed will be adjusted based on time signature 
+(section II.4).
 
 12. Octave
 An octave is the distance between two musical notes that share the same name
@@ -632,6 +635,8 @@ function buildSequencer(sheetMusic = EMPTY) {
     PULSE_FLAG = true;       
     DEF_ROADMAP_VISITED = 1; 
     CLASSICAL = true;        
+    DEF_OCTAVE = 4;
+    isPlaying = false;
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
         error.msg = `[SHEET MUSIC ERROR] sheet music length exceeds limit`;
         return;
@@ -713,8 +718,7 @@ function buildSequencer(sheetMusic = EMPTY) {
         error.msg = `[TIME SIGNATURE ERROR] Time signature nominator must be more than 0`;
         return;
     }
-    const reshake = BPM.val;
-    BPM.val = reshake;
+    BPM.val = DEF_BPM;
     var repeatStack = [];          
     var repeatStackMap = {};       
     var sequencer = [];            
@@ -1395,28 +1399,12 @@ function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volum
   osc.start(now);
   osc.stop(now + duration + 0.9);
 }
-function _delay(ms = DEF_MSEC, signal) {
-  return new Promise(function (resolve, reject) {
-    if (signal && signal.aborted) {
-      return reject(new DOMException("Aborted", "AbortError"));
-    }
-    var timer;
-    function cleanup() {
-      if (signal) {
-        signal.removeEventListener("abort", onAbort);
-      }
-    }
-    function onAbort() {
-      clearTimeout(timer);
-      cleanup();
-      reject(new DOMException("Aborted", "AbortError"));
-    }
-    timer = setTimeout(function () {
-      cleanup();
-      resolve();
-    }, ms);
-    if (signal) {
-      signal.addEventListener("abort", onAbort);
+function _delay(ms = DEF_MSEC) {
+  return new Promise((resolve, reject) => {
+    if (isPlaying) {
+      setTimeout(resolve, ms);
+    } else {
+      reject(new Error("IRQ"));
     }
   });
 }
@@ -1569,6 +1557,8 @@ function _createOopsContainer() {
     return container;
 }
 async function playSequencer(sequencerObj) {
+  const myRef = {};
+  currentSequencerRef = myRef;
   var sequencer=SMP_SEQUENCER;
   var loopBackIndex={};
   var repeatCount={};
@@ -1585,91 +1575,95 @@ async function playSequencer(sequencerObj) {
     const problem = `[SEQUENCER WARNING] Must run buildSequencer() first before feeding result to playSequencer(). Using default sequencer: ${JSON.stringify(SMP_SEQUENCER)} with tempo: ${BPM.val} bpm`;
     oops(problem, 'warning');
   }
-  if (taskDropper) taskDropper.abort();
-  taskDropper = new AbortController();
-  const { signal } = taskDropper;
   let i = 0; 
   let n = sequencer.length;
   let timeout = 0; 
   let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));     
+  isPlaying = true;
   oops('🤟 | | |', 'info');
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
-  await _delay(DEF_MSEC, signal); 
+  await _delay(DEF_MSEC); 
   oops('✌️ | |', 'info');
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
-  await _delay(DEF_MSEC, signal); 
+  await _delay(DEF_MSEC); 
   oops('☝️ |', 'info');
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
-  await _delay(DEF_MSEC, signal);     
-  while (!signal.aborted && timeout < MAX_TIMEOUT) {
-    timeout += 1;
-    i = 0;
-    for (let j = 0, len = voltaArr.length; j < len; j++) {             
-        voltaArr[j][0] = false;
-    }
-    let tempRoadmapVisited = JSON.parse(JSON.stringify(roadmapVisited));     
-    let tempRank = [...roadmapRank];
-    while (i < n) {
-      if (signal.aborted) break;
-      if (i in roadmap) {
-        let f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
-        if (f >= 0) {
-            i = f;
-            continue;
-        } else if (f == -8 || f == -3) {
-            oops(getErrorMsg(), 'error');
-            return;
+  await _delay(DEF_MSEC);   
+  while (isPlaying && timeout < MAX_TIMEOUT) {
+        if (myRef !== currentSequencerRef) {
+            return; 
         }
-      }
-      if (i in voltaMap) {
-        if (!voltaArr[voltaMap[i]][0]) {      
-            _playSequencerChord(sequencer[i],DEF_OCTAVE,STACKATO_LEGATO);
-            await _delay(DEF_MSEC, signal);
-            voltaArr[voltaMap[i]][0] = true;
-            i += 1;
-        } else {
-            while ((i < n) && (i in voltaMap) && (voltaArr[voltaMap[i]][0])) {
-                i = voltaArr[voltaMap[i]][2]; 
-            }    
+        timeout += 1;
+        i = 0;
+        for (let j = 0, len = voltaArr.length; j < len; j++) {             
+            voltaArr[j][0] = false;
         }
-      } else {
-        _playSequencerChord(sequencer[i],DEF_OCTAVE,STACKATO_LEGATO);
-        await _delay(DEF_MSEC, signal);
-        if (i in loopBackIndex) { 
-            if (repeatCount[i] > 0) {
-                repeatCount[i] -= 1;
-                i = loopBackIndex[i];
-            } else {
-                if ((!end) || (i !== n-1)) {
-                    repeatCount[i] = tempRepeatCount[i];
-                }
-                i += 1;
+        let tempRoadmapVisited = JSON.parse(JSON.stringify(roadmapVisited));     
+        let tempRank = [...roadmapRank];
+        while (isPlaying && i < n) {
+            if (myRef !== currentSequencerRef) {
+                return; 
             }
-        } else {
-            i += 1;
+            if (i in roadmap) {
+                let f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
+                if (f >= 0) {
+                    i = f;
+                    continue;
+                } else if (f == -8 || f == -3) {
+                    oops(getErrorMsg(), 'error');
+                    return;
+                }
+            }
+            if (i in voltaMap) {
+                if (!voltaArr[voltaMap[i]][0]) {      
+                    _playSequencerChord(sequencer[i],DEF_OCTAVE,STACKATO_LEGATO);
+                    await _delay(DEF_MSEC);
+                    voltaArr[voltaMap[i]][0] = true;
+                    i += 1;
+                } else {
+                    while ((i < n) && (i in voltaMap) && (voltaArr[voltaMap[i]][0])) {
+                        i = voltaArr[voltaMap[i]][2]; 
+                    }    
+                }
+            } else {
+                _playSequencerChord(sequencer[i],DEF_OCTAVE,STACKATO_LEGATO);
+                await _delay(DEF_MSEC);
+                if (i in loopBackIndex) { 
+                    if (repeatCount[i] > 0) {
+                        repeatCount[i] -= 1;
+                        i = loopBackIndex[i];
+                    } else {
+                        if ((!end) || (i !== n-1)) {
+                            repeatCount[i] = tempRepeatCount[i];
+                        }
+                        i += 1;
+                    }
+                } else {
+                    i += 1;
+                }
+            }
+            if (i === n && n in roadmap) {
+                let f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
+                if (f >= 0) {
+                    i = f;
+                    continue;
+                } else if (f == -8 || f == -3) {
+                    oops(getErrorMsg(), 'error');
+                    return;
+                }
+            }
         }
-      }
-      if (i === n && n in roadmap) {
-        let f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
-        if (f >= 0) {
-            i = f;
-            continue;
-        } else if (f == -8 || f == -3) {
-            oops(getErrorMsg(), 'error');
-            return;
+        if (isPlaying) {
+            if (end && (!(n-1 in repeatCount) || repeatCount[n-1] == 0)) {
+                oops('♪ ♫ 👏 Whoohoo! 👏 ♫ ♪ ', 'info');
+                return;
+            } else {
+                roadmapRank = tempRank; 
+                roadmapVisited = tempRoadmapVisited; 
+                oops('👏🥁🎉 Encore, back for more! 🎺🎷👏', 'info');
+            }
         }
-      }
     }
-    if (end && (!(n-1 in repeatCount) || repeatCount[n-1] == 0)) {
-        oops('♪ ♫ 👏 Whoohoo! 👏 ♫ ♪ ', 'info');
-        return;
-    } else {
-        roadmapRank = tempRank; 
-        roadmapVisited = tempRoadmapVisited; 
-        oops('👏🥁🎉 Encore, back for more! 🎺🎷👏', 'info');
-    }
-  }
-  return;
 }
 async function setSaveAs(option) {
     if (!SAVE_AS_TYPES.has(option)) {
@@ -1731,9 +1725,7 @@ function oops(message, type = 'info', show=true) {
     }, 3000);
 }
 function stopSequencer() {
-  if (taskDropper) {
-    taskDropper.abort(); 
-  }
+    isPlaying = false;
 }
 function setTempo(bpm) {
     const convert = Number(bpm);
