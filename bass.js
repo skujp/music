@@ -348,22 +348,22 @@ sustained chords. For example, | <- D D D D | -> / / / / ||
 In a sheet music, there are special symbols ('roadmap symbols') which designate
 to change the music flow such as:
 (D.C.) : Go back to the beginning
-(D.S.) : Go to SEGNO symbol ($)
+(D.S.) : Go to SEGNO symbol (${SEGNO})
 (DC.AL.CODA) : Go back to the beginning, play until (TO.CODA) symbol, then jump
-to CODA symbol (+)
-(DS.AL.CODA) : Go to SEGNO symbol ($), play until (TO.CODA) symbol, then jump to
-CODA symbol (+)
+to CODA symbol (${CODA})
+(DS.AL.CODA) : Go to SEGNO symbol (${SEGNO}), play until (TO.CODA) symbol, then jump to
+CODA symbol (${CODA})
 (DC.AL.FINE) : Go back to the beginning, play until (FINE) symbol, then end the
 music
-(DS.AL.FINE) : Go to SEGNO symbol ($), play until (FINE) symbol, then end the
+(DS.AL.FINE) : Go to SEGNO symbol (${SEGNO}), play until (FINE) symbol, then end the
 music
 By default, in the BASS system during playback, it will immediately change the
-music direction upon encountering these symbols. For example, 2/4 | G G | C ($)
-C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F || will play G G C C E E C E F.
+music direction upon encountering these symbols. For example, 2/4 | G G | C (${SEGNO})
+C | E (TO.CODA) E | (D.S.AL.CODA) F (${CODA}) F || will play G G C C E E C E F.
 Sometimes, musicians would prefer to apply those symbols from the second time
 after music repeat instead. In such cases, they must use the system setting
 'Roadmap:OnRepeat' (section IV). For example, Roadmap:OnRepeat 2/4 | G G
-| C ($) C | E (TO.CODA) E | (D.S.AL.CODA) F (+) F :|| will play G G C C E E F F
+| C (${SEGNO}) C | E (TO.CODA) E | (D.S.AL.CODA) F (${CODA}) F :|| will play G G C C E E F F
 the 1st time through, then play G G C C E E C E F like before. Please note that
 these special roadmap symbols should be used carefully to avoid any confusion
 in the sheet music. Also, they can be applied for ONLY ONE TIME during the whole
@@ -420,7 +420,7 @@ Comment (Vi-De):
 <- ->
 
 Roadmap:
-(FINE) ($) (+) (TO.CODA) (D.C.) (D.S.) (D.C.AL.CODA) (D.S.AL.CODA) (D.C.AL.FINE)
+(FINE) (${SEGNO}) (${CODA}) (TO.CODA) (D.C.) (D.S.) (D.C.AL.CODA) (D.S.AL.CODA) (D.C.AL.FINE)
 (D.S.AL.FINE)
 
 Annotation:
@@ -825,7 +825,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                 }
                 if (rs === SEGNO) {
                     if (roadmapRank[1]) {
-                        error.msg = `[ROADMAP SEGNO ERROR 1] too many ($) symbols repeats`;
+                        error.msg = `[ROADMAP SEGNO ERROR 1] too many (${SEGNO}) symbols repeats`;
                         return;
                     }
                     roadmapRank[1] = rs;
@@ -837,7 +837,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                     roadmapRank[2] = rs;
                 } else if (rs === CODA) {
                     if (roadmapRank[3]) {
-                        error.msg = `[ROADMAP CODA ERROR 1] too many (+) symbols repeats`;
+                        error.msg = `[ROADMAP CODA ERROR 1] too many (${CODA}) symbols repeats`;
                         return;
                     }
                     roadmapRank[3] = rs;
@@ -1281,7 +1281,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                     }
                     if (match_aux[1] === SEGNO) {
                         if (roadmapRank[1]) {
-                            error.msg = `[ROADMAP SEGNO ERROR 2] too many ($) symbols repeats`;
+                            error.msg = `[ROADMAP SEGNO ERROR 2] too many (${SEGNO}) symbols repeats`;
                             return;
                         }
                         roadmapRank[1] = match_aux[1];
@@ -1293,7 +1293,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                         roadmapRank[2] = match_aux[1];
                     } else if (match_aux[1] === CODA) {
                         if (roadmapRank[3]) {
-                            error.msg = `[ROADMAP CODA ERROR 2] too many (+) symbols repeats`;
+                            error.msg = `[ROADMAP CODA ERROR 2] too many (${CODA}) symbols repeats`;
                             return;
                         }
                         roadmapRank[3] = match_aux[1];
