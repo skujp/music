@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "10.3.1";
+const VERSION = "10.3.2";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -239,7 +239,7 @@ A A B B C C, then go back to beginning and play A A, then jump to D D, and end
 with E E. Notice that it does not jump to [2. like standard common musical
 notation and this is expected in the BASS system, allowing more leeway for
 musicians. This usage only works when 'Classical:No' setting is set at the
-beginning of the sheet music (section IV). Another example,
+beginning of the sheet music (section II.10). Another example,
 3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B ||
 After the 1st repeat, it will skip [40. bar to the next bar [20. After the 2nd
 repeat, it will skip [40. bar and [20. bar to the next bar [30. Please note
@@ -269,18 +269,18 @@ eventually.
 10. Classical Rule
 By default, the BASS system implements several classical rule checks to make
 sure the sheet music follow common classical standard. For example: if there is
-a leading tone in the sheet music (section 6), this rule will be applied: 'The
-number of opening beats and ending beats must equal the nominator beats in time
-signature'. Another example is: in a repeat section, volta brackets should be 
-adjacent. However, musicians can bypass these classical rule checks by adding 
+a leading tone in the sheet music (section II.6), this rule will be applied: 
+'The number of opening beats and ending beats must equal the nominator beats in 
+time signature'. Another example is: in a repeat section, volta brackets should 
+be adjacent. However, musicians can bypass these classical rule checks by adding 
 system setting 'Classical:No' at the beginning of the sheet music (section IV)
 
 11. Tempo
 Tempo is the speed or pace at which a piece of music is played. It is the number
 of beats per minutes (bpm) set up before playing the sheet music. In the BASS
 system, by default it is set to 90, assuming quarter note is in time signature
-(4/4). The musician can change tempo manually. Please note that, the actual
-final sheet music speed will be adjusted based on time signature (section II.4).
+(4/4). Musicians can change tempo manually. Please note that, the actual final 
+sheet music speed will be adjusted based on time signature (section II.4).
 
 12. Octave
 An octave is the distance between two musical notes that share the same name
@@ -338,7 +338,7 @@ branching behavior, whereas (Z*2) will ignore branching behavior.
 Commented section (or Vi-De) is a special marked section NOT to be played in
 a sheet music. The commented opening symbol (Vi) is <- and the closing (De) is
 -> They are usually set after the opening section of a sheet music (section
-I.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will
+II.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will
 only play | G G | D D | F F || This Vi-De mode can be useful to test playing
 only specific parts of the sheet music. Please note that, in some cases playback
 does not echo any sound due to the commented sheet music containing only
