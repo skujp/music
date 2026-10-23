@@ -1,19 +1,14 @@
 (function(global) {
-const VERSION = "10.3.2";
+const VERSION = "10.4.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
         return this._msg;
     },
     set msg(val) {
-        if (DEBUG_MODE) {
-            console.log(val);
-        }
         this._msg = val;
     }
 }
-var DEBUG_MODE = false;                                                   
-var FULL_ASYNC_DEBUG_MODE = false;                                        
 var DEF_INST = "piano";
 var DEF_SUPPORT_INST = new Set([DEF_INST, "drum", "guitar", "flute"]);
 var instrument = DEF_INST; 
@@ -32,8 +27,8 @@ function rename() {
 function attach(libObject, functionObj) {
     Object.assign(libObject, functionObj);
 }
-attach(TheBass, {rename, setDebug, help, getErrorMsg, getChordNotes, buildSequencer});  
-attach(TheBass, {setFullAsyncDebug, getFullAsyncDebugMode, oops, 
+attach(TheBass, {rename, help, getErrorMsg, getChordNotes, buildSequencer});  
+attach(TheBass, {oops, 
                  playNote, playChord, playSequencer, stopSequencer, 
                  setTempo, setOctave, getOctave, getTempo, 
                  getSampleTestCase, getMaxSheetLength,
@@ -138,12 +133,6 @@ function _initMusicMajorScale() {
     Object.assign(notes, flatNotes);
     return notes;
 }
-function setDebug(f) {
-    DEBUG_MODE = f;
-}
-function setFullAsyncDebug(f) {
-    FULL_ASYNC_DEBUG_MODE = f;
-}
 function help() {
 const manual = 
 `| Rev ${VERSION} |
@@ -195,7 +184,7 @@ denominator part is a power of two, representing a fraction of a whole note for
 adjusting the actual sheet music speed. For example, 8/16 means there are 8
 beats in a bar, and the actual music speed will be adjusted based on the 16th
 note. This is to accommodate the treble clef parts and other instruments. So do
-not be surprised if you see a time signature such as 123/256 in the BASS system
+not be surprised if you see a time signature such as 123/256 in the BASS system.
 :)
 
 5. Time Measure
@@ -255,7 +244,7 @@ of multipliers in repeat sections. For example,
 Last, it is generally recommended to use consecutive numbers in branching
 section for the clarity of the sheet music. For example, instead of having this
 2/4 | D E | [1. F G :| [300. A A ||, it is more common to do this:
-2/4 | D E | [1. F G :| [2. A A ||
+2/4 | D E | [1. F G :| [2. A A ||.
 
 9. Ending Section
 A sheet music must end with either a single bar | or a double bar || symbol. If
@@ -273,7 +262,7 @@ a leading tone in the sheet music (section II.6), this rule will be applied:
 'The number of opening beats and ending beats must equal the nominator beats in 
 time signature'. Another example is: in a repeat section, volta brackets should 
 be adjacent. However, musicians can bypass these classical rule checks by adding 
-system setting 'Classical:No' at the beginning of the sheet music (section IV)
+system setting 'Classical:No' at the beginning of the sheet music (section IV).
 
 11. Tempo
 Tempo is the speed or pace at which a piece of music is played. It is the number
@@ -294,7 +283,7 @@ adding system setting 'Octave:<number>' at the beginning of the sheet music
 13. Space
 Every musical symbol must be separated by a blank space. The recommended space
 is 1 blank character between two musical symbols. For example, one blank space
-between two opening notes in this sheet music 2/4 D D | F F |
+between two opening notes in this sheet music 2/4 D D | F F |.
 
 14. Rhythm Slash /
 In the BASS system, a rhythm slash / (or BM) represents one beat in a bar.
@@ -303,11 +292,11 @@ will play A B B. To turn off the default play, musicians can set Sustain:Yes
 at the beginning of the sheet music (section IV). For example,
 Sustain:Yes 3/4 | A B / | will play A B only and silent on the last chord /.
 Please note that this rhythm slash / symbol should not be mistaken with / in
-a slash chord (section II.2)
+a slash chord (section II.2).
 
 15. Duplicate %
 A duplicate symbol % means to repeat playing the previous bar. For example,
-3/4 | A B C | % || will play A B C A B C
+3/4 | A B C | % || will play A B C A B C.
 
 16. Section Marker (#)
 A group of bars can be marked with a section marker such as (A) (B) (C), etc.
@@ -342,7 +331,7 @@ II.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will
 only play | G G | D D | F F || This Vi-De mode can be useful to test playing
 only specific parts of the sheet music. Please note that, in some cases playback
 does not echo any sound due to the commented sheet music containing only
-sustained chords. For example, | <- D D D D | -> / / / / ||
+sustained chords. For example, | <- D D D D | -> / / / / ||.
 
 18. Roadmap Symbols
 In a sheet music, there are special symbols ('roadmap symbols') which designate
@@ -444,7 +433,7 @@ tuning middle C, or save the sheet music to PDF or BASS files. Please note that,
 they must be written at the beginning of the sheet music. Also, any value after
 the double dot symbol (:) can not have any blank space. In the BASS system, it
 is recommended to use the underscore _ symbol. For example, Composer:Loremipsum_
-Dolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Ninja_Chkft
+Dolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Ninja_Chkft.
 
 Tempo:<number> for example, Tempo:100 to set BPM=100
 Octave:<number> for example, Octave:5 to set middle C to C5
@@ -516,7 +505,7 @@ for you. Well, enjoy and have fun! :)
 
 VIII. SOURCE
 
-The BASS source code is as below. The library file is bass.js
+The BASS system source code is as below. The library file is bass.js
 
 https://github.com/skujp/music
 
@@ -1592,8 +1581,6 @@ async function playSequencer(sequencerObj) {
   if (validArgs.has(sequencerObj)) {
     [sequencer,loopBackIndex,repeatCount,end=END,voltaMap,voltaArr,roadmap,roadmapVisited,roadmapRank] = sequencerObj;
     validArgs.delete(sequencerObj); 
-    const problem = `Sequencer object will be removed from WeakSet right after playing`;
-    oops(problem, 'warning', FULL_ASYNC_DEBUG_MODE);
   } else {
     const problem = `[SEQUENCER WARNING] Must run buildSequencer() first before feeding result to playSequencer(). Using default sequencer: ${JSON.stringify(SMP_SEQUENCER)} with tempo: ${BPM.val} bpm`;
     oops(problem, 'warning');
@@ -1877,9 +1864,6 @@ function getGuitarNote(st = 6, fret = 0) {
     }
     error.msg = `[TUNING A GUITAR][CURRENT OCTAVE: ${DEF_OCTAVE}], Playing: ${notes[calculated_lookup_note]}, should play in: ${octave_offset} octave higher!`;
     return [notes[calculated_lookup_note], octave_offset];
-}
-function getFullAsyncDebugMode() {
-    return FULL_ASYNC_DEBUG_MODE;
 }
 function getVersion() {
     return VERSION;    
