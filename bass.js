@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "10.3.0";
+const VERSION = "10.3.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -280,7 +280,7 @@ Tempo is the speed or pace at which a piece of music is played. It is the number
 of beats per minutes (bpm) set up before playing the sheet music. In the BASS
 system, by default it is set to 90, assuming quarter note is in time signature
 (4/4). The musician can change tempo manually. Please note that, the actual
-final sheet music speed will be adjusted based on time signature (section IV).
+final sheet music speed will be adjusted based on time signature (section II.4).
 
 12. Octave
 An octave is the distance between two musical notes that share the same name
