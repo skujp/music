@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "11.0.0";
+  var VERSION = "11.0.1";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -201,7 +201,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var DEF_MSEC = DEF_DURATION * 1000;
   var MAX_SECTION_REP = 51;
   var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";
-  var SAVE_AS_TYPES = new Set(["PDF", "BASS"]);
   var BASSBOARD_DB_FIELD = new Set(["Contributor", "Title"]);
   var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
   var isPlaying = false;
@@ -247,7 +246,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     return notes;
   }
   function help() {
-    var manual = "| Rev ".concat(VERSION, " |\n\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n\nI. INTRODUCTION\n\nBASS, pronounced /be\u026As/, spelled /B-A-S-S/ all uppercase, is a musical chord\nnotation system. Derived from the word 'bass clef' of a piano instrument, it\nuses common musical symbols often found in a sheet music. Anyone can use the\nBASS system to try new chord progressions, compose, or learn music. The world is\nyour oyster!!!\n\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n\nII. THE BASICS\n\n1. Note\nA musical note is a single, basic building block of music. For a piano common\nmusical scale, it can be written as: C C# Db D D# Eb E F F# Gb G G# Ab A A# Bb\nB.\n\n2. Chord\nA chord is a group of three or more notes played at the same time. For example,\nchord C (C major) consists of C E G. Chord C/E (C major / bass E) consists of C\nE G with a bass note E. Currently, the BASS system supports the following chord\ntype notations: C (C Major), Cm (C Minor), Caug (C Augmented), Cdim (C\nDiminished), Cmaj7 (C Major 7), C7 (C Dominant 7), Cm7 (C Minor 7), Cmmaj7 (C\nMinor-Major 7), Cm7b5 (C Half-Diminished), C7b5 (C Dominant-seventh flat five),\nCdim7 (C Fully Diminished), Csus2 (C Suspended 2), Csus4 (C Suspended 4), Cadd9\n(C Add 9), C5 (C Power Chord), Cmaj9 (C Major 9), C6 (C Major 6), C9 (C 9), C/E\n(C with E in the bass), Cmaug (C Minor Augmented).\n\n3. Sheet Music\nA sheet music is a written or printed guide for musicians. In the BASS system, a\nchord (NOT note) is the basic unit of a sheet music. For example, 4/4 | C C C C\n|| means to play chord C Major four times (NOT single C note four times).\n\n4. Time Signature\nA time signature is a musical notation symbol made of two stacked numbers\ntelling about the rhythm of a song such as: 4/4, 3/4, 6/8, etc. Time signature\nis usually written in the beginning of a sheet music. For example, 3/4 | A B C |\nD E / |. If the sheet music does not start with a time signature, by default the\ntime signature is 4/4. For example, | F D A C | B A B A |. Please note that,\ntime signature in the BASS system has more varieties than common sheet music.\nFor example, the nominator part represents the number of beats in a bar. The\ndenominator part is a power of two, representing a fraction of a whole note for\nadjusting the actual sheet music speed. For example, 8/16 means there are 8\nbeats in a bar, and the actual music speed will be adjusted based on the 16th\nnote. This is to accommodate the treble clef parts and other instruments. So do\nnot be surprised if you see a time signature such as 123/256 in the BASS system.\n:)\n\n5. Time Measure\nTime Measure (or Bar) is a small container of time that holds a specific number\nof beats. For example, the following bar contains 3 beats: | / / / |, this bar\ncontains 0 beat: | | Please note that, this Bar refers to time measure, not to\nbe mistaken with single Bar symbol | or double Bar symbol || (section III).\n\n6. Opening Section\nAn opening section begins the sheet music. It may or may not have a leading\ntone. If it has a leading tone, the number of opening beats can not go over the\nnominator beats of time signature. For example, A A | D / D / | Amaj7 / Amaj7 /\n|| is accepted with a leading tone A A (2 beats). Please note that, without a\nleading tone, an opening section usually starts with a | or |: or ||: or ||\nAlso, in the BASS system, if a music sheet has a leading tone, its beginning is\ncounted from the onset of that leading tone.\n\n7. Repeat Section\nA repeat section (or loop) is a section which is played again and again. The\nloop usually looks like this |: :| or ||: :|| or a loop back from beginning such\nas | :| and | :|| In some cases, it can use back to back loop :|: or :||:\nsymbols. For example, |: :|: :| or ||: :||: :|| By default, repeat section will\nloop for 1 time (2x), but it is up to the musician to modify it using repeat\nmultipliers such as (3x), (4x), etc. For example, |: (4x) F / / C | B / / A :|\nmeans loop 4 times over the 2 bars of chords. In the BASS system, if there is no\nmatching opening repeat symbols, it will go back to the beginning by default.\nFor example, 2/4 | C D | F G :| A B :| G G || will go back to the beginning\nthree times in total, resulted in ( C D F G ) ( C D F G ) ( A B )\n( C D F G A B ) ( C D F G A B ) ( G G ).\n\n8. Branching Section\nA branching section (or Volta Bracket) is used to skip from one section to\nanother of a sheet music AFTER REPEAT. It is written as an open bracket followed\nby a number and a dot. For example, [1. [2. [3. [123. , etc. The next example is\na section of a sheet music which will skip [1. and jump to [2. after repeat: 4/4\n|: A A A A | [1. B B B B :| [2. C C C C | D D D D | Please note that, the BASS\nsystem implements positional volta brackets, which include usages beyond common\nmusic notation. For example,\nClassical:No 2/4 |: A A | [1. B B | C C :| D D | [2. E E || will play\nA A B B C C, then go back to beginning and play A A, then jump to D D, and end\nwith E E. Notice that it does not jump to [2. like standard common musical\nnotation and this is expected in the BASS system, allowing more leeway for\nmusicians. This usage only works when 'Classical:No' setting is set at the\nbeginning of the sheet music (section II.10). Another example,\n3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B ||\nAfter the 1st repeat, it will skip [40. bar to the next bar [20. After the 2nd\nrepeat, it will skip [40. bar and [20. bar to the next bar [30. Please note\nthat, the branching section relies on repeat symbols :| or :|| to move back to \nthe closest matching |: or ||: If not finding a match, it will go back to the\nbeginning of the sheet music. Also, colliding numbers for branching section are\nallowed but NOT RECOMMENDED for the clarity of a music sheet. For example,\ninstead of writing 3/4 | C C C | [1. D D D :| [1. E E E || it is recommended\nto replace the second [1. as [2. or so. Last, branching section can coexist with\nmultipliers from repeat sections. However, it will override the default behavior\nof multipliers in repeat sections. For example,\n2/4 | (123x) A A | [1. B B :| C C || will ignore (123x) on the second repeat.\nLast, it is generally recommended to use consecutive numbers in branching\nsection for the clarity of the sheet music. For example, instead of having this\n2/4 | D E | [1. F G :| [300. A A ||, it is more common to do this:\n2/4 | D E | [1. F G :| [2. A A ||.\n\n9. Ending Section\nA sheet music must end with either a single bar | or a double bar || symbol. If\nit ends with a || symbol, the system will stop playing (no loop back).\nOtherwise, the system by default will keep looping back from the beginning even\nwithout the musician's intervention. Please note that, if it ends with :| or :||\nsymbol, it will loop back according to music sheet movement direction before the\ndefault system loop back begins. For the case of :|| symbol, it will stop\neventually.\n\n10. Classical Rule\nBy default, the BASS system implements several classical rule checks to make\nsure the sheet music follow common classical standard. For example: if there is\na leading tone in the sheet music (section II.6), this rule will be applied: \n'The number of opening beats and ending beats must equal the nominator beats in \ntime signature'. Another example is: in a repeat section, volta brackets should \nbe adjacent. However, musicians can bypass these classical rule checks by adding \nsystem setting 'Classical:No' at the beginning of the sheet music (section IV).\n\n11. Tempo\nTempo is the speed or pace at which a piece of music is played. It is the number\nof beats per minutes (bpm) set up before playing the sheet music. In the BASS\nsystem, by default it is set to ").concat(DEF_BPM, ", assuming quarter note is in time \nsignature (4/4). Musicians can change tempo manually. Please note that, the \nactual final sheet music speed will be adjusted based on time signature \n(section II.4).\n\n12. Octave\nAn octave is the distance between two musical notes that share the same name\n(like two different C notes). It is exactly eight steps apart on a common\nmusical scale. In the BASS system, octave ranges can be from 0 to 8 where 0 is\nthe lowest bass, and 8 is the highest bass. By default, it uses octave 4 similar\nto the concept of middle C in a piano. Musicians can change it manually by\nadding system setting 'Octave:<number>' at the beginning of the sheet music \n(section IV).\n\n13. Space\nEvery musical symbol must be separated by a blank space. The recommended space\nis 1 blank character between two musical symbols. For example, one blank space\nbetween two opening notes in this sheet music 2/4 D D | F F |.\n\n14. Rhythm Slash /\nIn the BASS system, a rhythm slash / (or BM) represents one beat in a bar.\nBy default, it plays by repeating a previous chord. For example, 3/4 | A B / |\nwill play A B B. To turn off the default play, musicians can set Sustain:Yes\nat the beginning of the sheet music (section IV). For example,\nSustain:Yes 3/4 | A B / | will play A B only and silent on the last chord /.\nPlease note that this rhythm slash / symbol should not be mistaken with / in\na slash chord (section II.2).\n\n15. Duplicate %\nA duplicate symbol % means to repeat playing the previous bar. For example,\n3/4 | A B C | % || will play A B C A B C.\n\n16. Section Marker (#)\nA group of bars can be marked with a section marker such as (A) (B) (C), etc.\nInside the parenthesis, it must be a single uppercase letter from A to Z. Once a\nsection marker is defined, it can be used later in the sheet music to repeat\nthat section. For example, 3/4 | (A) F G A | B C D | (B) E F G | (C) D E F |\n(Bx3) || means the last bar will repeat the section marked with (B) three times.\nPlease note that, the section marker must be defined before used. For example,\n3/4 | D D D | (Mx2) G G G | will raise an error because (M) is not defined\nbefore it is used. Another example, 4/4 |: (3x) (T) C D E F :| (G) G A B C |\n(Tx2) || means the last bar will repeat 2 times the first bar (including 3x), so\nit will be played in total 6 times. By default, the marker works by scanning\nuntil the next marker is available to determine which section to repeat. If it\ndoesn't find any marker, it will scan until the end of the sheet music. For\nexample, 4/4 | C D E F | (Z) G A B C | D E F G | (Zx1) || means the last bar\nwill do a 1 time repeat for section (Z), which is G A B C | D E F G | Please\nnote that, there are 3 types of notations often used in section marker (section\nIII). For example, (Z), (Zx2), and (Z*2), in which (Z) is the section marker\ndefinition, (Zx2) is the section marker usage with 2 times repeat (INCLUDING\nmultipliers), and (Z*2) is the section marker usage with 2 times repeat\n(EXCLUDING multipliers). For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) ||\nwill play the last bar 9 times in total because of the multiplier (3x), whereas\n3/4 | A A A |: (3x) (Q) B B B :| (Q*3) || will play the last bar 3 times only.\nPlease note that, (Zx2) also works with branching section, preserving the\nbranching behavior, whereas (Z*2) will ignore branching behavior.\n\n17. Commented Section\nCommented section (or Vi-De) is a special marked section NOT to be played in\na sheet music. The commented opening symbol (Vi) is <- and the closing (De) is\n-> They are usually set after the opening section of a sheet music (section\nII.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will\nonly play | G G | D D | F F || This Vi-De mode can be useful to test playing\nonly specific parts of the sheet music. Please note that, in some cases playback\ndoes not echo any sound due to the commented sheet music containing only\nsustained chords. For example, | <- D D D D | -> / / / / ||.\n\n18. Roadmap Symbols\nIn a sheet music, there are special symbols ('roadmap symbols') which designate\nto change the music flow such as:\n(D.C.) : Go back to the beginning\n(D.S.) : Go to SEGNO symbol (").concat(SEGNO, ")\n(DC.AL.CODA) : Go back to the beginning, play until (TO.CODA) symbol, then jump\nto CODA symbol (").concat(CODA, ")\n(DS.AL.CODA) : Go to SEGNO symbol (").concat(SEGNO, "), play until (TO.CODA) symbol, then jump to\nCODA symbol (").concat(CODA, ")\n(DC.AL.FINE) : Go back to the beginning, play until (FINE) symbol, then end the\nmusic\n(DS.AL.FINE) : Go to SEGNO symbol (").concat(SEGNO, "), play until (FINE) symbol, then end the\nmusic\nBy default, in the BASS system during playback, it will immediately change the\nmusic direction upon encountering these symbols. For example, 2/4 | G G | C (").concat(SEGNO, ")\nC | E (TO.CODA) E | (D.S.AL.CODA) F (").concat(CODA, ") F || will play G G C C E E C E F.\nSometimes, musicians would prefer to apply those symbols from the second time\nafter music repeat instead. In such cases, they must use the system setting\n'Roadmap:OnRepeat' (section IV). For example, Roadmap:OnRepeat 2/4 | G G\n| C (").concat(SEGNO, ") C | E (TO.CODA) E | (D.S.AL.CODA) F (").concat(CODA, ") F :|| will play G G C C E E F F\nthe 1st time through, then play G G C C E E C E F like before. Please note that\nthese special roadmap symbols should be used carefully to avoid any confusion\nin the sheet music. Also, they can be applied for ONLY ONE TIME during the whole\nplayback in the BASS system. Last, if these symbols are located right before any\nrepeat symbols, they will be played after all the repeats. For example,\n| A A A A (FINE) ||: B B B B (D.C.AL.FINE) :|| will play A A A A B B B B, then\nrepeat B B B B, then go back to the beginning with (D.C.AL.FINE), and finally\nplay A A A A, ending there at (FINE).\n\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n\nIII. THE CHORD-BASED NOTATION SYSTEM\n\nTime Signature:\n3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 6/16 32/64 8/128\n123/512 ...\n\nBar (incl. double):\n| ||\n\nOpening (incl. repeat):\n| || |: ||:\n\nClosing (incl. repeat):\n| || :| :||\n\nRepeat:\n:|\n:||\n|: :|\n||: :||\n|: :|: :|\n||: :||: :||\n\nMultiplier:\n(1x) (2x) (3x) (4x) (5x) ...\n\nBranching (Volta Bracket):\n[1. [2. [3. [4. [99. [101. [123. ...\n\nRhythm Slash (BM):\n/\n\nDuplicate:\n%\n\nChord:\nm aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug\n\nSection Marker:\n(#) (#x<number>) (#*<number>)\n\nComment (Vi-De):\n<- ->\n\nRoadmap:\n(FINE) (").concat(SEGNO, ") (").concat(CODA, ") (TO.CODA) (D.C.) (D.S.) (D.C.AL.CODA) (D.S.AL.CODA) (D.C.AL.FINE)\n(D.S.AL.FINE)\n\nAnnotation:\n(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) (allegro)\n(moderato) (adagio) (lyrics_separated_by_underscores) ...\n\n||||||\nRemark:\n... means et cetera\n# means any uppercase letter A-Z\n<number> means any non-negative integer\nroadmap symbols are all uppercase\n\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n\nIV. SPECIAL NOTATIONS\n\nThe following notations are separate from the core musical notation system. They\nare case-sensitive and used for special purposes such as changing music tempo,\ntuning middle C, or save the sheet music to PDF or BASS files. Please note that,\nthey must be written at the beginning of the sheet music. Also, any value after\nthe double dot symbol (:) can not have any blank space. In the BASS system, it\nis recommended to use the underscore _ symbol. For example, Composer:Loremipsum_\nDolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Ninja_Chkft.\n\nTempo:<number> for example, Tempo:100 to set BPM=100\nOctave:<number> for example, Octave:5 to set middle C to C5\nSaveAs:PDF to save as pdf file using default host system\nSaveAs:BASS to save as .bass file\nSustain:Yes to stop playing previous chord when seeing / symbol\nSustain:No to repeat playing previous chord when seeing / symbol (default)\nTitle:<name> for example, Title:My_awesome_melody, required for .bass\nArtist:<name> for example, Artist:The_BASS\nMusician:<name> for example, Musician:BeatBox\nComposer:<name> for example, Composer:RHYTHM\nArranger:<name> for example, Arranger:ChoRder\nSinger:<name> for example, Singer:Unknown\nWriter:<name> for example, Writer:Folklore\nAuthor:<name> for example, Author:Unknown\nSong:<name> for example, Song:Hip_And_Hop\nPerformer:<name> for example, Performer:Super-nova\nGenre:<type> for example, Genre:Rap\nCover:Yes to confirm it is a cover\nRemix:Yes to confirm it is a remix\nOriginal:Yes to confirm it is your original masterpiece\nContributor:<name> for example, Contributor:Newbie_Composer, required for .bass\nDerivative:Yes to confirm it is an arrangement from others' masterpiece\nURL:<address> URL:https://youtube.com/yourmusicchannel, optional but recommended\nfor .bass\nMisc:<anything> for example, Misc:anything_separated_by_underscore\nRoadmap:OnRepeat to activate roadmap symbols only after the music is repeated\nClassical:Yes to activate classical rule check (default)\nClassical:No to deactivate classical rule check\n\nPlease note that, when setting Octave:<number> above, it is to set the BASS\ndefault system octave. It is not the same as the default octave used in other\ninstruments for treble clef parts.\n\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n\nV. BASSBOARD CHART\n\nThis section is also separate from the core musical notation system. It serves\nas a demo collection of sheet music where musicians can contribute to. To be\nlisted on the chart, please save to .bass file and send it to this email:\nbassthemusic101 |at| gmail |dot| com. Please note that, certain settings are\nrequired in order to save to .bass such as Title: Contributor: or URL: (section\nIV). Last, any music (chords, rhythms, melody) is allowed, but lyrics and URLs\nwill be reviewed for explicit content prior to posting. A masterpiece with\nclarity is always appreciated! :)\n\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n\nVI. QWERTY KEYBOARD\n\nFor the treble clef parts of the BASS system:\n- Piano notes are mapped to qwerty and number row of a QWERTY computer keyboard.\nFor example, q,w,e,r,t,2,3...\n- Guitar notes are mapped to next rows. For example, a s d f g for frets and h j\nk l ; ' for strings 6 to 1.\n\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n\nVII. DISCLAIMER\n\nThe BASS system is written by a music enthusiast to help you learn rhythms,\nchords, and very basic compositions. It is by no means to replace a trained\nprofessional who can guide you through your complete music endeavor. If you are\na strictly classically trained musician, this system may not be the right fit\nfor you. Well, enjoy and have fun! :)\n\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n\nVIII. SOURCE\n\nThe BASS system source code is as below. The library file is bass.js\n\nhttps://github.com/skujp/music\n\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+    var manual = "| Rev ".concat(VERSION, " |\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\nI. INTRODUCTION\nBASS, pronounced /be\u026As/, spelled /B-A-S-S/ all uppercase, is a musical chord\nnotation system. Derived from the word 'bass clef' of a piano instrument, it\nuses common musical symbols often found in a sheet music. Anyone can use the\nBASS system to try new chord progressions, compose, or learn music. The world is\nyour oyster!!!\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\nII. THE BASICS\n1. Note\nA musical note is a single, basic building block of music. For a piano common\nmusical scale, it can be written as: C C# Db D D# Eb E F F# Gb G G# Ab A A# Bb\nB.\n2. Chord\nA chord is a group of three or more notes played at the same time. For example,\nchord C (C major) consists of C E G. Chord C/E (C major / bass E) consists of C\nE G with a bass note E. Currently, the BASS system supports the following chord\ntype notations: C (C Major), Cm (C Minor), Caug (C Augmented), Cdim (C\nDiminished), Cmaj7 (C Major 7), C7 (C Dominant 7), Cm7 (C Minor 7), Cmmaj7 (C\nMinor-Major 7), Cm7b5 (C Half-Diminished), C7b5 (C Dominant-seventh flat five),\nCdim7 (C Fully Diminished), Csus2 (C Suspended 2), Csus4 (C Suspended 4), Cadd9\n(C Add 9), C5 (C Power Chord), Cmaj9 (C Major 9), C6 (C Major 6), C9 (C 9), C/E\n(C with E in the bass), Cmaug (C Minor Augmented).\n3. Sheet Music\nA sheet music is a written or printed guide for musicians. In the BASS system, a\nchord (NOT note) is the basic unit of a sheet music. For example, 4/4 | C C C C\n|| means to play chord C Major four times (NOT single C note four times).\n4. Time Signature\nA time signature is a musical notation symbol made of two stacked numbers\ntelling about the rhythm of a song such as: 4/4, 3/4, 6/8, etc. Time signature\nis usually written in the beginning of a sheet music. For example, 3/4 | A B C |\nD E / |. If the sheet music does not start with a time signature, by default the\ntime signature is 4/4. For example, | F D A C | B A B A |. Please note that,\ntime signature in the BASS system has more varieties than common sheet music.\nFor example, the nominator part represents the number of beats in a bar. The\ndenominator part is a power of two, representing a fraction of a whole note for\nadjusting the actual sheet music speed. For example, 8/16 means there are 8\nbeats in a bar, and the actual music speed will be adjusted based on the 16th\nnote. This is to accommodate the treble clef parts and other instruments. So do\nnot be surprised if you see a time signature such as 123/256 in the BASS system.\n:)\n5. Time Measure\nTime Measure (or Bar) is a small container of time that holds a specific number\nof beats. For example, the following bar contains 3 beats: | / / / |, this bar\ncontains 0 beat: | | Please note that, this Bar refers to time measure, not to\nbe mistaken with single Bar symbol | or double Bar symbol || (section III).\n6. Opening Section\nAn opening section begins the sheet music. It may or may not have a leading\ntone. If it has a leading tone, the number of opening beats can not go over the\nnominator beats of time signature. For example, A A | D / D / | Amaj7 / Amaj7 /\n|| is accepted with a leading tone A A (2 beats). Please note that, without a\nleading tone, an opening section usually starts with a | or |: or ||: or ||\nAlso, in the BASS system, if a music sheet has a leading tone, its beginning is\ncounted from the onset of that leading tone.\n7. Repeat Section\nA repeat section (or loop) is a section which is played again and again. The\nloop usually looks like this |: :| or ||: :|| or a loop back from beginning such\nas | :| and | :|| In some cases, it can use back to back loop :|: or :||:\nsymbols. For example, |: :|: :| or ||: :||: :|| By default, repeat section will\nloop for 1 time (2x), but it is up to the musician to modify it using repeat\nmultipliers such as (3x), (4x), etc. For example, |: (4x) F / / C | B / / A :|\nmeans loop 4 times over the 2 bars of chords. In the BASS system, if there is no\nmatching opening repeat symbols, it will go back to the beginning by default.\nFor example, 2/4 | C D | F G :| A B :| G G || will go back to the beginning\nthree times in total, resulted in ( C D F G ) ( C D F G ) ( A B )\n( C D F G A B ) ( C D F G A B ) ( G G ).\n8. Branching Section\nA branching section (or Volta Bracket) is used to skip from one section to\nanother of a sheet music AFTER REPEAT. It is written as an open bracket followed\nby a number and a dot. For example, [1. [2. [3. [123. , etc. The next example is\na section of a sheet music which will skip [1. and jump to [2. after repeat: 4/4\n|: A A A A | [1. B B B B :| [2. C C C C | D D D D | Please note that, the BASS\nsystem implements positional volta brackets, which include usages beyond common\nmusic notation. For example,\nClassical:No 2/4 |: A A | [1. B B | C C :| D D | [2. E E || will play\nA A B B C C, then go back to beginning and play A A, then jump to D D, and end\nwith E E. Notice that it does not jump to [2. like standard common musical\nnotation and this is expected in the BASS system, allowing more leeway for\nmusicians. This usage only works when 'Classical:No' setting is set at the\nbeginning of the sheet music (section II.10). Another example,\n3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B ||\nAfter the 1st repeat, it will skip [40. bar to the next bar [20. After the 2nd\nrepeat, it will skip [40. bar and [20. bar to the next bar [30. Please note\nthat, the branching section relies on repeat symbols :| or :|| to move back to \nthe closest matching |: or ||: If not finding a match, it will go back to the\nbeginning of the sheet music. Also, colliding numbers for branching section are\nallowed but NOT RECOMMENDED for the clarity of a music sheet. For example,\ninstead of writing 3/4 | C C C | [1. D D D :| [1. E E E || it is recommended\nto replace the second [1. as [2. or so. Last, branching section can coexist with\nmultipliers from repeat sections. However, it will override the default behavior\nof multipliers in repeat sections. For example,\n2/4 | (123x) A A | [1. B B :| C C || will ignore (123x) on the second repeat.\nLast, it is generally recommended to use consecutive numbers in branching\nsection for the clarity of the sheet music. For example, instead of having this\n2/4 | D E | [1. F G :| [300. A A ||, it is more common to do this:\n2/4 | D E | [1. F G :| [2. A A ||.\n9. Ending Section\nA sheet music must end with either a single bar | or a double bar || symbol. If\nit ends with a || symbol, the system will stop playing (no loop back).\nOtherwise, the system by default will keep looping back from the beginning even\nwithout the musician's intervention. Please note that, if it ends with :| or :||\nsymbol, it will loop back according to music sheet movement direction before the\ndefault system loop back begins. For the case of :|| symbol, it will stop\neventually.\n10. Classical Rule\nBy default, the BASS system implements several classical rule checks to make\nsure the sheet music follow common classical standard. For example: if there is\na leading tone in the sheet music (section II.6), this rule will be applied: \n'The number of opening beats and ending beats must equal the nominator beats in \ntime signature'. Another example is: in a repeat section, volta brackets should \nbe adjacent. However, musicians can bypass these classical rule checks by adding \nsystem setting 'Classical:No' at the beginning of the sheet music (section IV).\n11. Tempo\nTempo is the speed or pace at which a piece of music is played. It is the number\nof beats per minutes (bpm) set up before playing the sheet music. In the BASS\nsystem, by default it is set to ").concat(DEF_BPM, ", assuming quarter note is in time \nsignature (4/4). Musicians can change tempo manually. Please note that, the \nactual final sheet music speed will be adjusted based on time signature \n(section II.4).\n12. Octave\nAn octave is the distance between two musical notes that share the same name\n(like two different C notes). It is exactly eight steps apart on a common\nmusical scale. In the BASS system, octave ranges can be from 0 to 8 where 0 is\nthe lowest bass, and 8 is the highest bass. By default, it uses octave 4 similar\nto the concept of middle C in a piano. Musicians can change it manually by\nadding system setting 'Octave:<number>' at the beginning of the sheet music \n(section IV).\n13. Space\nEvery musical symbol must be separated by a blank space. The recommended space\nis 1 blank character between two musical symbols. For example, one blank space\nbetween two opening notes in this sheet music 2/4 D D | F F |.\n14. Rhythm Slash /\nIn the BASS system, a rhythm slash / (or BM) represents one beat in a bar.\nBy default, it plays by repeating a previous chord. For example, 3/4 | A B / |\nwill play A B B. To turn off the default play, musicians can set Sustain:Yes\nat the beginning of the sheet music (section IV). For example,\nSustain:Yes 3/4 | A B / | will play A B only and silent on the last chord /.\nPlease note that this rhythm slash / symbol should not be mistaken with / in\na slash chord (section II.2).\n15. Duplicate %\nA duplicate symbol % means to repeat playing the previous bar. For example,\n3/4 | A B C | % || will play A B C A B C.\n16. Section Marker (#)\nA group of bars can be marked with a section marker such as (A) (B) (C), etc.\nInside the parenthesis, it must be a single uppercase letter from A to Z. Once a\nsection marker is defined, it can be used later in the sheet music to repeat\nthat section. For example, 3/4 | (A) F G A | B C D | (B) E F G | (C) D E F |\n(Bx3) || means the last bar will repeat the section marked with (B) three times.\nPlease note that, the section marker must be defined before used. For example,\n3/4 | D D D | (Mx2) G G G | will raise an error because (M) is not defined\nbefore it is used. Another example, 4/4 |: (3x) (T) C D E F :| (G) G A B C |\n(Tx2) || means the last bar will repeat 2 times the first bar (including 3x), so\nit will be played in total 6 times. By default, the marker works by scanning\nuntil the next marker is available to determine which section to repeat. If it\ndoesn't find any marker, it will scan until the end of the sheet music. For\nexample, 4/4 | C D E F | (Z) G A B C | D E F G | (Zx1) || means the last bar\nwill do a 1 time repeat for section (Z), which is G A B C | D E F G | Please\nnote that, there are 3 types of notations often used in section marker (section\nIII). For example, (Z), (Zx2), and (Z*2), in which (Z) is the section marker\ndefinition, (Zx2) is the section marker usage with 2 times repeat (INCLUDING\nmultipliers), and (Z*2) is the section marker usage with 2 times repeat\n(EXCLUDING multipliers). For example, 3/4 | A A A |: (3x) (Q) B B B :| (Qx3) ||\nwill play the last bar 9 times in total because of the multiplier (3x), whereas\n3/4 | A A A |: (3x) (Q) B B B :| (Q*3) || will play the last bar 3 times only.\nPlease note that, (Zx2) also works with branching section, preserving the\nbranching behavior, whereas (Z*2) will ignore branching behavior.\n17. Commented Section\nCommented section (or Vi-De) is a special marked section NOT to be played in\na sheet music. The commented opening symbol (Vi) is <- and the closing (De) is\n-> They are usually set after the opening section of a sheet music (section\nII.6). For example, 2/4 | G G | <- A A | B B | -> D D | <- E E | -> F F || will\nonly play | G G | D D | F F || This Vi-De mode can be useful to test playing\nonly specific parts of the sheet music. Please note that, in some cases playback\ndoes not echo any sound due to the commented sheet music containing only\nsustained chords. For example, | <- D D D D | -> / / / / ||.\n18. Roadmap Symbols\nIn a sheet music, there are special symbols ('roadmap symbols') which designate\nto change the music flow such as:\n(D.C.) : Go back to the beginning\n(D.S.) : Go to SEGNO symbol (").concat(SEGNO, ")\n(DC.AL.CODA) : Go back to the beginning, play until (TO.CODA) symbol, then jump\nto CODA symbol (").concat(CODA, ")\n(DS.AL.CODA) : Go to SEGNO symbol (").concat(SEGNO, "), play until (TO.CODA) symbol, then jump to\nCODA symbol (").concat(CODA, ")\n(DC.AL.FINE) : Go back to the beginning, play until (FINE) symbol, then end the\nmusic\n(DS.AL.FINE) : Go to SEGNO symbol (").concat(SEGNO, "), play until (FINE) symbol, then end the\nmusic\nBy default, in the BASS system during playback, it will immediately change the\nmusic direction upon encountering these symbols. For example, 2/4 | G G | C (").concat(SEGNO, ")\nC | E (TO.CODA) E | (D.S.AL.CODA) F (").concat(CODA, ") F || will play G G C C E E C E F.\nSometimes, musicians would prefer to apply those symbols from the second time\nafter music repeat instead. In such cases, they must use the system setting\n'Roadmap:OnRepeat' (section IV). For example, Roadmap:OnRepeat 2/4 | G G\n| C (").concat(SEGNO, ") C | E (TO.CODA) E | (D.S.AL.CODA) F (").concat(CODA, ") F :|| will play G G C C E E F F\nthe 1st time through, then play G G C C E E C E F like before. Please note that\nthese special roadmap symbols should be used carefully to avoid any confusion\nin the sheet music. Also, they can be applied for ONLY ONE TIME during the whole\nplayback in the BASS system. Last, if these symbols are located right before any\nrepeat symbols, they will be played after all the repeats. For example,\n| A A A A (FINE) ||: B B B B (D.C.AL.FINE) :|| will play A A A A B B B B, then\nrepeat B B B B, then go back to the beginning with (D.C.AL.FINE), and finally\nplay A A A A, ending there at (FINE).\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\nIII. THE CHORD-BASED NOTATION SYSTEM\nTime Signature:\n3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 6/16 32/64 8/128\n123/512 ...\nBar (incl. double):\n| ||\nOpening (incl. repeat):\n| || |: ||:\nClosing (incl. repeat):\n| || :| :||\nRepeat:\n:|\n:||\n|: :|\n||: :||\n|: :|: :|\n||: :||: :||\nMultiplier:\n(1x) (2x) (3x) (4x) (5x) ...\nBranching (Volta Bracket):\n[1. [2. [3. [4. [99. [101. [123. ...\nRhythm Slash (BM):\n/\nDuplicate:\n%\nChord:\nm aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug\nSection Marker:\n(#) (#x<number>) (#*<number>)\nComment (Vi-De):\n<- ->\nRoadmap:\n(FINE) (").concat(SEGNO, ") (").concat(CODA, ") (TO.CODA) (D.C.) (D.S.) (D.C.AL.CODA) (D.S.AL.CODA) (D.C.AL.FINE)\n(D.S.AL.FINE)\nAnnotation:\n(intro) (verse) (chorus) (bridge) (outro) (sustain) (p) (mf) (f) (ff) (allegro)\n(moderato) (adagio) (lyrics_separated_by_underscores) ...\n||||||\nRemark:\n... means et cetera\n# means any uppercase letter A-Z\n<number> means any whole number\nroadmap symbols are all uppercase\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\nIV. SPECIAL NOTATIONS\nThe following notations are separate from the core musical notation system. They\nare case-sensitive and used for special purposes such as changing music tempo,\ntuning middle C, or save the sheet music to PDF or BASS files. Please note that,\nthey must be written at the beginning of the sheet music. Also, any value after\nthe double dot symbol (:) can not have any blank space. In the BASS system, it\nis recommended to use the underscore _ symbol. For example, Composer:Loremipsum_\nDolorsitamet_Maximus_Vesterialian_Batiatus_Mortdevold_Ninja_Chkft.\nTempo:<number> for example, Tempo:100 to set BPM=100\nOctave:<number> for example, Octave:5 to set middle C to C5\nSaveAs:PDF to save as pdf file using default host system\nSaveAs:BASS to save as .bass file\nSustain:Yes to stop playing previous chord when seeing / symbol\nSustain:No to repeat playing previous chord when seeing / symbol (default)\nTitle:<name> for example, Title:My_awesome_melody, required for .bass\nArtist:<name> for example, Artist:The_BASS\nMusician:<name> for example, Musician:BeatBox\nComposer:<name> for example, Composer:RHYTHM\nArranger:<name> for example, Arranger:ChoRder\nSinger:<name> for example, Singer:Unknown\nWriter:<name> for example, Writer:Folklore\nAuthor:<name> for example, Author:Unknown\nSong:<name> for example, Song:Hip_And_Hop\nPerformer:<name> for example, Performer:Super-nova\nGenre:<type> for example, Genre:Rap\nCover:Yes to confirm it is a cover\nRemix:Yes to confirm it is a remix\nOriginal:Yes to confirm it is your original masterpiece\nContributor:<name> for example, Contributor:Newbie_Composer, required for .bass\nDerivative:Yes to confirm it is an arrangement from others' masterpiece\nURL:<address> URL:https://youtube.com/yourmusicchannel, optional but recommended\nfor .bass\nMisc:<anything> for example, Misc:anything_separated_by_underscore\nRoadmap:OnRepeat to activate roadmap symbols only after the music is repeated\nClassical:Yes to activate classical rule check (default)\nClassical:No to deactivate classical rule check\nPlease note that, when setting Octave:<number> above, it is to set the BASS\ndefault system octave. It is not the same as the default octave used in other\ninstruments for treble clef parts.\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\nV. BASSBOARD CHART\nThis section is also separate from the core musical notation system. It serves\nas a demo collection of sheet music where musicians can contribute to. To be\nlisted on the chart, please save to .bass file and send it to this email:\nbassthemusic101 |at| gmail |dot| com. Please note that, certain settings are\nrequired in order to save to .bass such as Title: Contributor: or URL: (section\nIV). Last, any music (chords, rhythms, melody) is allowed, but lyrics and URLs\nwill be reviewed for explicit content prior to posting. A masterpiece with\nclarity is always appreciated! :)\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\nVI. QWERTY KEYBOARD\nFor the treble clef parts of the BASS system:\n- Piano notes are mapped to qwerty and number row of a QWERTY computer keyboard.\nFor example, q,w,e,r,t,2,3...\n- Guitar notes are mapped to next rows. For example, a s d f g for frets and h j\nk l ; ' for strings 6 to 1.\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\nVII. DISCLAIMER\nThe BASS system is written by a music enthusiast to help you learn rhythms,\nchords, and very basic compositions. It is by no means to replace a trained\nprofessional who can guide you through your complete music endeavor. If you are\na strictly classically trained musician, this system may not be the right fit\nfor you. Well, enjoy and have fun! :)\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\nVIII. SOURCE\nThe BASS system source code is as below. The library file is bass.js\nhttps://github.com/skujp/music\n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
     return manual;
   }
   function getErrorMsg() {
@@ -404,7 +403,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return;
     }
     var index = 0;
-    var ctrlVars = [];
+    var syncFuncs = [];
+    var asyncFuncs = [];
     var match;
     var dupFuncs = new Set();
     var offset_beats = 0;
@@ -437,8 +437,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         if (status !== undefined) {
           return;
         }
+      } else if (setFunc == 'setSaveAs') {
+        asyncFuncs.push([setFunc, arg]);
       } else {
-        ctrlVars.push([setFunc, arg]);
+        syncFuncs.push([setFunc, arg]);
       }
       index += 1;
       offset_beats += 1;
@@ -1067,29 +1069,28 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       }
     }
     _sheetMusic.content = sheetMusic;
-    for (var _i4 = 0, _ctrlVars = ctrlVars; _i4 < _ctrlVars.length; _i4++) {
-      var _ctrlVars$_i = _slicedToArray(_ctrlVars[_i4], 2),
-        _func = _ctrlVars$_i[0],
-        _arg = _ctrlVars$_i[1];
-      if (this[_func].constructor.name === 'AsyncFunction') {
-        var _result = this[_func](_arg);
-        _result.then(function (data) {
-          if (data) {
-            oops("[Async Error 1] ".concat(data), 'warning');
-          }
-        }).catch(function (exp) {
-          oops("[Async Error 2] ".concat(exp), 'warning');
-        });
-        error.msg = '[SaveAs Exception] Sequencer built successfully but no playback during SaveAs:';
+    for (var _i4 = 0, _syncFuncs = syncFuncs; _i4 < _syncFuncs.length; _i4++) {
+      var _syncFuncs$_i = _slicedToArray(_syncFuncs[_i4], 2),
+        _func = _syncFuncs$_i[0],
+        _arg = _syncFuncs$_i[1];
+      var _result = this[_func](_arg);
+      if (_result !== undefined) {
+        error.msg = _result;
         return;
-      } else {
-        error.msg = "invoking synchronous func ".concat(_func);
-        var _result2 = this[_func](_arg);
-        if (_result2 !== undefined) {
-          error.msg = _result2;
-          return;
-        }
       }
+    }
+    for (var _i5 = 0, _asyncFuncs = asyncFuncs; _i5 < _asyncFuncs.length; _i5++) {
+      var _asyncFuncs$_i = _slicedToArray(_asyncFuncs[_i5], 2),
+        _func2 = _asyncFuncs$_i[0],
+        _arg2 = _asyncFuncs$_i[1];
+      var _result2 = this[_func2](_arg2);
+      _result2.then(function (data) {
+        if (data) {
+          oops("".concat(data), 'warning');
+        }
+      }).catch(function () {});
+      error.msg = -1;
+      break;
     }
     var result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank];
     validArgs.add(result);
@@ -1186,7 +1187,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function _saveSheetMusicToBASS2() {
     _saveSheetMusicToBASS2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var problem, _iterator3, _step3, field, lc_field, _problem4, jsonString, filename, options, handle, writable, isIOS, utf8Bytes, binaryString, base64Data, dataUri, a, blob, url, _a, _t, _t2;
+      var problem, _iterator3, _step3, field, lc_field, _problem4, jsonString, filename, options, handle, writable, isIOS, utf8Bytes, binaryString, base64Data, dataUri, a, blob, url, _a, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -1211,7 +1212,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
               _context.n = 4;
               break;
             }
-            _problem4 = "[SaveAs .bass ERROR] Setting ".concat(field, ": is required, URL: is optional but recommended");
+            _problem4 = "".concat(field, ": is required, URL: is optional but recommended");
             return _context.a(2, _problem4);
           case 4:
             _context.n = 3;
@@ -1231,7 +1232,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             jsonString = JSON.stringify(_sheetMusic, null, 2);
             filename = "".concat(_sheetMusic.title, "_by_").concat(_sheetMusic.contributor, ".bass");
             if (!(global === window && 'showSaveFilePicker' in global)) {
-              _context.n = 15;
+              _context.n = 13;
               break;
             }
             options = {
@@ -1243,30 +1244,25 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                 }
               }]
             };
-            _context.p = 9;
-            _context.n = 10;
+            _context.n = 9;
             return global.showSaveFilePicker(options);
-          case 10:
+          case 9:
             handle = _context.v;
-            _context.n = 11;
+            _context.n = 10;
             return handle.createWritable();
-          case 11:
+          case 10:
             writable = _context.v;
-            _context.n = 12;
+            _context.n = 11;
             return writable.write(jsonString);
-          case 12:
-            _context.n = 13;
+          case 11:
+            _context.n = 12;
             return writable.close();
-          case 13:
+          case 12:
             return _context.a(2);
-          case 14:
-            _context.p = 14;
-            _t2 = _context.v;
-            throw new Error('[_saveSheetMusicToBASS Error] : ' + _t2);
-          case 15:
+          case 13:
             isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
             if (!isIOS) {
-              _context.n = 16;
+              _context.n = 14;
               break;
             }
             utf8Bytes = new TextEncoder().encode(jsonString);
@@ -1283,7 +1279,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             a.click();
             document.body.removeChild(a);
             return _context.a(2);
-          case 16:
+          case 14:
             blob = new Blob([jsonString], {
               type: 'application/octet-stream'
             });
@@ -1296,10 +1292,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             document.body.removeChild(_a);
             URL.revokeObjectURL(url);
             return _context.a(2);
-          case 17:
+          case 15:
             return _context.a(2);
         }
-      }, _callee, null, [[9, 14], [2, 6, 7, 8]]);
+      }, _callee, null, [[2, 6, 7, 8]]);
     }));
     return _saveSheetMusicToBASS2.apply(this, arguments);
   }
@@ -1308,7 +1304,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function _saveSheetMusicToPDF2() {
     _saveSheetMusicToPDF2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var iframe, escapeHtml, printWindow, cleanedUp, cleanup, handleFocus;
+      var iframe, _escapeHtml, printWindow, cleanedUp, cleanup, handleFocus;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.n) {
           case 0:
@@ -1335,10 +1331,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             iframe.style.border = '0';
             iframe.style.visibility = 'hidden';
             document.body.appendChild(iframe);
-            escapeHtml = function escapeHtml(text) {
+            _escapeHtml = function _escapeHtml(text) {
               return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             };
-            iframe.srcdoc = "\n        <!DOCTYPE html>\n        <html>\n        <head>\n        <meta charset=\"utf-8\">\n        <style>\n        body,\n        pre {\n            font-family: ui-monospace, SFMono-Regular, Consolas,\n                        \"Liberation Mono\", Menlo, monospace;\n        }\n        pre {\n            white-space: pre-wrap;\n            margin: 0;\n        }\n        @media print {\n            body,\n            pre {\n                color-adjust: exact;\n                -webkit-print-color-adjust: exact;\n            }\n        }\n        </style>\n        </head>\n        <body>\n        <pre>".concat(escapeHtml(_sheetMusic.content), "</pre>\n        </body>\n        </html>");
+            iframe.srcdoc = "\n        <!DOCTYPE html>\n        <html>\n        <head>\n        <meta charset=\"utf-8\">\n        <style>\n        body,\n        pre {\n            font-family: ui-monospace, SFMono-Regular, Consolas,\n                        \"Liberation Mono\", Menlo, monospace;\n        }\n        pre {\n            white-space: pre-wrap;\n            margin: 0;\n        }\n        @media print {\n            body,\n            pre {\n                color-adjust: exact;\n                -webkit-print-color-adjust: exact;\n            }\n        }\n        </style>\n        </head>\n        <body>\n        <pre>".concat(_escapeHtml(_sheetMusic.content), "</pre>\n        </body>\n        </html>");
             _context2.n = 1;
             return new Promise(function (resolve) {
               iframe.onload = resolve;
@@ -1548,7 +1544,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           case 18:
             roadmapRank = tempRank;
             roadmapVisited = tempRoadmapVisited;
-            oops('👏🥁🎉 Encore, back for more! 🎺🎷👏', 'info');
+            oops('👏🥁🔔 Encore, back for more! 🎺🎷🎉', 'info');
           case 19:
             _context3.n = 3;
             break;
@@ -1564,60 +1560,39 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function _setSaveAs() {
     _setSaveAs = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(option) {
-      var _problem5, _problem6, result, _result3, problem, _t3;
+      var _problem5, problem;
       return _regenerator().w(function (_context4) {
-        while (1) switch (_context4.p = _context4.n) {
+        while (1) switch (_context4.n) {
           case 0:
-            if (SAVE_AS_TYPES.has(option)) {
+            if (!(_typeof(global) !== "object" || global !== window)) {
               _context4.n = 1;
               break;
             }
-            _problem5 = "[SaveAs Syntax ERROR] SaveAs: followed by ".concat(_toConsumableArray(SAVE_AS_TYPES));
+            _problem5 = "[SaveAs ERROR] Print function is currently supported in browser environment only";
             return _context4.a(2, _problem5);
           case 1:
-            if (!(_typeof(global) !== "object" || global !== window)) {
-              _context4.n = 2;
-              break;
-            }
-            _problem6 = "[SaveAs ERROR] Print function is currently supported in browser environment only";
-            return _context4.a(2, _problem6);
-          case 2:
-            _context4.p = 2;
             if (!(option == "PDF")) {
-              _context4.n = 4;
+              _context4.n = 3;
               break;
             }
-            _context4.n = 3;
-            return _saveSheetMusicToPDF().catch(function (err) {
-              throw new Error("Save As PDF Exception: " + err.message);
-            });
+            _context4.n = 2;
+            return _saveSheetMusicToPDF();
+          case 2:
+            return _context4.a(2, _context4.v);
           case 3:
-            result = _context4.v;
-            return _context4.a(2, result);
-          case 4:
             if (!(option == "BASS")) {
-              _context4.n = 6;
+              _context4.n = 5;
               break;
             }
-            _context4.n = 5;
-            return _saveSheetMusicToBASS().catch(function (err) {
-              throw new Error("Save As BASS Exception: " + err.message);
-            });
+            _context4.n = 4;
+            return _saveSheetMusicToBASS();
+          case 4:
+            return _context4.a(2, _context4.v);
           case 5:
-            _result3 = _context4.v;
-            return _context4.a(2, _result3);
-          case 6:
-            _context4.n = 8;
-            break;
-          case 7:
-            _context4.p = 7;
-            _t3 = _context4.v;
-            throw new Error('[setSaveAs Error] ' + _t3);
-          case 8:
-            problem = "This SaveAs format is not supported : ".concat(option);
+            problem = "Please use either SaveAs:PDF or SaveAs:BASS";
             return _context4.a(2, problem);
         }
-      }, _callee4, null, [[2, 7]]);
+      }, _callee4);
     }));
     return _setSaveAs.apply(this, arguments);
   }
@@ -1670,7 +1645,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return problem;
     }
     if (!Number.isInteger(convert) || convert < MIN_TEMPO || convert > MAX_TEMPO) {
-      var _problem = "[TEMPO ERROR] Tempo (BPM) must be an integer in the range of ".concat(MIN_TEMPO, " and ").concat(MAX_TEMPO);
+      var _problem = "[TEMPO ERROR] BPM must be a whole number between ".concat(MIN_TEMPO, " and ").concat(MAX_TEMPO);
       error.msg = _problem;
       return _problem;
     }
@@ -1684,7 +1659,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return problem;
     }
     if (!Number.isInteger(convert) || convert < MIN_OCTAVE || convert > MAX_OCTAVE) {
-      var _problem2 = "[SET OCTAVE ERROR] Default octave must be a number in the range of ".concat(MIN_OCTAVE, " and ").concat(MAX_OCTAVE, ". ");
+      var _problem2 = "[SET OCTAVE ERROR] Default octave must be a whole number between ".concat(MIN_OCTAVE, " and ").concat(MAX_OCTAVE, ". ");
       error.msg = _problem2;
       return _problem2;
     }

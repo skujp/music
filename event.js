@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "11.0.0";
+    // VERSION = "11.0.1";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
@@ -132,25 +132,24 @@ function initEvents() {
     playBtn.addEventListener('click', () => {
         const sheetContent = sheetMusic.value;
         const sequencer = bass.buildSequencer(sheetContent);
+        const error = bass.getErrorMsg();
         
-        if (sequencer) {
-            if (bass.getRoadmapStatus()) {
-                oops(`🎧 🐉 [Roadmap Mode Playing]  | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'show');
-            } else if (bass.hasComment()) {
-                oops(`🎧 🤔 [Vi-De Mode Playing] | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'warning');
+        if (error !== -1) {
+            if (sequencer) {
+                if (bass.getRoadmapStatus()) {
+                    oops(`🎧 🐉 [Roadmap Mode Playing]  | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'show');
+                } else if (bass.hasComment()) {
+                    oops(`🎧 🤔 [Vi-De Mode Playing] | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'warning');
+                } else {
+                    oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
+                }
+                bass.playSequencer(sequencer).catch((e) => {
+                    oops(`[IRQ EXCEPTION]: ${e.message}`, 'warning');
+                });
             } else {
-                oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
+                oops(error, 'error');
             }
-            bass.playSequencer(sequencer).catch((e) => {
-                // if (e.name !== 'AbortError') {
-                //     oops(`[Error playing sequencer]: ${e.message}`, 'error');
-                // }
-                oops(`[IRQ EXCEPTION]: ${e.message}`, 'error');
-            });
-        } else {
-            oops(bass.getErrorMsg(), 'error');  // synchronous
         }
-
         sheetMusic.prevClick = PLAYBTN;
     });
 
@@ -447,7 +446,7 @@ function initEvents() {
                 sheetMusic.style.height = sheetMusic.scrollHeight + 'px';
                 sheetMusic.dispatchEvent(new Event('input', { bubbles: true }));
                 sheetMusic.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                oops(`(Loading) ${entry.title || 'Untitled Song'}`, 'info');
+                oops(`⌛ ${entry.title || 'Untitled Song'}`, 'info');
             }
         });
 
@@ -695,14 +694,14 @@ function initEvents() {
         return match ? decodeURIComponent(match[2]) : null;
     }
 
-    const THREE_DAYS_IN_SECONDS = 3 * 24 * 60 * 60;
-    const THREE_DAYS_IN_MILLISECONDS = THREE_DAYS_IN_SECONDS * 1000;
+    const DEFAULT_DAYS_IN_SECONDS = 3 * 24 * 60 * 60;
+    const DEFAULT_DAYS_IN_MILLISECONDS = DEFAULT_DAYS_IN_SECONDS * 1000;
 
-    function setThreeDayCookie() {
+    function setDefaultDayCookie() {
         const date = new Date();
-        date.setTime(date.getTime() + THREE_DAYS_IN_MILLISECONDS);
+        date.setTime(date.getTime() + DEFAULT_DAYS_IN_MILLISECONDS);
         const expires = "expires=" + date.toUTCString();
-        document.cookie = `__Host-site_active=true; ${expires}; max-age=${THREE_DAYS_IN_SECONDS}; path=/; SameSite=Strict; Secure`;
+        document.cookie = `__Host-site_active=true; ${expires}; max-age=${DEFAULT_DAYS_IN_SECONDS}; path=/; SameSite=Strict; Secure`;
     }
 
     function _cookiesEnabled() {
@@ -734,7 +733,7 @@ function initEvents() {
             const lastOpen = parseInt(localStorage.getItem('site_last_opened'), 10);
             if (isNaN(lastOpen)) {
                 localStorage.setItem('site_last_opened', now);
-            } else if (now - lastOpen > THREE_DAYS_IN_MILLISECONDS) {
+            } else if (now - lastOpen > DEFAULT_DAYS_IN_MILLISECONDS) {
                 localStorage.setItem('site_last_opened', now);
                 shouldUpdate = true;
             }
@@ -744,7 +743,7 @@ function initEvents() {
             if (cookiesEnabled && !completedFallbackReload) {
                 const isSiteActive = getCookie('__Host-site_active');
                 if (!isSiteActive) {
-                    setThreeDayCookie();
+                    setDefaultDayCookie();
                     shouldUpdate = true;
                 }
             } else {
@@ -753,7 +752,7 @@ function initEvents() {
                 } else {
                     const sParam = urlParams.get('p');
                     const sTimestamp = parseInt(sParam, 10);
-                    if (!isNaN(sTimestamp) && (now - sTimestamp > THREE_DAYS_IN_MILLISECONDS)) {
+                    if (!isNaN(sTimestamp) && (now - sTimestamp > DEFAULT_DAYS_IN_MILLISECONDS)) {
                         shouldUpdate = true;
                     }
                 }
