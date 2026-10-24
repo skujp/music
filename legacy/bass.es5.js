@@ -1078,10 +1078,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         return;
       }
     }
-    for (var _i5 = 0, _asyncFuncs = asyncFuncs; _i5 < _asyncFuncs.length; _i5++) {
-      var _asyncFuncs$_i = _slicedToArray(_asyncFuncs[_i5], 2),
-        _func2 = _asyncFuncs$_i[0],
-        _arg2 = _asyncFuncs$_i[1];
+    if (asyncFuncs.length == 1) {
+      var _func2 = asyncFuncs[0][0];
+      var _arg2 = asyncFuncs[0][1];
       var _result2 = this[_func2](_arg2);
       _result2.then(function (data) {
         if (data) {
@@ -1089,13 +1088,12 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         }
       }).catch(function (exp) {
         if (exp.name === 'AbortError') {
-          oops("\uD834\uDD22\u266A\u266C Masterpiece in hand? Bassboard understands \u266C\u266A\uD834\uDD1E", 'info');
+          oops("Masterpiece in hand, bassboard understands", 'info');
         } else {
           oops("".concat(exp), 'error');
         }
       });
       error.msg = -1;
-      break;
     }
     var result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank];
     validArgs.add(result);

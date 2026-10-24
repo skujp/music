@@ -1340,7 +1340,9 @@ function buildSequencer(sheetMusic = EMPTY) {
             return;
         } 
     }
-    for (let [func, arg] of asyncFuncs) {
+    if (asyncFuncs.length == 1) {
+        let func = asyncFuncs[0][0];
+        let arg = asyncFuncs[0][1]
         let result = this[func](arg);
         result.then(function(data) {
             if (data) {
@@ -1348,13 +1350,12 @@ function buildSequencer(sheetMusic = EMPTY) {
             } 
         }).catch(function(exp) {
             if (exp.name === 'AbortError') {
-                oops(`𝄢♪♬ Masterpiece in hand? Bassboard understands ♬♪𝄞`,'info');
+                oops(`Masterpiece in hand, bassboard understands`,'info');
             } else {
                 oops(`${exp}`,'error');
             }
         });
         error.msg = -1;
-        break;        
     }
     const result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank];
     validArgs.add(result); 
