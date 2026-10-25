@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "11.1.1";
+    // VERSION = "11.2.3";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded. Program exit';
@@ -131,11 +131,9 @@ function initEvents() {
 
     playBtn.addEventListener('click', () => {
         const sheetContent = sheetMusic.value;
-        const sequencer = bass.buildSequencer(sheetContent);
-        
+        const sequencer = bass.buildSequencer(sheetContent);        
         if (sequencer) {
-            let asyncFuncs = sequencer[sequencer.length - 1];
-            if (asyncFuncs.length === 0) {
+            if (!bass.aftermath()) {
                 if (bass.getRoadmapStatus()) {
                     oops(`🎧 🐉 [Roadmap Mode Playing]  | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'show');
                 } else if (bass.hasComment()) {
@@ -145,12 +143,11 @@ function initEvents() {
                 }
                 bass.playSequencer(sequencer).catch((e) => {
                     oops(`[IRQ EXCEPTION]: ${e.message}`, 'warning');
+                    bass.stopSequencer();
                 });
-            } else {
-                bass.aftermath(asyncFuncs);
-            }
+            }         
         } else {
-            oops(error, 'error');
+            oops(bass.getErrorMsg(), 'error'); 
         }
         sheetMusic.prevClick = PLAYBTN;
     });

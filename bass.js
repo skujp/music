@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "11.1.1";
+const VERSION = "11.2.3";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -124,6 +124,7 @@ var notes = _initMusicMajorScale();
 var roadmapMode = null;                                                 
 var MAX_ROADMAP_VISITED = 333;                                          
 var DEF_ROADMAP_VISITED = 1;                                            
+var asyncFuncs = [];                                                    
 function _initMusicMajorScale() {
     const baseNotes = {1: 'C', 2: 'C#', 3: 'D', 4: 'D#', 5: 'E', 6: 'F', 7: 'F#', 8: 'G', 9: 'G#', 10: 'A', 11: 'A#', 12: 'B'};
     const notes = { ...baseNotes };
@@ -258,8 +259,8 @@ system loop back begins. For the case of :|| symbol, it will stop eventually.
 
 10. Classical Rule
 By default, the BASS system implements several classical rule checks to make
-sure the sheet music follow common classical standard. For example: if there is
-a leading tone in the sheet music (section II.6), this rule will be applied: 
+sure the sheet music adhere to common classical standard. For example: if there 
+is a leading tone in the sheet music (section II.6), this rule will be applied: 
 'The number of opening beats and ending beats must equal the numerator beats in 
 time signature'. Another example is: in a repeat section, volta brackets should 
 be adjacent. Or one more example: the opening section can not begin with a 
@@ -638,6 +639,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     CLASSICAL = true;        
     DEF_OCTAVE = 4;
     isPlaying = false;
+    asyncFuncs = [];
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
         error.msg = `[SHEET MUSIC ERROR] sheet music length exceeds limit`;
         return;
@@ -659,7 +661,6 @@ function buildSequencer(sheetMusic = EMPTY) {
     }
     var index = 0;
     let syncFuncs = [];
-    let asyncFuncs = [];
     let match;
     let dupFuncs = new Set();
     let offset_beats = 0; 
@@ -1341,7 +1342,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             return;
         } 
     }
-    const result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank, asyncFuncs];
+    const result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank];
     validArgs.add(result); 
     return result; 
 }
@@ -1898,22 +1899,22 @@ function getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
         return -6;
     }    
 }
-function aftermath(asyncFuncs = []) {
+function aftermath() {
     if (asyncFuncs.length === 1 && asyncFuncs[0][0] === 'setSaveAs') {
-        let result = this[asyncFuncs[0][0]](asyncFuncs[0][1]);
+        let result = setSaveAs(asyncFuncs[0][1]);
         result.then(function(data) {
             if (data) {
                 oops(`${data}`,'warning');
             } 
         }).catch(function(exp) {
             if (exp.name === 'AbortError') {
-                oops(`Masterpiece in hand, bassboard understands!`,'info');
+                oops(`Masterpiece in hand, bassboard understands`,'info');
             } else {
                 oops(`${exp}`,'error');
             }
         });
-    } else {
-        oops(`[AFTERMATH ERROR] sequencer-post-build, SaveAs not found`,'error');
+        return true;
     }
+    return false;
 }
 })(typeof window !== "undefined" ? window : this);
