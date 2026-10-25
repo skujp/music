@@ -36,7 +36,8 @@ attach(TheBass, {oops,
                  getInstrument, setInstrument,
                  getDuration, getGuitarNote, getVersion, hasComment,
                  getRoadmapStatus, getRoadmap, setRoadmap, 
-                 setClassical, getClassical 
+                 setClassical, getClassical,
+                 aftermath 
                 });    
 const DEF_BPM = 90; 
 const BPM = {                                                           
@@ -1340,24 +1341,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             return;
         } 
     }
-    if (asyncFuncs.length == 1) {
-        let func = asyncFuncs[0][0];
-        let arg = asyncFuncs[0][1]
-        let result = this[func](arg);
-        result.then(function(data) {
-            if (data) {
-                oops(`${data}`,'warning');
-            } 
-        }).catch(function(exp) {
-            if (exp.name === 'AbortError') {
-                oops(`Masterpiece in hand, bassboard understands`,'info');
-            } else {
-                oops(`${exp}`,'error');
-            }
-        });
-        error.msg = -1;
-    }
-    const result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank];
+    const result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank, asyncFuncs];
     validArgs.add(result); 
     return result; 
 }
@@ -1913,5 +1897,23 @@ function getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
     } else {
         return -6;
     }    
+}
+function aftermath(asyncFuncs = []) {
+    if (asyncFuncs.length === 1 && asyncFuncs[0][0] === 'setSaveAs') {
+        let result = this[asyncFuncs[0][0]](asyncFuncs[0][1]);
+        result.then(function(data) {
+            if (data) {
+                oops(`${data}`,'warning');
+            } 
+        }).catch(function(exp) {
+            if (exp.name === 'AbortError') {
+                oops(`Masterpiece in hand, bassboard understands!`,'info');
+            } else {
+                oops(`${exp}`,'error');
+            }
+        });
+    } else {
+        oops(`[AFTERMATH ERROR] sequencer-post-build, SaveAs not found`,'error');
+    }
 }
 })(typeof window !== "undefined" ? window : this);

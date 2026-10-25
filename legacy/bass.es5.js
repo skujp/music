@@ -122,7 +122,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     getRoadmap: getRoadmap,
     setRoadmap: setRoadmap,
     setClassical: setClassical,
-    getClassical: getClassical
+    getClassical: getClassical,
+    aftermath: aftermath
   });
   var DEF_BPM = 90;
   var BPM = {
@@ -1077,24 +1078,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         return;
       }
     }
-    if (asyncFuncs.length == 1) {
-      var _func2 = asyncFuncs[0][0];
-      var _arg2 = asyncFuncs[0][1];
-      var _result2 = this[_func2](_arg2);
-      _result2.then(function (data) {
-        if (data) {
-          oops("".concat(data), 'warning');
-        }
-      }).catch(function (exp) {
-        if (exp.name === 'AbortError') {
-          oops("Masterpiece in hand, bassboard understands", 'info');
-        } else {
-          oops("".concat(exp), 'error');
-        }
-      });
-      error.msg = -1;
-    }
-    var result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank];
+    var result = [sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank, asyncFuncs];
     validArgs.add(result);
     return result;
   }
@@ -1834,6 +1818,25 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       }
     } else {
       return -6;
+    }
+  }
+  function aftermath() {
+    var asyncFuncs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+    if (asyncFuncs.length === 1 && asyncFuncs[0][0] === 'setSaveAs') {
+      var result = this[asyncFuncs[0][0]](asyncFuncs[0][1]);
+      result.then(function (data) {
+        if (data) {
+          oops("".concat(data), 'warning');
+        }
+      }).catch(function (exp) {
+        if (exp.name === 'AbortError') {
+          oops("Masterpiece in hand, bassboard understands!", 'info');
+        } else {
+          oops("".concat(exp), 'error');
+        }
+      });
+    } else {
+      oops("[AFTERMATH ERROR] sequencer-post-build, SaveAs not found", 'error');
     }
   }
 })(typeof window !== "undefined" ? window : void 0);
