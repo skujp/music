@@ -297,8 +297,8 @@ Please note that this rhythm slash / symbol should not be mistaken with / in
 a slash chord (section II.2).
 
 15. Duplicate %
-A duplicate symbol % means to repeat playing the previous bar. For example,
-3/4 | A B C | % || will play A B C A B C.
+A duplicate symbol % means to repeat playing the previous bar (time measure). 
+For example, 3/4 | A B C | % || will play A B C A B C.
 
 16. Section Marker (#)
 A group of bars can be marked with a section marker such as (A) (B) (C), etc.
@@ -376,7 +376,8 @@ Bar (incl. double):
 | ||
 
 Opening (incl. repeat):
-| || |: ||:
+| |: ||:
+||
 
 Closing (incl. repeat):
 | || :| :||
@@ -743,11 +744,10 @@ function buildSequencer(sheetMusic = EMPTY) {
                 sequencer.push(chord); 
                 openingClassicalCount++ ; 
                 if (openingClassicalCount > beats) {
-                    error.msg = `[OPENING ERROR] opening beats (${openingClassicalCount}) > time signature beats (${beats}) is not accepted`;
+                    error.msg = `[OPENING ERROR 0] opening beats (${openingClassicalCount}) > time signature beats (${beats}) is not accepted`;
                     return;
                 }
             } else {
-                error.msg = `[CHORD ERROR 1] ${tokens[index]}`;
                 return;
             }
             index++;   
@@ -755,7 +755,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     }
     if (tokens[index] == BAR || tokens[index] == DBL_BAR) {
         if (CLASSICAL && tokens[index] == DBL_BAR) {
-            error.msg = `[CLASSICAL RULE ERROR 0] Invalid opening bar: ${DBL_BAR}`;
+            error.msg = `[CLASSICAL RULE ERROR 0] invalid opening bar: ${DBL_BAR}`;
             return;
         }
         repeatStackMap[sequencer.length] = repeatStack.length;
@@ -764,7 +764,7 @@ function buildSequencer(sheetMusic = EMPTY) {
         repeatStackMap[sequencer.length] = repeatStack.length;
         repeatStack.push([tokens[index], sequencer.length, DEF_REP_NUM]);
     } else {
-        error.msg = `[OPENING ERROR 2] invalid token at position ${index + 1}: ${tokens[index]}`;
+        error.msg = `[OPENING ERROR 1] invalid text at position ${index + 1}: ${tokens[index]}`;
         return;
     }
     index++;
@@ -847,7 +847,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             } else if (tokens[i].match(REP_NUM) || 
                        tokens[i].match(SKIP_NUM) 
                       ) { 
-                error.msg = `[MULTIPLIER OR VOLTA ERROR] invalid token at position ${i + 1}: ${tokens[i]}`;
+                error.msg = `[MULTIPLIER OR VOLTA ERROR] invalid text at position ${i + 1}: ${tokens[i]}`;
                 return;
             } else  {   
                 const match_aux = tokens[i].match(AUX);
@@ -902,7 +902,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             if (!seperateBarTokens.has(tokens[i]) && 
                 !closingTokens.has(tokens[i]) && 
                 !repeatTokens.has(tokens[i])) {
-                    error.msg = `[BAR BEAT COUNT ERROR 1] invalid token at position ${i + 1}: ${tokens[i]}`;
+                    error.msg = `[BAR BEAT COUNT ERROR 1] invalid text at position ${i + 1}: ${tokens[i]}`;
                     return;
             }
             beatCount = 0;
@@ -914,11 +914,11 @@ function buildSequencer(sheetMusic = EMPTY) {
                  (beatCount > 1 && tokens[i] !== BM)
                 )
                ) {
-                    error.msg = `[BAR BEAT COUNT ERROR 2] invalid token at position ${i + 1}: ${tokens[i]}`;
+                    error.msg = `[BAR BEAT COUNT ERROR 2] invalid text at position ${i + 1}: ${tokens[i]}`;
                     return;
             }
             if (i == length - 1 && openingClassicalCount && sequencer.length == beats && beatCount - 1 < beats) {
-                error.msg = `[BAR BEAT COUNT ERROR 3] invalid token at position ${i + 1}: ${tokens[i]}`;
+                error.msg = `[BAR BEAT COUNT ERROR 3] invalid text at position ${i + 1}: ${tokens[i]}`;
                 return;
             }
             if (pulseBarTokens.has(tokens[i])) {    
@@ -937,7 +937,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             }
             if (repeatPreviousBarTokens.has(tokens[i])) {
                 if (length < 3 || (!openingTokens.has(tokens[i-1]) && !closingTokens.has(tokens[i+1]))) {
-                    error.msg = `[REPEAT PREVIOUS BAR ERROR] invalid token at position ${i + 1}: ${tokens[i]}`;
+                    error.msg = `[REPEAT PREVIOUS BAR ERROR] invalid text at position ${i + 1}: ${tokens[i]}`;
                     return;
                 }
                 if (sequencer.length >= beats) {
@@ -945,7 +945,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                     beatCount = beats;  
                     continue;
                 } else {
-                    error.msg = `[BEAT COUNT SYNTAX ERROR] cannot repeat previous bar at position ${i + 1} with token: ${tokens[i]}`;
+                    error.msg = `[BEAT COUNT SYNTAX ERROR] cannot repeat previous bar at position ${i + 1} with text: ${tokens[i]}`;
                     return;
                 }
             }
@@ -982,7 +982,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }
                         } else {
-                            error.msg = `[STACK ERROR 1] contains wrong matching tokens ${p} for ${tokens[i]}`;
+                            error.msg = `[STACK ERROR 1] mismatch text ${p} for ${tokens[i]}`;
                             return;
                         }
                     }
@@ -1019,7 +1019,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }                            
                         } else {
-                            error.msg = `[STACK ERROR 2] contains wrong matching tokens ${p} for ${tokens[i]}`;
+                            error.msg = `[STACK ERROR 2] mismatch text ${p} for ${tokens[i]}`;
                             return;
                         }
                     }
@@ -1056,7 +1056,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }
                         } else {
-                            error.msg = `[STACK ERROR 3] contains wrong matching tokens ${p} for ${tokens[i]}`;
+                            error.msg = `[STACK ERROR 3] mismatch text ${p} for ${tokens[i]}`;
                             return;
                         }
                     }
@@ -1094,7 +1094,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }
                         } else {
-                            error.msg = `[STACK ERROR 4] contains wrong matching tokens ${p} for ${tokens[i]}`;
+                            error.msg = `[STACK ERROR 4] mismatch text ${p} for ${tokens[i]}`;
                             return;
                         }
                     }
@@ -1117,12 +1117,12 @@ function buildSequencer(sheetMusic = EMPTY) {
                 if ((p === undefined) || 
                     (length >= 2 && tokens[i-1] !== REP_START && tokens[i-1] !== DBL_REP_START && p.length !== 3) ||
                     (p[1] === 0 && sequencer.length !== 0)) {
-                    error.msg = `[REPEAT MULTIPLIER ERROR] invalid token at position ${i + 1}: ${tokens[i]}`;
+                    error.msg = `[REPEAT MULTIPLIER ERROR] invalid text at position ${i + 1}: ${tokens[i]}`;
                     return;
                 }
                 const num = Number(match_rep_num[1]);  
                 if (num > MAX_REPEAT_MULTIPLIER) {
-                    error.msg = `[REPEAT MULTIPLIER ERROR] invalid token at position ${i + 1}: ${tokens[i]}, maximum multiplier allowed is: "(${MAX_REPEAT_MULTIPLIER}x)"`;
+                    error.msg = `[REPEAT MULTIPLIER ERROR] "${tokens[i]}" at position ${i + 1} exceeds limit (${MAX_REPEAT_MULTIPLIER}x)`;
                     return;
                 }  
                 p[2] = num - 1; 
@@ -1146,7 +1146,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             const match_aux = tokens[i].match(AUX);
             if (match_aux) {
                 beatCount = beatCount - 1;
-                error.msg = `found an auxiliary token: ${tokens[i]}`;
+                error.msg = `found an auxiliary text: ${tokens[i]}`;
                 if (match_aux[1].match(SEC_MAR)) {
                     if (match_aux[1] in markerIndex) {
                         error.msg = `[AUX ERROR 1] section marker "${match_aux[1]}" is already defined`;
@@ -1314,7 +1314,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                 sequencer.push(chord); 
                 continue;
             }   
-            error.msg = `[CHORD ERROR 2] invalid token at position ${i + 1}: ${tokens[i]}`;
+            error.msg = `[CHORD ERROR 1] invalid text at position ${i + 1}: ${tokens[i]}`;
             return;
         }        
     } 
