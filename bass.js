@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "12.0.0";
+const VERSION = "12.0.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -114,9 +114,9 @@ var MAX_SECTION_REP = 51;
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var BASSBOARD_DB_FIELD = new Set(["Contributor", "Title"]);              
 var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
-var ACL_SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name]);  
-var ACL_SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]); 
-var ACL_ASYNC  = new Set([setSaveAs.name]);
+var SYNC_0   = new Set([setSustain.name, setRoadmap.name, setClassical.name]);  
+var SYNC_1   = new Set([setTempo.name, setOctave.name, setInstrument.name]); 
+var ASYNC_0  = new Set([setSaveAs.name]);
 var _isPlaying = false;
 var currentSequencerRef = null;                                             
 var validArgs = new WeakSet();                                          
@@ -690,14 +690,14 @@ function buildSequencer(sheetMusic = EMPTY) {
             offset_beats += 1;
             continue;
         }
-        if (ACL_SYNC_0.has(setFunc)) {    
+        if (SYNC_0.has(setFunc)) {    
             let status = this[setFunc](arg);  
             if (status !== undefined) {    
                 return;
             }
-        } else if (ACL_SYNC_1.has(setFunc)) {
+        } else if (SYNC_1.has(setFunc)) {
             syncFuncs.push([setFunc,arg]);
-        } else if (ACL_ASYNC.has(setFunc)) {
+        } else if (ASYNC_0.has(setFunc)) {
             asyncFuncs.push([setFunc,arg]);
         } else {
             error.msg = `[AUTHORIZATION REQUIRED] ${setFunc} not permitted`;
@@ -1652,7 +1652,7 @@ async function playSequencer(sequencerObj) {
             } else {
                 roadmapRank = tempRank; 
                 roadmapVisited = tempRoadmapVisited; 
-                oops('📣Encore More♾️', 'info');
+                oops('📣Encore More🧢', 'info');
             }
         }
     }

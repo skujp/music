@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "12.0.0";
+    // VERSION = "12.0.1";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded, program exit';
@@ -22,6 +22,47 @@ function initEvents() {
 
     // volume for treble clef
     var TREB_VOL = 0.5;
+
+    // quotes collected from copilot
+    const WRITE_QUOTES = [
+        "Write the rhyme, make it climb",
+        "Drop the beat, make it elite",
+        "Hit the page, set the stage",
+        "Write that heat, make it repeat",
+        "Stack the bars, reach the stars",
+        "Lay the track, don't look back",
+        "Fill the sheet, bring the heat",
+        "Write with soul, make it gold",
+        "Craft the tune, shine like the moon",
+        "Strike the note, stay afloat",
+        "Chase the dream, build your theme",
+        "Make it tight, own the night",
+        "Pen the sound, wear the crown",
+        "From the page to the fame, make them remember your name",
+        "Write one line, make it divine"
+    ];
+
+    const READ_QUOTES = [
+        "Read that score, become folklore",
+        "Eyes on the staff, learn the craft",
+        "Read that page, own the stage",
+        "Study the notes, then run the show",
+        "Read the game, build your name",
+        "Learn the flow, then steal the show",
+        "Read those bars, reach the stars",
+        "Catch that vibe, let it ride",
+        "Read more scores, unlock more doors",
+        "Read the greats, elevate",
+        "Drop those notes, stack those quotes",
+        "Read that heat, then complete",
+        "Write that flame, chase no fame, make a name",
+        "Learn the rules, then make new moves",
+        "Read the masters, become the master"
+    ];
+
+    function randomQuote(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
 
     const SHEETMUSIC = 'sheetMusic';
     const PLAYBTN = 'playBtn';
@@ -135,9 +176,9 @@ function initEvents() {
         if (sequencer) {
             if (!bass.aftermath()) {
                 if (bass.getRoadmapStatus()) {
-                    oops(`🎧 Roadmap Mode 🐉`, 'vex1');
+                    oops(`🎧 Roadmap Mode 🐉`, 'roadmap');
                 } else if (bass.hasComment()) {
-                    oops(`🎧 Vi-De Mode 🙈`, 'warning');
+                    oops(`🎧 Vi-De Mode 🙈`, 'vide');
                 } else {
                     oops(`🎧 Playing`, 'success');
                 }
@@ -146,7 +187,7 @@ function initEvents() {
                         bass.stopSequencer();
                     }
                     if (e.message !== 'IRQ') {
-                        oops(`[HASTA LATOR GATOR 🐊] ${e.message}`, 'error');
+                        oops(`[SYSTEM ERROR] ${e.message}`, 'error');
                     }
                 });
             }         
@@ -160,7 +201,7 @@ function initEvents() {
         if (sheetMusic.prevClick == READBTN) {
             if (sheetMusic.value.length >  bass.getMaxSheetLength()) {
                 sheetMusic.value = "";
-                oops('Stop', 'warning');
+                oops("❝" + randomQuote(WRITE_QUOTES) + "❞", 'warning');
                 sheetMusic.style.height = '300px';
             }
             bass.stopSequencer();
@@ -170,7 +211,7 @@ function initEvents() {
                 sheetMusic.style.height = '300px';
             }
             bass.stopSequencer();
-            oops('Stop', 'warning');
+            oops("❝" + randomQuote(READ_QUOTES) + "❞", 'warning');
         }
         sheetMusic.prevClick = STOPBTN;
     });
@@ -179,7 +220,7 @@ function initEvents() {
         if (sheetMusic.prevClick !== READBTN || sheetMusic.value.length == 0) {
             sheetMusic.value = bass.help();
             sheetMusic.style.height = '300px';
-            oops('Reading', 'info');
+            oops('Read it, rock it 🔥', 'info');
             sheetMusic.prevClick = READBTN;
         }
     });
@@ -449,7 +490,7 @@ function initEvents() {
                 sheetMusic.style.height = sheetMusic.scrollHeight + 'px';
                 sheetMusic.dispatchEvent(new Event('input', { bubbles: true }));
                 sheetMusic.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                oops(`⌛ ${entry.title || 'Untitled Song'}`, 'vex1');
+                oops(`⌛ ${entry.title || 'Untitled Song'}`, 'title');
             }
         });
 
@@ -697,7 +738,7 @@ function initEvents() {
         return match ? decodeURIComponent(match[2]) : null;
     }
 
-    const DEFAULT_DAYS_IN_SECONDS = 3 * 24 * 60 * 60;
+    const DEFAULT_DAYS_IN_SECONDS = 6 * 24 * 60 * 60;
     const DEFAULT_DAYS_IN_MILLISECONDS = DEFAULT_DAYS_IN_SECONDS * 1000;
 
     function setDefaultDayCookie() {

@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "12.0.0";
+  var VERSION = "12.0.1";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -204,9 +204,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";
   var BASSBOARD_DB_FIELD = new Set(["Contributor", "Title"]);
   var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
-  var ACL_SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name]);
-  var ACL_SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]);
-  var ACL_ASYNC = new Set([setSaveAs.name]);
+  var SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name]);
+  var SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]);
+  var ASYNC_0 = new Set([setSaveAs.name]);
   var _isPlaying = false;
   var currentSequencerRef = null;
   var validArgs = new WeakSet();
@@ -435,14 +435,14 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         offset_beats += 1;
         continue;
       }
-      if (ACL_SYNC_0.has(setFunc)) {
+      if (SYNC_0.has(setFunc)) {
         var status = this[setFunc](arg);
         if (status !== undefined) {
           return;
         }
-      } else if (ACL_SYNC_1.has(setFunc)) {
+      } else if (SYNC_1.has(setFunc)) {
         syncFuncs.push([setFunc, arg]);
-      } else if (ACL_ASYNC.has(setFunc)) {
+      } else if (ASYNC_0.has(setFunc)) {
         asyncFuncs.push([setFunc, arg]);
       } else {
         error.msg = "[AUTHORIZATION REQUIRED] ".concat(setFunc, " not permitted");
@@ -1538,7 +1538,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           case 18:
             roadmapRank = tempRank;
             roadmapVisited = tempRoadmapVisited;
-            oops('📣Encore More♾️', 'info');
+            oops('📣Encore More🧢', 'info');
           case 19:
             _context3.n = 3;
             break;
