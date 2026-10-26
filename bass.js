@@ -112,8 +112,11 @@ var DEF_DURATION = 60 / BPM.val;
 var DEF_MSEC = DEF_DURATION * 1000;                                     
 var MAX_SECTION_REP = 51;                                               
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
-var BASSBOARD_DB_FIELD = new Set(["Contributor","Title"]);              
+var BASSBOARD_DB_FIELD = new Set(["Contributor", "Title"]);              
 var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
+var ACL_SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name]);  
+var ACL_SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]); 
+var ACL_ASYNC  = new Set([setSaveAs.name]);
 var isPlaying = false;
 var currentSequencerRef = null;                                             
 var validArgs = new WeakSet();                                          
@@ -504,7 +507,7 @@ The BASS system is written by a music enthusiast to help you learn rhythms,
 chords, and very basic compositions. It is by no means to replace a trained 
 professional who can guide you through your complete music endeavor. This 
 system is not designed with strict classical notation in mind. 
-Well, take what works, make some music, and have fun!
+Take what works, make some music, and have fun!
 
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
@@ -687,15 +690,18 @@ function buildSequencer(sheetMusic = EMPTY) {
             offset_beats += 1;
             continue;
         }
-        if (setFunc == 'setSustain' || setFunc == 'setRoadmap' || setFunc == 'setClassical') {    
+        if (ACL_SYNC_0.has(setFunc)) {    
             let status = this[setFunc](arg);  
             if (status !== undefined) {    
                 return;
             }
-        } else if (setFunc == 'setSaveAs') {
-            asyncFuncs.push([setFunc,arg]);
-        } else {          
+        } else if (ACL_SYNC_1.has(setFunc)) {
             syncFuncs.push([setFunc,arg]);
+        } else if (ACL_ASYNC.has(setFunc)) {
+            asyncFuncs.push([setFunc,arg]);
+        } else {
+            error.msg = `[AUTHORIZATION REQUIRED] ${setFunc} not permitted`;
+            return;
         }
         index += 1;
         offset_beats += 1;
@@ -1900,8 +1906,9 @@ function getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
     }    
 }
 function aftermath() {
-    if (asyncFuncs.length === 1 && asyncFuncs[0][0] === 'setSaveAs') {
-        let result = setSaveAs(asyncFuncs[0][1]);
+    let asyncInvoke = false;
+    for (let [func, arg] of asyncFuncs) {
+        let result = this[func](arg);
         result.then(function(data) {
             if (data) {
                 oops(`${data}`,'warning');
@@ -1913,8 +1920,10 @@ function aftermath() {
                 oops(`${exp}`,'error');
             }
         });
-        return true;
+        if (!asyncInvoke) {
+            asyncInvoke = true;
+        } 
     }
-    return false;
+    return asyncInvoke;
 }
 })(typeof window !== "undefined" ? window : this);
