@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "11.2.3";
+const VERSION = "12.0.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -37,7 +37,7 @@ attach(TheBass, {oops,
                  getDuration, getGuitarNote, getVersion, hasComment,
                  getRoadmapStatus, getRoadmap, setRoadmap, 
                  setClassical, getClassical,
-                 aftermath 
+                 aftermath, isPlaying 
                 });    
 const DEF_BPM = 90; 
 const BPM = {                                                           
@@ -117,7 +117,7 @@ var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Aut
 var ACL_SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name]);  
 var ACL_SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]); 
 var ACL_ASYNC  = new Set([setSaveAs.name]);
-var isPlaying = false;
+var _isPlaying = false;
 var currentSequencerRef = null;                                             
 var validArgs = new WeakSet();                                          
 var _sheetMusic;                                                        
@@ -544,7 +544,7 @@ function getChordNotes(chord=FAKE) {
     const ebassRoot = (match[10] + (match[11] || '')) || '';
     var rootNoteNumber = notes[root];
     if (rootNoteNumber === undefined) {
-        error.msg = `invalid root for the chord: ${chord}`;
+        error.msg = `invalid root for chord: ${chord}`;
         return null; 
     }
     var thirdNoteNumber = (rootNoteNumber + 4) % OCTAVE_LENGTH || OCTAVE_LENGTH;
@@ -641,10 +641,10 @@ function buildSequencer(sheetMusic = EMPTY) {
     DEF_ROADMAP_VISITED = 1; 
     CLASSICAL = true;        
     DEF_OCTAVE = 4;
-    isPlaying = false;
+    _isPlaying = false;
     asyncFuncs = [];
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
-        error.msg = `[SHEET MUSIC ERROR] sheet music length exceeds limit`;
+        error.msg = `[SHEET MUSIC ERROR] length exceeds limit`;
         return;
     }
     const openingTokens = new Set([BAR, REP_START, DBL_REP_START, DBL_BAR]);
@@ -659,7 +659,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     const tokens = sheetMusic.trim().split(SPACE);
     const length = tokens.length;
     if (length > 0 && !tokens[length-1].endsWith(BAR)) {
-        error.msg = `[SHEET MUSIC ENDING ERROR] ending symbol must be | or :| or || or :||`;
+        error.msg = `[SHEET MUSIC ENDING ERROR] ending must be | or :| or || or :||`;
         return;
     }
     var index = 0;
@@ -718,7 +718,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             error.msg = `[TIME SIGNATURE ERROR] use default time signature ${DEF_TIME_SIGNATURE}`;
         }
     } else {
-        error.msg = `[SHEET MUSIC ERROR] a sheet music can not be empty`;
+        error.msg = `[SHEET MUSIC ERROR] empty sheet music`;
         return;
     }
     if (beats == 0) {
@@ -752,7 +752,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                 sequencer.push(chord); 
                 openingClassicalCount++ ; 
                 if (openingClassicalCount > beats) {
-                    error.msg = `[OPENING ERROR 0] opening beats (${openingClassicalCount}) > time signature beats (${beats}) is not accepted`;
+                    error.msg = `[OPENING ERROR 0] opening beats (${openingClassicalCount}) > time signature beats (${beats})`;
                     return;
                 }
             } else {
@@ -772,7 +772,7 @@ function buildSequencer(sheetMusic = EMPTY) {
         repeatStackMap[sequencer.length] = repeatStack.length;
         repeatStack.push([tokens[index], sequencer.length, DEF_REP_NUM]);
     } else {
-        error.msg = `[OPENING ERROR 1] invalid text at position ${index + 1}: ${tokens[index]}`;
+        error.msg = `[OPENING ERROR 1] invalid at location ${index + 1}: ${tokens[index]}`;
         return;
     }
     index++;
@@ -780,7 +780,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     var maxsequencerlength = MAX_SHEET_LENGTH * MAX_SECTION_REP; 
     for (let i = index; i < length; i++) {
         if (sequencer.length > maxsequencerlength) {
-            error.msg = `[BUILD SEQUENCER ERROR] sequencer length is too long (${maxsequencerlength}+ chars), reduce repeats or shorten sections`;
+            error.msg = `[BUILD SEQUENCER ERROR] length too long (${maxsequencerlength}+ chars), reduce repeats or shorten sections`;
             return;
         } 
         if (_cmtActive) {
@@ -801,26 +801,26 @@ function buildSequencer(sheetMusic = EMPTY) {
             const rs = tokens[i].slice(1,-1);
             if (roadmapTokens.has(rs)) {
                 if (rs in roadmap) {
-                    error.msg = `[ROADMAP DUPLICATE ERROR 1] too many roadmap symbols: ${tokens[i]}`;
+                    error.msg = `[ROADMAP DUPLICATE ERROR 1] exceed: ${tokens[i]}`;
                     return;
                 }
                 roadmap[rs] = sequencer.length;
                 roadmapVisited[rs] = DEF_ROADMAP_VISITED; 
                 if (sequencer.length in roadmap) {
-                    error.msg = `[ROADMAP EXIST ERROR 1] too many existing roadmap symbols at position ${i}`;
+                    error.msg = `[ROADMAP EXIST ERROR 1] exceed roadmap symbols at location ${i}`;
                     return;
                 }
                 roadmap[sequencer.length] = rs;
                 if (rs === DC || rs === DCALCODA || rs === DCALFINE) {
                     if (roadmapMode) {
-                        error.msg = `[ROADMAP DC DACAPO ERROR 1] too many dc dacapo repeats: ${DC} ${DCALCODA} ${DCALFINE}`;
+                        error.msg = `[ROADMAP DC DACAPO ERROR 1] exceed dc dacapo repeats: ${DC} ${DCALCODA} ${DCALFINE}`;
                         return;
                     }
                     roadmapMode = rs;
                     roadmapRank[0] = rs;
                 } else if (rs === DS || rs === DSALCODA || rs === DSALFINE) {
                     if (roadmapMode) {
-                        error.msg = `[ROADMAP DS SEGNO ERROR 1] too many ds segno repeats: ${DS} ${DSALCODA} ${DSALFINE}`;
+                        error.msg = `[ROADMAP DS SEGNO ERROR 1] exceed ds segno repeats: ${DS} ${DSALCODA} ${DSALFINE}`;
                         return;
                     }
                     roadmapMode = rs;
@@ -828,25 +828,25 @@ function buildSequencer(sheetMusic = EMPTY) {
                 }
                 if (rs === SEGNO) {
                     if (roadmapRank[1]) {
-                        error.msg = `[ROADMAP SEGNO ERROR 1] too many (${SEGNO}) symbols repeats`;
+                        error.msg = `[ROADMAP SEGNO ERROR 1] exceed (${SEGNO}) symbols repeats`;
                         return;
                     }
                     roadmapRank[1] = rs;
                 } else if (rs === TOCODA) {
                     if (roadmapRank[2]) {
-                        error.msg = `[ROADMAP TOCODA ERROR 1] too many (TO.CODA) symbols repeats`;
+                        error.msg = `[ROADMAP TOCODA ERROR 1] exceed (TO.CODA) symbols repeats`;
                         return;
                     }
                     roadmapRank[2] = rs;
                 } else if (rs === CODA) {
                     if (roadmapRank[3]) {
-                        error.msg = `[ROADMAP CODA ERROR 1] too many (${CODA}) symbols repeats`;
+                        error.msg = `[ROADMAP CODA ERROR 1] exceed (${CODA}) symbols repeats`;
                         return;
                     }
                     roadmapRank[3] = rs;
                 } else if (rs === FINE) {
                         if (roadmapRank[4]) {
-                        error.msg = `[ROADMAP FINE ERROR 1] too many (FINE) symbols repeats`;
+                        error.msg = `[ROADMAP FINE ERROR 1] exceed (FINE) symbols repeats`;
                         return;
                     }
                     roadmapRank[4] = rs;
@@ -855,7 +855,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             } else if (tokens[i].match(REP_NUM) || 
                        tokens[i].match(SKIP_NUM) 
                       ) { 
-                error.msg = `[MULTIPLIER OR VOLTA ERROR] invalid text at position ${i + 1}: ${tokens[i]}`;
+                error.msg = `[MULTIPLIER OR VOLTA ERROR] invalid at location ${i + 1}: ${tokens[i]}`;
                 return;
             } else  {   
                 const match_aux = tokens[i].match(AUX);
@@ -887,22 +887,22 @@ function buildSequencer(sheetMusic = EMPTY) {
         if (i == length - 1) {
             if (openingClassicalCount && (beatCount + openingClassicalCount - 1 !== beats)) {
                 if (CLASSICAL) {
-                    error.msg = `[CLASSICAL RULE ERROR 1] opening beats (${openingClassicalCount}) + ending beats (${beatCount - 1}) not equal to time signature beats (${beats})`;
+                    error.msg = `[CLASSICAL RULE ERROR 1] opening beats (${openingClassicalCount}) + ending beats (${beatCount - 1}) <> time signature numerator (${beats})`;
                     return;
                 }
             }
             if (openingClassicalCount === 0 && (beatCount !== beats + 1)) {
-                error.msg = `[ENDING BAR BEAT ERROR 1] ending bar beats (${beatCount-1}) not equal to time signature beats (${beats})`;
+                error.msg = `[ENDING BAR BEAT ERROR 1] ending bar beats (${beatCount-1}) <> time signature numerator (${beats})`;
                 return;
             }
             if (openingClassicalCount > 0 && beatCount == 1) {
                 if (!CLASSICAL) {
-                    error.msg = `[ENDING BAR BEAT ERROR 2] ending bar beats (${beatCount-1}) is not accepted in this time signature`;
+                    error.msg = `[ENDING BAR BEAT ERROR 2] invalid ending bar beats (${beatCount-1})`;
                     return;
                 }
             }
             if (openingClassicalCount === beats && beatCount === 1) {
-                error.msg = `[ENDING BAR BEAT ERROR 3] ending bar beats (${beatCount-1}) is not accepted in this time signature`;
+                error.msg = `[ENDING BAR BEAT ERROR 3] invalid ending bar beats (${beatCount-1})`;
                 return;
             }
         } 
@@ -910,7 +910,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             if (!seperateBarTokens.has(tokens[i]) && 
                 !closingTokens.has(tokens[i]) && 
                 !repeatTokens.has(tokens[i])) {
-                    error.msg = `[BAR BEAT COUNT ERROR 1] invalid text at position ${i + 1}: ${tokens[i]}`;
+                    error.msg = `[BAR BEAT COUNT ERROR 1] invalid at location ${i + 1}: ${tokens[i]}`;
                     return;
             }
             beatCount = 0;
@@ -922,11 +922,11 @@ function buildSequencer(sheetMusic = EMPTY) {
                  (beatCount > 1 && tokens[i] !== BM)
                 )
                ) {
-                    error.msg = `[BAR BEAT COUNT ERROR 2] invalid text at position ${i + 1}: ${tokens[i]}`;
+                    error.msg = `[BAR BEAT COUNT ERROR 2] invalid at location ${i + 1}: ${tokens[i]}`;
                     return;
             }
             if (i == length - 1 && openingClassicalCount && sequencer.length == beats && beatCount - 1 < beats) {
-                error.msg = `[BAR BEAT COUNT ERROR 3] invalid text at position ${i + 1}: ${tokens[i]}`;
+                error.msg = `[BAR BEAT COUNT ERROR 3] invalid at location ${i + 1}: ${tokens[i]}`;
                 return;
             }
             if (pulseBarTokens.has(tokens[i])) {    
@@ -935,7 +935,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                     if (repeatChord) {
                         sequencer.push(repeatChord); 
                     } else {
-                        error.msg = `no previous chord to repeat at position ${i + 1}: ${tokens[i]}`;
+                        error.msg = `no previous chord to repeat at location ${i + 1}: ${tokens[i]}`;
                         sequencer.push(BM); 
                     }
                 } else {
@@ -945,7 +945,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             }
             if (repeatPreviousBarTokens.has(tokens[i])) {
                 if (length < 3 || (!openingTokens.has(tokens[i-1]) && !closingTokens.has(tokens[i+1]))) {
-                    error.msg = `[REPEAT PREVIOUS BAR ERROR] invalid text at position ${i + 1}: ${tokens[i]}`;
+                    error.msg = `[REPEAT PREVIOUS BAR ERROR] invalid at location ${i + 1}: ${tokens[i]}`;
                     return;
                 }
                 if (sequencer.length >= beats) {
@@ -953,7 +953,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                     beatCount = beats;  
                     continue;
                 } else {
-                    error.msg = `[BEAT COUNT SYNTAX ERROR] cannot repeat previous bar at position ${i + 1} with text: ${tokens[i]}`;
+                    error.msg = `[BEAT COUNT SYNTAX ERROR] cannot repeat previous bar at location ${i + 1} with: ${tokens[i]}`;
                     return;
                 }
             }
@@ -969,7 +969,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                     if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
                         voltaArr[voltaArr.length - 1][2] = sequencer.length; 
                         if (CLASSICAL && (i+1 < length) && !tokens[i+1].match(SKIP_NUM)) {
-                            error.msg = `[CLASSICAL VOLTA BRACKET ERROR 1] one more volta bracket is needed at position ${i} after repeat symbols ${tokens[i]}`;
+                            error.msg = `[CLASSICAL VOLTA BRACKET ERROR 1] additional volta bracket required at location ${i+1} after repeat symbols ${tokens[i]}`;
                             return;
                         } 
                     }
@@ -990,7 +990,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }
                         } else {
-                            error.msg = `[STACK ERROR 1] mismatch text ${p} for ${tokens[i]}`;
+                            error.msg = `[STACK ERROR 1] mismatch ${p} for ${tokens[i]}`;
                             return;
                         }
                     }
@@ -1006,7 +1006,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                     if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
                         voltaArr[voltaArr.length - 1][2] = sequencer.length; 
                         if (CLASSICAL && (i+1 < length) && !tokens[i+1].match(SKIP_NUM)) {
-                            error.msg = `[CLASSICAL VOLTA BRACKET ERROR 2] one more volta bracket is needed at position ${i} after repeat symbols ${tokens[i]}`;
+                            error.msg = `[CLASSICAL VOLTA BRACKET ERROR 2] additional volta bracket required at location ${i+1} after repeat symbols ${tokens[i]}`;
                             return;                    
                         }
                     }
@@ -1027,7 +1027,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }                            
                         } else {
-                            error.msg = `[STACK ERROR 2] mismatch text ${p} for ${tokens[i]}`;
+                            error.msg = `[STACK ERROR 2] mismatch ${p} for ${tokens[i]}`;
                             return;
                         }
                     }
@@ -1043,7 +1043,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                     if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
                         voltaArr[voltaArr.length - 1][2] = sequencer.length; 
                         if (CLASSICAL && (i+1 < length) && !tokens[i+1].match(SKIP_NUM)) {
-                            error.msg = `[CLASSICAL VOLTA BRACKET ERROR 3] one more volta bracket is needed at position ${i} after repeat symbols ${tokens[i]}`;
+                            error.msg = `[CLASSICAL VOLTA BRACKET ERROR 3] additional volta bracket required at location ${i+1} after repeat symbols ${tokens[i]}`;
                             return;                    
                         }
                     }
@@ -1064,7 +1064,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }
                         } else {
-                            error.msg = `[STACK ERROR 3] mismatch text ${p} for ${tokens[i]}`;
+                            error.msg = `[STACK ERROR 3] mismatch ${p} for ${tokens[i]}`;
                             return;
                         }
                     }
@@ -1081,7 +1081,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                     if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
                         voltaArr[voltaArr.length - 1][2] = sequencer.length; 
                         if (CLASSICAL && (i+1 < length) && !tokens[i+1].match(SKIP_NUM)) {
-                            error.msg = `[CLASSICAL VOLTA BRACKET ERROR 4] one more volta bracket is needed at position ${i} after repeat symbols ${tokens[i]}`;
+                            error.msg = `[CLASSICAL VOLTA BRACKET ERROR 4] additional volta bracket required at location ${i+1} after repeat symbols ${tokens[i]}`;
                             return;                    
                         }
                     }
@@ -1102,7 +1102,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                                 voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];  
                             }
                         } else {
-                            error.msg = `[STACK ERROR 4] mismatch text ${p} for ${tokens[i]}`;
+                            error.msg = `[STACK ERROR 4] mismatch ${p} for ${tokens[i]}`;
                             return;
                         }
                     }
@@ -1125,12 +1125,12 @@ function buildSequencer(sheetMusic = EMPTY) {
                 if ((p === undefined) || 
                     (length >= 2 && tokens[i-1] !== REP_START && tokens[i-1] !== DBL_REP_START && p.length !== 3) ||
                     (p[1] === 0 && sequencer.length !== 0)) {
-                    error.msg = `[REPEAT MULTIPLIER ERROR] invalid text at position ${i + 1}: ${tokens[i]}`;
+                    error.msg = `[REPEAT MULTIPLIER ERROR] invalid at location ${i + 1}: ${tokens[i]}`;
                     return;
                 }
                 const num = Number(match_rep_num[1]);  
                 if (num > MAX_REPEAT_MULTIPLIER) {
-                    error.msg = `[REPEAT MULTIPLIER ERROR] "${tokens[i]}" at position ${i + 1} exceeds limit (${MAX_REPEAT_MULTIPLIER}x)`;
+                    error.msg = `[REPEAT MULTIPLIER ERROR] "${tokens[i]}" at location ${i + 1} exceeds limit (${MAX_REPEAT_MULTIPLIER}x)`;
                     return;
                 }  
                 p[2] = num - 1; 
@@ -1144,7 +1144,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                 voltaArr.push([false, 0, tokens.length]);   
                 if (voltaArr.length > 1) {
                     if (voltaArr.length > MAX_VOLTA) {
-                        error.msg = `[VOLTA BRACKETS ERROR] too many volta brackets are in use, max allowed: ${MAX_VOLTA}`;
+                        error.msg = `[VOLTA BRACKETS ERROR] exceed volta brackets are in use, max allowed: ${MAX_VOLTA}`;
                         return;
                     }
                     voltaArr[voltaArr.length - 1][1] =  voltaArr[voltaArr.length - 2][1]; 
@@ -1154,7 +1154,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             const match_aux = tokens[i].match(AUX);
             if (match_aux) {
                 beatCount = beatCount - 1;
-                error.msg = `found an auxiliary text: ${tokens[i]}`;
+                error.msg = `found an auxiliary: ${tokens[i]}`;
                 if (match_aux[1].match(SEC_MAR)) {
                     if (match_aux[1] in markerIndex) {
                         error.msg = `[AUX ERROR 1] section marker "${match_aux[1]}" is already defined`;
@@ -1257,26 +1257,26 @@ function buildSequencer(sheetMusic = EMPTY) {
                 } 
                 if (roadmapTokens.has(match_aux[1])) {
                     if (match_aux[1] in roadmap) {
-                        error.msg = `[ROADMAP DUPLICATE ERROR 2] too many roadmap symbols: ${tokens[i]}`;
+                        error.msg = `[ROADMAP DUPLICATE ERROR 2] exceed roadmap symbols: ${tokens[i]}`;
                         return;
                     }
                     roadmap[match_aux[1]] = sequencer.length;
                     roadmapVisited[match_aux[1]] = DEF_ROADMAP_VISITED; 
                     if (sequencer.length in roadmap) {
-                        error.msg = `[ROADMAP EXIST ERROR 2] too many existing roadmap symbols at position ${i}`;
+                        error.msg = `[ROADMAP EXIST ERROR 2] exceed existing roadmap symbols at location ${i}`;
                         return;
                     }
                     roadmap[sequencer.length] = match_aux[1];
                     if (match_aux[1] === DC || match_aux[1] === DCALCODA || match_aux[1] === DCALFINE) {
                         if (roadmapMode) {
-                            error.msg = `[ROADMAP DC DACAPO ERROR 2] too many dc dacapo repeats: ${DC} ${DCALCODA} ${DCALFINE}`;
+                            error.msg = `[ROADMAP DC DACAPO ERROR 2] exceed dc dacapo repeats: ${DC} ${DCALCODA} ${DCALFINE}`;
                             return;
                         }
                         roadmapMode = match_aux[1];
                         roadmapRank[0] = match_aux[1];
                     } else if (match_aux[1] === DS || match_aux[1] === DSALCODA || match_aux[1] === DSALFINE) {
                         if (roadmapMode) {
-                            error.msg = `[ROADMAP DS SEGNO ERROR 2] too many ds segno repeats: ${DS} ${DSALCODA} ${DSALFINE}`;
+                            error.msg = `[ROADMAP DS SEGNO ERROR 2] exceed ds segno repeats: ${DS} ${DSALCODA} ${DSALFINE}`;
                             return;
                         }
                         roadmapMode = match_aux[1];
@@ -1284,25 +1284,25 @@ function buildSequencer(sheetMusic = EMPTY) {
                     }
                     if (match_aux[1] === SEGNO) {
                         if (roadmapRank[1]) {
-                            error.msg = `[ROADMAP SEGNO ERROR 2] too many (${SEGNO}) symbols repeats`;
+                            error.msg = `[ROADMAP SEGNO ERROR 2] exceed (${SEGNO}) symbols repeats`;
                             return;
                         }
                         roadmapRank[1] = match_aux[1];
                     } else if (match_aux[1] === TOCODA) {
                         if (roadmapRank[2]) {
-                            error.msg = `[ROADMAP TOCODA ERROR 2] too many (TO.CODA) symbols repeats`;
+                            error.msg = `[ROADMAP TOCODA ERROR 2] exceed (TO.CODA) symbols repeats`;
                             return;
                         }
                         roadmapRank[2] = match_aux[1];
                     } else if (match_aux[1] === CODA) {
                         if (roadmapRank[3]) {
-                            error.msg = `[ROADMAP CODA ERROR 2] too many (${CODA}) symbols repeats`;
+                            error.msg = `[ROADMAP CODA ERROR 2] exceed (${CODA}) symbols repeats`;
                             return;
                         }
                         roadmapRank[3] = match_aux[1];
                     } else if (match_aux[1] === FINE) {
                          if (roadmapRank[4]) {
-                            error.msg = `[ROADMAP FINE ERROR 2] too many (FINE) symbols repeats`;
+                            error.msg = `[ROADMAP FINE ERROR 2] exceed (FINE) symbols repeats`;
                             return;
                         }
                         roadmapRank[4] = match_aux[1];
@@ -1322,7 +1322,7 @@ function buildSequencer(sheetMusic = EMPTY) {
                 sequencer.push(chord); 
                 continue;
             }   
-            error.msg = `[CHORD ERROR 1] invalid text at position ${i + 1}: ${tokens[i]}`;
+            error.msg = `[CHORD ERROR 1] invalid at location ${i + 1}: ${tokens[i]}`;
             return;
         }        
     } 
@@ -1397,7 +1397,7 @@ function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volum
 }
 function _delay(ms = DEF_MSEC) {
   return new Promise((resolve, reject) => {
-    if (isPlaying) {
+    if (_isPlaying) {
       setTimeout(resolve, ms);
     } else {
       reject(new Error("IRQ"));
@@ -1571,17 +1571,17 @@ async function playSequencer(sequencerObj) {
   let n = sequencer.length;
   let timeout = 0; 
   let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));     
-  isPlaying = true;
-  oops('🤟 | | |', 'info');
+  _isPlaying = true;
+  oops('🤟', 'info');
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC); 
-  oops('✌️ | |', 'info');
+  oops('✌️', 'info');
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC); 
-  oops('☝️ |', 'info');
+  oops('☝️', 'info');
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC);   
-  while (isPlaying && timeout < MAX_TIMEOUT) {
+  while (_isPlaying && timeout < MAX_TIMEOUT) {
         if (myRef !== currentSequencerRef) {
             return; 
         }
@@ -1592,7 +1592,7 @@ async function playSequencer(sequencerObj) {
         }
         let tempRoadmapVisited = JSON.parse(JSON.stringify(roadmapVisited));     
         let tempRank = [...roadmapRank];
-        while (isPlaying && i < n) {
+        while (_isPlaying && i < n) {
             if (myRef !== currentSequencerRef) {
                 return; 
             }
@@ -1645,14 +1645,14 @@ async function playSequencer(sequencerObj) {
                 }
             }
         }
-        if (isPlaying) {
+        if (_isPlaying) {
             if (end && (!(n-1 in repeatCount) || repeatCount[n-1] == 0)) {
-                oops('♪ ♫ 👏 Whoohoo! 👏 ♫ ♪ ', 'info');
+                oops('♪♫👏Whoohoo👏♫♪', 'info');
                 return;
             } else {
                 roadmapRank = tempRank; 
                 roadmapVisited = tempRoadmapVisited; 
-                oops('👏🥁🔔 Encore, back for more! 🎺🎷🎉', 'info');
+                oops('📣Encore More♾️', 'info');
             }
         }
     }
@@ -1707,7 +1707,7 @@ function oops(message, type = 'info', show=true) {
     }, 3000);
 }
 function stopSequencer() {
-    isPlaying = false;
+    _isPlaying = false;
 }
 function setTempo(bpm) {
     const convert = Number(bpm);
@@ -1925,5 +1925,8 @@ function aftermath() {
         } 
     }
     return asyncInvoke;
+}
+function isPlaying() {
+    return _isPlaying;
 }
 })(typeof window !== "undefined" ? window : this);

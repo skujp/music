@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "11.2.3";
+  var VERSION = "12.0.0";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -123,7 +123,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     setRoadmap: setRoadmap,
     setClassical: setClassical,
     getClassical: getClassical,
-    aftermath: aftermath
+    aftermath: aftermath,
+    isPlaying: isPlaying
   });
   var DEF_BPM = 90;
   var BPM = {
@@ -206,7 +207,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var ACL_SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name]);
   var ACL_SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]);
   var ACL_ASYNC = new Set([setSaveAs.name]);
-  var isPlaying = false;
+  var _isPlaying = false;
   var currentSequencerRef = null;
   var validArgs = new WeakSet();
   var _sheetMusic;
@@ -278,7 +279,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var ebassRoot = match[10] + (match[11] || '') || '';
     var rootNoteNumber = notes[root];
     if (rootNoteNumber === undefined) {
-      error.msg = "invalid root for the chord: ".concat(chord);
+      error.msg = "invalid root for chord: ".concat(chord);
       return null;
     }
     var thirdNoteNumber = (rootNoteNumber + 4) % OCTAVE_LENGTH || OCTAVE_LENGTH;
@@ -386,10 +387,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     DEF_ROADMAP_VISITED = 1;
     CLASSICAL = true;
     DEF_OCTAVE = 4;
-    isPlaying = false;
+    _isPlaying = false;
     asyncFuncs = [];
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
-      error.msg = "[SHEET MUSIC ERROR] sheet music length exceeds limit";
+      error.msg = "[SHEET MUSIC ERROR] length exceeds limit";
       return;
     }
     var openingTokens = new Set([BAR, REP_START, DBL_REP_START, DBL_BAR]);
@@ -403,7 +404,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var tokens = sheetMusic.trim().split(SPACE);
     var length = tokens.length;
     if (length > 0 && !tokens[length - 1].endsWith(BAR)) {
-      error.msg = "[SHEET MUSIC ENDING ERROR] ending symbol must be | or :| or || or :||";
+      error.msg = "[SHEET MUSIC ENDING ERROR] ending must be | or :| or || or :||";
       return;
     }
     var index = 0;
@@ -465,7 +466,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         error.msg = "[TIME SIGNATURE ERROR] use default time signature ".concat(DEF_TIME_SIGNATURE);
       }
     } else {
-      error.msg = "[SHEET MUSIC ERROR] a sheet music can not be empty";
+      error.msg = "[SHEET MUSIC ERROR] empty sheet music";
       return;
     }
     if (beats == 0) {
@@ -499,7 +500,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           sequencer.push(chord);
           openingClassicalCount++;
           if (openingClassicalCount > beats) {
-            error.msg = "[OPENING ERROR 0] opening beats (".concat(openingClassicalCount, ") > time signature beats (").concat(beats, ") is not accepted");
+            error.msg = "[OPENING ERROR 0] opening beats (".concat(openingClassicalCount, ") > time signature beats (").concat(beats, ")");
             return;
           }
         } else {
@@ -519,7 +520,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       repeatStackMap[sequencer.length] = repeatStack.length;
       repeatStack.push([tokens[index], sequencer.length, DEF_REP_NUM]);
     } else {
-      error.msg = "[OPENING ERROR 1] invalid text at position ".concat(index + 1, ": ").concat(tokens[index]);
+      error.msg = "[OPENING ERROR 1] invalid at location ".concat(index + 1, ": ").concat(tokens[index]);
       return;
     }
     index++;
@@ -527,7 +528,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var maxsequencerlength = MAX_SHEET_LENGTH * MAX_SECTION_REP;
     for (var i = index; i < length; i++) {
       if (sequencer.length > maxsequencerlength) {
-        error.msg = "[BUILD SEQUENCER ERROR] sequencer length is too long (".concat(maxsequencerlength, "+ chars), reduce repeats or shorten sections");
+        error.msg = "[BUILD SEQUENCER ERROR] length too long (".concat(maxsequencerlength, "+ chars), reduce repeats or shorten sections");
         return;
       }
       if (_cmtActive) {
@@ -546,26 +547,26 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         var rs = tokens[i].slice(1, -1);
         if (roadmapTokens.has(rs)) {
           if (rs in roadmap) {
-            error.msg = "[ROADMAP DUPLICATE ERROR 1] too many roadmap symbols: ".concat(tokens[i]);
+            error.msg = "[ROADMAP DUPLICATE ERROR 1] exceed: ".concat(tokens[i]);
             return;
           }
           roadmap[rs] = sequencer.length;
           roadmapVisited[rs] = DEF_ROADMAP_VISITED;
           if (sequencer.length in roadmap) {
-            error.msg = "[ROADMAP EXIST ERROR 1] too many existing roadmap symbols at position ".concat(i);
+            error.msg = "[ROADMAP EXIST ERROR 1] exceed roadmap symbols at location ".concat(i);
             return;
           }
           roadmap[sequencer.length] = rs;
           if (rs === DC || rs === DCALCODA || rs === DCALFINE) {
             if (roadmapMode) {
-              error.msg = "[ROADMAP DC DACAPO ERROR 1] too many dc dacapo repeats: ".concat(DC, " ").concat(DCALCODA, " ").concat(DCALFINE);
+              error.msg = "[ROADMAP DC DACAPO ERROR 1] exceed dc dacapo repeats: ".concat(DC, " ").concat(DCALCODA, " ").concat(DCALFINE);
               return;
             }
             roadmapMode = rs;
             roadmapRank[0] = rs;
           } else if (rs === DS || rs === DSALCODA || rs === DSALFINE) {
             if (roadmapMode) {
-              error.msg = "[ROADMAP DS SEGNO ERROR 1] too many ds segno repeats: ".concat(DS, " ").concat(DSALCODA, " ").concat(DSALFINE);
+              error.msg = "[ROADMAP DS SEGNO ERROR 1] exceed ds segno repeats: ".concat(DS, " ").concat(DSALCODA, " ").concat(DSALFINE);
               return;
             }
             roadmapMode = rs;
@@ -573,32 +574,32 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           }
           if (rs === SEGNO) {
             if (roadmapRank[1]) {
-              error.msg = "[ROADMAP SEGNO ERROR 1] too many (".concat(SEGNO, ") symbols repeats");
+              error.msg = "[ROADMAP SEGNO ERROR 1] exceed (".concat(SEGNO, ") symbols repeats");
               return;
             }
             roadmapRank[1] = rs;
           } else if (rs === TOCODA) {
             if (roadmapRank[2]) {
-              error.msg = "[ROADMAP TOCODA ERROR 1] too many (TO.CODA) symbols repeats";
+              error.msg = "[ROADMAP TOCODA ERROR 1] exceed (TO.CODA) symbols repeats";
               return;
             }
             roadmapRank[2] = rs;
           } else if (rs === CODA) {
             if (roadmapRank[3]) {
-              error.msg = "[ROADMAP CODA ERROR 1] too many (".concat(CODA, ") symbols repeats");
+              error.msg = "[ROADMAP CODA ERROR 1] exceed (".concat(CODA, ") symbols repeats");
               return;
             }
             roadmapRank[3] = rs;
           } else if (rs === FINE) {
             if (roadmapRank[4]) {
-              error.msg = "[ROADMAP FINE ERROR 1] too many (FINE) symbols repeats";
+              error.msg = "[ROADMAP FINE ERROR 1] exceed (FINE) symbols repeats";
               return;
             }
             roadmapRank[4] = rs;
           }
           continue;
         } else if (tokens[i].match(REP_NUM) || tokens[i].match(SKIP_NUM)) {
-          error.msg = "[MULTIPLIER OR VOLTA ERROR] invalid text at position ".concat(i + 1, ": ").concat(tokens[i]);
+          error.msg = "[MULTIPLIER OR VOLTA ERROR] invalid at location ".concat(i + 1, ": ").concat(tokens[i]);
           return;
         } else {
           var match_aux = tokens[i].match(AUX);
@@ -630,39 +631,39 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       if (i == length - 1) {
         if (openingClassicalCount && beatCount + openingClassicalCount - 1 !== beats) {
           if (CLASSICAL) {
-            error.msg = "[CLASSICAL RULE ERROR 1] opening beats (".concat(openingClassicalCount, ") + ending beats (").concat(beatCount - 1, ") not equal to time signature beats (").concat(beats, ")");
+            error.msg = "[CLASSICAL RULE ERROR 1] opening beats (".concat(openingClassicalCount, ") + ending beats (").concat(beatCount - 1, ") <> time signature numerator (").concat(beats, ")");
             return;
           }
         }
         if (openingClassicalCount === 0 && beatCount !== beats + 1) {
-          error.msg = "[ENDING BAR BEAT ERROR 1] ending bar beats (".concat(beatCount - 1, ") not equal to time signature beats (").concat(beats, ")");
+          error.msg = "[ENDING BAR BEAT ERROR 1] ending bar beats (".concat(beatCount - 1, ") <> time signature numerator (").concat(beats, ")");
           return;
         }
         if (openingClassicalCount > 0 && beatCount == 1) {
           if (!CLASSICAL) {
-            error.msg = "[ENDING BAR BEAT ERROR 2] ending bar beats (".concat(beatCount - 1, ") is not accepted in this time signature");
+            error.msg = "[ENDING BAR BEAT ERROR 2] invalid ending bar beats (".concat(beatCount - 1, ")");
             return;
           }
         }
         if (openingClassicalCount === beats && beatCount === 1) {
-          error.msg = "[ENDING BAR BEAT ERROR 3] ending bar beats (".concat(beatCount - 1, ") is not accepted in this time signature");
+          error.msg = "[ENDING BAR BEAT ERROR 3] invalid ending bar beats (".concat(beatCount - 1, ")");
           return;
         }
       }
       if (beatCount > beats) {
         if (!seperateBarTokens.has(tokens[i]) && !closingTokens.has(tokens[i]) && !repeatTokens.has(tokens[i])) {
-          error.msg = "[BAR BEAT COUNT ERROR 1] invalid text at position ".concat(i + 1, ": ").concat(tokens[i]);
+          error.msg = "[BAR BEAT COUNT ERROR 1] invalid at location ".concat(i + 1, ": ").concat(tokens[i]);
           return;
         }
         beatCount = 0;
       }
       if (validTokens.has(tokens[i])) {
         if (i < length - 1 && (beatCount == 1 && tokens[i] !== BM && tokens[i] !== BAR_REPEAT || beatCount > 1 && tokens[i] !== BM)) {
-          error.msg = "[BAR BEAT COUNT ERROR 2] invalid text at position ".concat(i + 1, ": ").concat(tokens[i]);
+          error.msg = "[BAR BEAT COUNT ERROR 2] invalid at location ".concat(i + 1, ": ").concat(tokens[i]);
           return;
         }
         if (i == length - 1 && openingClassicalCount && sequencer.length == beats && beatCount - 1 < beats) {
-          error.msg = "[BAR BEAT COUNT ERROR 3] invalid text at position ".concat(i + 1, ": ").concat(tokens[i]);
+          error.msg = "[BAR BEAT COUNT ERROR 3] invalid at location ".concat(i + 1, ": ").concat(tokens[i]);
           return;
         }
         if (pulseBarTokens.has(tokens[i])) {
@@ -671,7 +672,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             if (repeatChord) {
               sequencer.push(repeatChord);
             } else {
-              error.msg = "no previous chord to repeat at position ".concat(i + 1, ": ").concat(tokens[i]);
+              error.msg = "no previous chord to repeat at location ".concat(i + 1, ": ").concat(tokens[i]);
               sequencer.push(BM);
             }
           } else {
@@ -681,7 +682,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         }
         if (repeatPreviousBarTokens.has(tokens[i])) {
           if (length < 3 || !openingTokens.has(tokens[i - 1]) && !closingTokens.has(tokens[i + 1])) {
-            error.msg = "[REPEAT PREVIOUS BAR ERROR] invalid text at position ".concat(i + 1, ": ").concat(tokens[i]);
+            error.msg = "[REPEAT PREVIOUS BAR ERROR] invalid at location ".concat(i + 1, ": ").concat(tokens[i]);
             return;
           }
           if (sequencer.length >= beats) {
@@ -689,7 +690,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             beatCount = beats;
             continue;
           } else {
-            error.msg = "[BEAT COUNT SYNTAX ERROR] cannot repeat previous bar at position ".concat(i + 1, " with text: ").concat(tokens[i]);
+            error.msg = "[BEAT COUNT SYNTAX ERROR] cannot repeat previous bar at location ".concat(i + 1, " with: ").concat(tokens[i]);
             return;
           }
         }
@@ -705,7 +706,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
               voltaArr[voltaArr.length - 1][2] = sequencer.length;
               if (CLASSICAL && i + 1 < length && !tokens[i + 1].match(SKIP_NUM)) {
-                error.msg = "[CLASSICAL VOLTA BRACKET ERROR 1] one more volta bracket is needed at position ".concat(i, " after repeat symbols ").concat(tokens[i]);
+                error.msg = "[CLASSICAL VOLTA BRACKET ERROR 1] additional volta bracket required at location ".concat(i + 1, " after repeat symbols ").concat(tokens[i]);
                 return;
               }
             }
@@ -726,7 +727,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                   voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
                 }
               } else {
-                error.msg = "[STACK ERROR 1] mismatch text ".concat(p, " for ").concat(tokens[i]);
+                error.msg = "[STACK ERROR 1] mismatch ".concat(p, " for ").concat(tokens[i]);
                 return;
               }
             }
@@ -742,7 +743,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
               voltaArr[voltaArr.length - 1][2] = sequencer.length;
               if (CLASSICAL && i + 1 < length && !tokens[i + 1].match(SKIP_NUM)) {
-                error.msg = "[CLASSICAL VOLTA BRACKET ERROR 2] one more volta bracket is needed at position ".concat(i, " after repeat symbols ").concat(tokens[i]);
+                error.msg = "[CLASSICAL VOLTA BRACKET ERROR 2] additional volta bracket required at location ".concat(i + 1, " after repeat symbols ").concat(tokens[i]);
                 return;
               }
             }
@@ -763,7 +764,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                   voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
                 }
               } else {
-                error.msg = "[STACK ERROR 2] mismatch text ".concat(_p, " for ").concat(tokens[i]);
+                error.msg = "[STACK ERROR 2] mismatch ".concat(_p, " for ").concat(tokens[i]);
                 return;
               }
             }
@@ -779,7 +780,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
               voltaArr[voltaArr.length - 1][2] = sequencer.length;
               if (CLASSICAL && i + 1 < length && !tokens[i + 1].match(SKIP_NUM)) {
-                error.msg = "[CLASSICAL VOLTA BRACKET ERROR 3] one more volta bracket is needed at position ".concat(i, " after repeat symbols ").concat(tokens[i]);
+                error.msg = "[CLASSICAL VOLTA BRACKET ERROR 3] additional volta bracket required at location ".concat(i + 1, " after repeat symbols ").concat(tokens[i]);
                 return;
               }
             }
@@ -800,7 +801,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                   voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
                 }
               } else {
-                error.msg = "[STACK ERROR 3] mismatch text ".concat(_p2, " for ").concat(tokens[i]);
+                error.msg = "[STACK ERROR 3] mismatch ".concat(_p2, " for ").concat(tokens[i]);
                 return;
               }
             }
@@ -817,7 +818,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             if (voltaArr.length > 0 && voltaArr[voltaArr.length - 1][2] == tokens.length) {
               voltaArr[voltaArr.length - 1][2] = sequencer.length;
               if (CLASSICAL && i + 1 < length && !tokens[i + 1].match(SKIP_NUM)) {
-                error.msg = "[CLASSICAL VOLTA BRACKET ERROR 4] one more volta bracket is needed at position ".concat(i, " after repeat symbols ").concat(tokens[i]);
+                error.msg = "[CLASSICAL VOLTA BRACKET ERROR 4] additional volta bracket required at location ".concat(i + 1, " after repeat symbols ").concat(tokens[i]);
                 return;
               }
             }
@@ -838,7 +839,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                   voltaArr[voltaArr.length - 1][1] = loopBackIndex[sequencer.length - 1];
                 }
               } else {
-                error.msg = "[STACK ERROR 4] mismatch text ".concat(_p3, " for ").concat(tokens[i]);
+                error.msg = "[STACK ERROR 4] mismatch ".concat(_p3, " for ").concat(tokens[i]);
                 return;
               }
             }
@@ -859,12 +860,12 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           beatCount = beatCount - 1;
           var _p4 = repeatStack.pop();
           if (_p4 === undefined || length >= 2 && tokens[i - 1] !== REP_START && tokens[i - 1] !== DBL_REP_START && _p4.length !== 3 || _p4[1] === 0 && sequencer.length !== 0) {
-            error.msg = "[REPEAT MULTIPLIER ERROR] invalid text at position ".concat(i + 1, ": ").concat(tokens[i]);
+            error.msg = "[REPEAT MULTIPLIER ERROR] invalid at location ".concat(i + 1, ": ").concat(tokens[i]);
             return;
           }
           var num = Number(match_rep_num[1]);
           if (num > MAX_REPEAT_MULTIPLIER) {
-            error.msg = "[REPEAT MULTIPLIER ERROR] \"".concat(tokens[i], "\" at position ").concat(i + 1, " exceeds limit (").concat(MAX_REPEAT_MULTIPLIER, "x)");
+            error.msg = "[REPEAT MULTIPLIER ERROR] \"".concat(tokens[i], "\" at location ").concat(i + 1, " exceeds limit (").concat(MAX_REPEAT_MULTIPLIER, "x)");
             return;
           }
           _p4[2] = num - 1;
@@ -878,7 +879,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           voltaArr.push([false, 0, tokens.length]);
           if (voltaArr.length > 1) {
             if (voltaArr.length > MAX_VOLTA) {
-              error.msg = "[VOLTA BRACKETS ERROR] too many volta brackets are in use, max allowed: ".concat(MAX_VOLTA);
+              error.msg = "[VOLTA BRACKETS ERROR] exceed volta brackets are in use, max allowed: ".concat(MAX_VOLTA);
               return;
             }
             voltaArr[voltaArr.length - 1][1] = voltaArr[voltaArr.length - 2][1];
@@ -888,7 +889,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         var _match_aux = tokens[i].match(AUX);
         if (_match_aux) {
           beatCount = beatCount - 1;
-          error.msg = "found an auxiliary text: ".concat(tokens[i]);
+          error.msg = "found an auxiliary: ".concat(tokens[i]);
           if (_match_aux[1].match(SEC_MAR)) {
             if (_match_aux[1] in markerIndex) {
               error.msg = "[AUX ERROR 1] section marker \"".concat(_match_aux[1], "\" is already defined");
@@ -991,26 +992,26 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           }
           if (roadmapTokens.has(_match_aux[1])) {
             if (_match_aux[1] in roadmap) {
-              error.msg = "[ROADMAP DUPLICATE ERROR 2] too many roadmap symbols: ".concat(tokens[i]);
+              error.msg = "[ROADMAP DUPLICATE ERROR 2] exceed roadmap symbols: ".concat(tokens[i]);
               return;
             }
             roadmap[_match_aux[1]] = sequencer.length;
             roadmapVisited[_match_aux[1]] = DEF_ROADMAP_VISITED;
             if (sequencer.length in roadmap) {
-              error.msg = "[ROADMAP EXIST ERROR 2] too many existing roadmap symbols at position ".concat(i);
+              error.msg = "[ROADMAP EXIST ERROR 2] exceed existing roadmap symbols at location ".concat(i);
               return;
             }
             roadmap[sequencer.length] = _match_aux[1];
             if (_match_aux[1] === DC || _match_aux[1] === DCALCODA || _match_aux[1] === DCALFINE) {
               if (roadmapMode) {
-                error.msg = "[ROADMAP DC DACAPO ERROR 2] too many dc dacapo repeats: ".concat(DC, " ").concat(DCALCODA, " ").concat(DCALFINE);
+                error.msg = "[ROADMAP DC DACAPO ERROR 2] exceed dc dacapo repeats: ".concat(DC, " ").concat(DCALCODA, " ").concat(DCALFINE);
                 return;
               }
               roadmapMode = _match_aux[1];
               roadmapRank[0] = _match_aux[1];
             } else if (_match_aux[1] === DS || _match_aux[1] === DSALCODA || _match_aux[1] === DSALFINE) {
               if (roadmapMode) {
-                error.msg = "[ROADMAP DS SEGNO ERROR 2] too many ds segno repeats: ".concat(DS, " ").concat(DSALCODA, " ").concat(DSALFINE);
+                error.msg = "[ROADMAP DS SEGNO ERROR 2] exceed ds segno repeats: ".concat(DS, " ").concat(DSALCODA, " ").concat(DSALFINE);
                 return;
               }
               roadmapMode = _match_aux[1];
@@ -1018,25 +1019,25 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             }
             if (_match_aux[1] === SEGNO) {
               if (roadmapRank[1]) {
-                error.msg = "[ROADMAP SEGNO ERROR 2] too many (".concat(SEGNO, ") symbols repeats");
+                error.msg = "[ROADMAP SEGNO ERROR 2] exceed (".concat(SEGNO, ") symbols repeats");
                 return;
               }
               roadmapRank[1] = _match_aux[1];
             } else if (_match_aux[1] === TOCODA) {
               if (roadmapRank[2]) {
-                error.msg = "[ROADMAP TOCODA ERROR 2] too many (TO.CODA) symbols repeats";
+                error.msg = "[ROADMAP TOCODA ERROR 2] exceed (TO.CODA) symbols repeats";
                 return;
               }
               roadmapRank[2] = _match_aux[1];
             } else if (_match_aux[1] === CODA) {
               if (roadmapRank[3]) {
-                error.msg = "[ROADMAP CODA ERROR 2] too many (".concat(CODA, ") symbols repeats");
+                error.msg = "[ROADMAP CODA ERROR 2] exceed (".concat(CODA, ") symbols repeats");
                 return;
               }
               roadmapRank[3] = _match_aux[1];
             } else if (_match_aux[1] === FINE) {
               if (roadmapRank[4]) {
-                error.msg = "[ROADMAP FINE ERROR 2] too many (FINE) symbols repeats";
+                error.msg = "[ROADMAP FINE ERROR 2] exceed (FINE) symbols repeats";
                 return;
               }
               roadmapRank[4] = _match_aux[1];
@@ -1056,7 +1057,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           sequencer.push(_chord);
           continue;
         }
-        error.msg = "[CHORD ERROR 1] invalid text at position ".concat(i + 1, ": ").concat(tokens[i]);
+        error.msg = "[CHORD ERROR 1] invalid at location ".concat(i + 1, ": ").concat(tokens[i]);
         return;
       }
     }
@@ -1143,7 +1144,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   function _delay() {
     var ms = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEF_MSEC;
     return new Promise(function (resolve, reject) {
-      if (isPlaying) {
+      if (_isPlaying) {
         setTimeout(resolve, ms);
       } else {
         reject(new Error("IRQ"));
@@ -1397,23 +1398,23 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             n = sequencer.length;
             timeout = 0;
             tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));
-            isPlaying = true;
-            oops('🤟 | | |', 'info');
+            _isPlaying = true;
+            oops('🤟', 'info');
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 1;
             return _delay(DEF_MSEC);
           case 1:
-            oops('✌️ | |', 'info');
+            oops('✌️', 'info');
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 2;
             return _delay(DEF_MSEC);
           case 2:
-            oops('☝️ |', 'info');
+            oops('☝️', 'info');
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 3;
             return _delay(DEF_MSEC);
           case 3:
-            if (!(isPlaying && timeout < MAX_TIMEOUT)) {
+            if (!(_isPlaying && timeout < MAX_TIMEOUT)) {
               _context3.n = 20;
               break;
             }
@@ -1431,7 +1432,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             tempRoadmapVisited = JSON.parse(JSON.stringify(roadmapVisited));
             tempRank = _toConsumableArray(roadmapRank);
           case 5:
-            if (!(isPlaying && i < n)) {
+            if (!(_isPlaying && i < n)) {
               _context3.n = 17;
               break;
             }
@@ -1524,7 +1525,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             _context3.n = 5;
             break;
           case 17:
-            if (!isPlaying) {
+            if (!_isPlaying) {
               _context3.n = 19;
               break;
             }
@@ -1532,12 +1533,12 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
               _context3.n = 18;
               break;
             }
-            oops('♪ ♫ 👏 Whoohoo! 👏 ♫ ♪ ', 'info');
+            oops('♪♫👏Whoohoo👏♫♪', 'info');
             return _context3.a(2);
           case 18:
             roadmapRank = tempRank;
             roadmapVisited = tempRoadmapVisited;
-            oops('👏🥁🔔 Encore, back for more! 🎺🎷🎉', 'info');
+            oops('📣Encore More♾️', 'info');
           case 19:
             _context3.n = 3;
             break;
@@ -1628,7 +1629,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     }, 3000);
   }
   function stopSequencer() {
-    isPlaying = false;
+    _isPlaying = false;
   }
   function setTempo(bpm) {
     var convert = Number(bpm);
@@ -1858,5 +1859,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       _iterator3.f();
     }
     return asyncInvoke;
+  }
+  function isPlaying() {
+    return _isPlaying;
   }
 })(typeof window !== "undefined" ? window : void 0);

@@ -2,10 +2,10 @@
 
 function initEvents() {
 
-    // VERSION = "11.2.3";
+    // VERSION = "12.0.0";
 
     if (typeof bass === "undefined") {
-        let problem = '[ERROR] bass.js is not loaded. Program exit';
+        let problem = '[ERROR] bass.js is not loaded, program exit';
         alert(problem);
         console.log(problem);
         return;
@@ -135,15 +135,19 @@ function initEvents() {
         if (sequencer) {
             if (!bass.aftermath()) {
                 if (bass.getRoadmapStatus()) {
-                    oops(`🎧 🐉 [Roadmap Mode Playing]  | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'show');
+                    oops(`🎧 Roadmap Mode 🐉`, 'vex1');
                 } else if (bass.hasComment()) {
-                    oops(`🎧 🤔 [Vi-De Mode Playing] | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'warning');
+                    oops(`🎧 Vi-De Mode 🙈`, 'warning');
                 } else {
-                    oops(`🎧 Playing | Tempo ${bass.getTempo()} | Bass Octave ${bass.getOctave()} | Sustain ${!bass.getSustain() ? 'Yes' : 'No'}`, 'success');
+                    oops(`🎧 Playing`, 'success');
                 }
                 bass.playSequencer(sequencer).catch((e) => {
-                    oops(`[IRQ EXCEPTION]: ${e.message}`, 'warning');
-                    bass.stopSequencer();
+                    if (bass.isPlaying()) {
+                        bass.stopSequencer();
+                    }
+                    if (e.message !== 'IRQ') {
+                        oops(`[HASTA LATOR GATOR 🐊] ${e.message}`, 'error');
+                    }
                 });
             }         
         } else {
@@ -156,7 +160,7 @@ function initEvents() {
         if (sheetMusic.prevClick == READBTN) {
             if (sheetMusic.value.length >  bass.getMaxSheetLength()) {
                 sheetMusic.value = "";
-                oops('Stop reading manual', 'warning');
+                oops('Stop', 'warning');
                 sheetMusic.style.height = '300px';
             }
             bass.stopSequencer();
@@ -166,7 +170,7 @@ function initEvents() {
                 sheetMusic.style.height = '300px';
             }
             bass.stopSequencer();
-            oops('Stop playing music', 'warning');
+            oops('Stop', 'warning');
         }
         sheetMusic.prevClick = STOPBTN;
     });
@@ -175,7 +179,7 @@ function initEvents() {
         if (sheetMusic.prevClick !== READBTN || sheetMusic.value.length == 0) {
             sheetMusic.value = bass.help();
             sheetMusic.style.height = '300px';
-            oops('Reading manual', 'info');
+            oops('Reading', 'info');
             sheetMusic.prevClick = READBTN;
         }
     });
@@ -369,7 +373,7 @@ function initEvents() {
 
     function upOctave() {
         if (UP1 >= MAXUP) {
-            oops('Max Octave Reached', 'error');
+            oops('Max octave reached', 'error');
             return;
         }
         UP1 += 1;
@@ -378,7 +382,7 @@ function initEvents() {
 
     function downOctave() {
         if (UP1 <= MINUP) {
-            oops('Min Octave Reached', 'error');
+            oops('Min octave reached', 'error');
             return;
         }
         UP1 -= 1;
@@ -445,7 +449,7 @@ function initEvents() {
                 sheetMusic.style.height = sheetMusic.scrollHeight + 'px';
                 sheetMusic.dispatchEvent(new Event('input', { bubbles: true }));
                 sheetMusic.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                oops(`⌛ ${entry.title || 'Untitled Song'}`, 'info');
+                oops(`⌛ ${entry.title || 'Untitled Song'}`, 'vex1');
             }
         });
 
@@ -579,7 +583,7 @@ function initEvents() {
             localStorage.setItem(key, value);
         } catch (error) {
             if (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                let msg = `Local storage quota exceeded! Running database entirely in-memory, error: ${error}`;
+                let msg = `Local storage quota exceeded, running database in-memory, error: ${error}`;
                 oops(msg, 'error');
             } else {
                 let msg = `Could not write to local storage for ${key}, error: ${error}`;
@@ -664,7 +668,7 @@ function initEvents() {
             // 6. Network/Fetch failed. Attempt emergency offline fallback using existing cache!
             if (cachedEntries) {
                 renderEntries(cachedEntries);
-                oops(`Network error (${networkError.message}). Loaded historical offline backup.`, 'warning');
+                oops(`Network error (${networkError.message}), loaded historical offline backup`, 'warning');
                 return;
             }
 
