@@ -201,7 +201,7 @@ function initEvents() {
         if (sheetMusic.prevClick == READBTN) {
             if (sheetMusic.value.length >  bass.getMaxSheetLength()) {
                 sheetMusic.value = "";
-                oops("❝" + randomQuote(WRITE_QUOTES) + "❞", 'warning');
+                oops(`❝${randomQuote(WRITE_QUOTES)}❞`, 'warning');
                 sheetMusic.style.height = '300px';
             }
             bass.stopSequencer();
@@ -211,7 +211,7 @@ function initEvents() {
                 sheetMusic.style.height = '300px';
             }
             bass.stopSequencer();
-            oops("❝" + randomQuote(READ_QUOTES) + "❞", 'warning');
+            oops(`❝${randomQuote(READ_QUOTES)}❞`, 'warning');
         }
         sheetMusic.prevClick = STOPBTN;
     });
