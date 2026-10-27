@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "12.0.1";
+    // VERSION = "12.3.4";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded, program exit';
@@ -186,7 +186,7 @@ function initEvents() {
                     if (bass.isPlaying()) {
                         bass.stopSequencer();
                     }
-                    if (e.message !== 'IRQ') {
+                    if (e.message !== 'PLAY_IN_PROGRESS') {
                         oops(`[SYSTEM ERROR] ${e.message}`, 'error');
                     }
                 });

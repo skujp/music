@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "12.0.1";
+const VERSION = "12.3.4";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -114,11 +114,10 @@ var MAX_SECTION_REP = 51;
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var BASSBOARD_DB_FIELD = new Set(["Contributor", "Title"]);              
 var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
-var SYNC_0   = new Set([setSustain.name, setRoadmap.name, setClassical.name]);  
-var SYNC_1   = new Set([setTempo.name, setOctave.name, setInstrument.name]); 
+var SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name]);  
+var SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]); 
 var ASYNC_0  = new Set([setSaveAs.name]);
 var _isPlaying = false;
-var currentSequencerRef = null;                                             
 var validArgs = new WeakSet();                                          
 var _sheetMusic;                                                        
 var _cmtActive = false;                                                 
@@ -128,6 +127,8 @@ var roadmapMode = null;
 var MAX_ROADMAP_VISITED = 333;                                          
 var DEF_ROADMAP_VISITED = 1;                                            
 var asyncFuncs = [];                                                    
+var currentTimeout;
+var _sCount = 0;
 function _initMusicMajorScale() {
     const baseNotes = {1: 'C', 2: 'C#', 3: 'D', 4: 'D#', 5: 'E', 6: 'F', 7: 'F#', 8: 'G', 9: 'G#', 10: 'A', 11: 'A#', 12: 'B'};
     const notes = { ...baseNotes };
@@ -641,8 +642,8 @@ function buildSequencer(sheetMusic = EMPTY) {
     DEF_ROADMAP_VISITED = 1; 
     CLASSICAL = true;        
     DEF_OCTAVE = 4;
-    _isPlaying = false;
     asyncFuncs = [];
+    _isPlaying = false;
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
         error.msg = `[SHEET MUSIC ERROR] length exceeds limit`;
         return;
@@ -1395,14 +1396,15 @@ function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volum
   osc.start(now);
   osc.stop(now + duration + 0.9);
 }
-function _delay(ms = DEF_MSEC) {
-  return new Promise((resolve, reject) => {
-    if (_isPlaying) {
-      setTimeout(resolve, ms);
+function _delay(ms = DEF_MSEC, myCount = -1) {
+    if (_sCount == myCount) {
+        return new Promise((resolve) => {
+            clearTimeout(currentTimeout);
+            currentTimeout = setTimeout(resolve, ms);
+        });
     } else {
-      reject(new Error("IRQ"));
+        return Promise.reject(new Error("PLAY_IN_PROGRESS"));
     }
-  });
 }
 function _playSequencerChord(sequencerChord = BM, octave = DEF_OCTAVE, duration = DEF_DURATION, volume = MAX_VOL) {
     if (sequencerChord != BM) {
@@ -1549,8 +1551,9 @@ function _createOopsContainer() {
     return container;
 }
 async function playSequencer(sequencerObj) {
-  const myRef = {};
-  currentSequencerRef = myRef;
+  _sCount += 1;
+  const myCount = _sCount;   
+  _isPlaying = true;
   var sequencer=SMP_SEQUENCER;
   var loopBackIndex={};
   var repeatCount={};
@@ -1571,20 +1574,16 @@ async function playSequencer(sequencerObj) {
   let n = sequencer.length;
   let timeout = 0; 
   let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));     
-  _isPlaying = true;
   oops('🤟', 'info');
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
-  await _delay(DEF_MSEC); 
+  await _delay(DEF_MSEC, myCount);
   oops('✌️', 'info');
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
-  await _delay(DEF_MSEC); 
+  await _delay(DEF_MSEC, myCount); 
   oops('☝️', 'info');
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
-  await _delay(DEF_MSEC);   
-  while (_isPlaying && timeout < MAX_TIMEOUT) {
-        if (myRef !== currentSequencerRef) {
-            return; 
-        }
+  await _delay(DEF_MSEC, myCount);   
+  while (_isPlaying && myCount == _sCount && timeout < MAX_TIMEOUT) {
         timeout += 1;
         i = 0;
         for (let j = 0, len = voltaArr.length; j < len; j++) {             
@@ -1592,10 +1591,7 @@ async function playSequencer(sequencerObj) {
         }
         let tempRoadmapVisited = JSON.parse(JSON.stringify(roadmapVisited));     
         let tempRank = [...roadmapRank];
-        while (_isPlaying && i < n) {
-            if (myRef !== currentSequencerRef) {
-                return; 
-            }
+        while (_isPlaying && myCount == _sCount && i < n) {
             if (i in roadmap) {
                 let f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
                 if (f >= 0) {
@@ -1609,7 +1605,7 @@ async function playSequencer(sequencerObj) {
             if (i in voltaMap) {
                 if (!voltaArr[voltaMap[i]][0]) {      
                     _playSequencerChord(sequencer[i],DEF_OCTAVE,STACKATO_LEGATO);
-                    await _delay(DEF_MSEC);
+                    await _delay(DEF_MSEC, myCount);
                     voltaArr[voltaMap[i]][0] = true;
                     i += 1;
                 } else {
@@ -1619,7 +1615,7 @@ async function playSequencer(sequencerObj) {
                 }
             } else {
                 _playSequencerChord(sequencer[i],DEF_OCTAVE,STACKATO_LEGATO);
-                await _delay(DEF_MSEC);
+                await _delay(DEF_MSEC, myCount);
                 if (i in loopBackIndex) { 
                     if (repeatCount[i] > 0) {
                         repeatCount[i] -= 1;
@@ -1707,6 +1703,7 @@ function oops(message, type = 'info', show=true) {
     }, 3000);
 }
 function stopSequencer() {
+    _sCount = 0;
     _isPlaying = false;
 }
 function setTempo(bpm) {

@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "12.0.1";
+  var VERSION = "12.3.4";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -208,7 +208,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]);
   var ASYNC_0 = new Set([setSaveAs.name]);
   var _isPlaying = false;
-  var currentSequencerRef = null;
   var validArgs = new WeakSet();
   var _sheetMusic;
   var _cmtActive = false;
@@ -218,6 +217,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var MAX_ROADMAP_VISITED = 333;
   var DEF_ROADMAP_VISITED = 1;
   var asyncFuncs = [];
+  var currentTimeout;
+  var _sCount = 0;
   function _initMusicMajorScale() {
     var baseNotes = {
       1: 'C',
@@ -387,8 +388,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     DEF_ROADMAP_VISITED = 1;
     CLASSICAL = true;
     DEF_OCTAVE = 4;
-    _isPlaying = false;
     asyncFuncs = [];
+    _isPlaying = false;
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
       error.msg = "[SHEET MUSIC ERROR] length exceeds limit";
       return;
@@ -1143,13 +1144,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function _delay() {
     var ms = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEF_MSEC;
-    return new Promise(function (resolve, reject) {
-      if (_isPlaying) {
-        setTimeout(resolve, ms);
-      } else {
-        reject(new Error("IRQ"));
-      }
-    });
+    var myCount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
+    if (_sCount == myCount) {
+      return new Promise(function (resolve) {
+        clearTimeout(currentTimeout);
+        currentTimeout = setTimeout(resolve, ms);
+      });
+    } else {
+      return Promise.reject(new Error("PLAY_IN_PROGRESS"));
+    }
   }
   function _playSequencerChord() {
     var sequencerChord = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : BM;
@@ -1362,12 +1365,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function _playSequencer() {
     _playSequencer = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(sequencerObj) {
-      var myRef, sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank, _sequencerObj, _sequencerObj$, problem, i, n, timeout, tempRepeatCount, j, len, tempRoadmapVisited, tempRank, f, _f;
+      var myCount, sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank, _sequencerObj, _sequencerObj$, problem, i, n, timeout, tempRepeatCount, j, len, tempRoadmapVisited, tempRank, f, _f;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
-            myRef = {};
-            currentSequencerRef = myRef;
+            _sCount += 1;
+            myCount = _sCount;
+            _isPlaying = true;
             sequencer = SMP_SEQUENCER;
             loopBackIndex = {};
             repeatCount = {};
@@ -1398,32 +1402,25 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             n = sequencer.length;
             timeout = 0;
             tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));
-            _isPlaying = true;
             oops('🤟', 'info');
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 1;
-            return _delay(DEF_MSEC);
+            return _delay(DEF_MSEC, myCount);
           case 1:
             oops('✌️', 'info');
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 2;
-            return _delay(DEF_MSEC);
+            return _delay(DEF_MSEC, myCount);
           case 2:
             oops('☝️', 'info');
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 3;
-            return _delay(DEF_MSEC);
+            return _delay(DEF_MSEC, myCount);
           case 3:
-            if (!(_isPlaying && timeout < MAX_TIMEOUT)) {
-              _context3.n = 20;
+            if (!(_isPlaying && myCount == _sCount && timeout < MAX_TIMEOUT)) {
+              _context3.n = 18;
               break;
             }
-            if (!(myRef !== currentSequencerRef)) {
-              _context3.n = 4;
-              break;
-            }
-            return _context3.a(2);
-          case 4:
             timeout += 1;
             i = 0;
             for (j = 0, len = voltaArr.length; j < len; j++) {
@@ -1431,64 +1428,58 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             }
             tempRoadmapVisited = JSON.parse(JSON.stringify(roadmapVisited));
             tempRank = _toConsumableArray(roadmapRank);
-          case 5:
-            if (!(_isPlaying && i < n)) {
-              _context3.n = 17;
+          case 4:
+            if (!(_isPlaying && myCount == _sCount && i < n)) {
+              _context3.n = 15;
               break;
             }
-            if (!(myRef !== currentSequencerRef)) {
-              _context3.n = 6;
-              break;
-            }
-            return _context3.a(2);
-          case 6:
             if (!(i in roadmap)) {
-              _context3.n = 8;
+              _context3.n = 6;
               break;
             }
             f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
             if (!(f >= 0)) {
-              _context3.n = 7;
+              _context3.n = 5;
               break;
             }
             i = f;
-            return _context3.a(3, 5);
-          case 7:
+            return _context3.a(3, 4);
+          case 5:
             if (!(f == -8 || f == -3)) {
-              _context3.n = 8;
+              _context3.n = 6;
               break;
             }
             oops(getErrorMsg(), 'error');
             return _context3.a(2);
-          case 8:
+          case 6:
             if (!(i in voltaMap)) {
-              _context3.n = 12;
-              break;
-            }
-            if (voltaArr[voltaMap[i]][0]) {
               _context3.n = 10;
               break;
             }
+            if (voltaArr[voltaMap[i]][0]) {
+              _context3.n = 8;
+              break;
+            }
             _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
-            _context3.n = 9;
-            return _delay(DEF_MSEC);
-          case 9:
+            _context3.n = 7;
+            return _delay(DEF_MSEC, myCount);
+          case 7:
             voltaArr[voltaMap[i]][0] = true;
             i += 1;
-            _context3.n = 11;
+            _context3.n = 9;
             break;
-          case 10:
+          case 8:
             while (i < n && i in voltaMap && voltaArr[voltaMap[i]][0]) {
               i = voltaArr[voltaMap[i]][2];
             }
-          case 11:
-            _context3.n = 14;
+          case 9:
+            _context3.n = 12;
             break;
-          case 12:
+          case 10:
             _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
-            _context3.n = 13;
-            return _delay(DEF_MSEC);
-          case 13:
+            _context3.n = 11;
+            return _delay(DEF_MSEC, myCount);
+          case 11:
             if (i in loopBackIndex) {
               if (repeatCount[i] > 0) {
                 repeatCount[i] -= 1;
@@ -1502,47 +1493,47 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             } else {
               i += 1;
             }
-          case 14:
+          case 12:
             if (!(i === n && n in roadmap)) {
-              _context3.n = 16;
+              _context3.n = 14;
               break;
             }
             _f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
             if (!(_f >= 0)) {
-              _context3.n = 15;
+              _context3.n = 13;
               break;
             }
             i = _f;
-            return _context3.a(3, 5);
-          case 15:
+            return _context3.a(3, 4);
+          case 13:
             if (!(_f == -8 || _f == -3)) {
-              _context3.n = 16;
+              _context3.n = 14;
               break;
             }
             oops(getErrorMsg(), 'error');
             return _context3.a(2);
-          case 16:
-            _context3.n = 5;
+          case 14:
+            _context3.n = 4;
             break;
-          case 17:
+          case 15:
             if (!_isPlaying) {
-              _context3.n = 19;
+              _context3.n = 17;
               break;
             }
             if (!(end && (!(n - 1 in repeatCount) || repeatCount[n - 1] == 0))) {
-              _context3.n = 18;
+              _context3.n = 16;
               break;
             }
             oops('♪♫👏Whoohoo👏♫♪', 'info');
             return _context3.a(2);
-          case 18:
+          case 16:
             roadmapRank = tempRank;
             roadmapVisited = tempRoadmapVisited;
             oops('📣Encore More🧢', 'info');
-          case 19:
+          case 17:
             _context3.n = 3;
             break;
-          case 20:
+          case 18:
             return _context3.a(2);
         }
       }, _callee3);
@@ -1629,6 +1620,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     }, 3000);
   }
   function stopSequencer() {
+    _sCount = 0;
     _isPlaying = false;
   }
   function setTempo(bpm) {
