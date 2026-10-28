@@ -660,7 +660,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     const tokens = sheetMusic.trim().split(SPACE);
     const length = tokens.length;
     if (length > 0 && !tokens[length-1].endsWith(BAR)) {
-        error.msg = `[SHEET MUSIC ENDING ERROR] ending must be | or :| or || or :||`;
+        error.msg = `[SHEET MUSIC ERROR] ending must be |, ||, :|, or :||`;
         return;
     }
     var index = 0;

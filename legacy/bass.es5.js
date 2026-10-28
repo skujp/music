@@ -405,7 +405,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var tokens = sheetMusic.trim().split(SPACE);
     var length = tokens.length;
     if (length > 0 && !tokens[length - 1].endsWith(BAR)) {
-      error.msg = "[SHEET MUSIC ENDING ERROR] ending must be | or :| or || or :||";
+      error.msg = "[SHEET MUSIC ERROR] ending must be |, ||, :|, or :||";
       return;
     }
     var index = 0;
