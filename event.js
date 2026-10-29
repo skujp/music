@@ -523,6 +523,25 @@ function initEvents() {
         return item;
     }
 
+    function randomTheme() {
+        document.body.style.backgroundColor = randomColor();
+    }
+
+    function randomColor() {
+        if (typeof randomColor.callCount === 'undefined') {
+            randomColor.callCount = 0;
+        }
+        randomColor.callCount++;
+        if (randomColor.callCount % 3 === 0) {
+            return '#f4f4f9';
+        }
+        var randomHex = Math.floor(Math.random() * 16777216).toString(16);
+        while (randomHex.length < 6) {
+            randomHex = '0' + randomHex;
+        }
+        return '#' + randomHex;
+    }
+
     function renderPage() {
         songList.innerHTML = '';
 
@@ -561,7 +580,10 @@ function initEvents() {
 
         const pageSpanInfo = document.createElement('span');
         pageSpanInfo.className = 'song-item pagination-info';
-        pageSpanInfo.textContent = `${currentPage} / ${Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE))}`;
+        pageSpanInfo.textContent = `${currentPage} 🪄 ${Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE))}`;
+        pageSpanInfo.addEventListener('click', () => {
+            randomTheme();
+        });
 
         controls.appendChild(prevBtn);
         controls.appendChild(pageSpanInfo);
