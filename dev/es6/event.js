@@ -394,7 +394,7 @@ function initEvents() {
     minusBtn.addEventListener('click', dropNoteClick);
 
     function addNoteClick() {
-        if (adjustPtr === gNote1)  { oops('Maximum notes reached!', 'warning'); return; }; // sentinel right
+        if (adjustPtr === gNote1)  { oops('Maximum notes reached', 'warning'); return; }; // sentinel right
 
         if (adjustPtr.classList.contains('white-key')) {
             if (adjustPtr.parentElement.childElementCount == 2) {
