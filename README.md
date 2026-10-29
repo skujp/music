@@ -147,7 +147,12 @@ Compatibility
 
 Works for ES6-compatible browsers.
 
-For ES5-compatible browsers, download `bass.es5.js` in legacy directory, beta-release using Babel/Polyfill.
+For ES5-compatible browsers, download `bass.es5.js`, beta-release using Babel/Polyfill.
+
+Development
+-----------
+
+Source files are in `dev` directory.
 
 Contact
 -------

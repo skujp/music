@@ -124,7 +124,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     setClassical: setClassical,
     getClassical: getClassical,
     aftermath: aftermath,
-    isPlaying: isPlaying
+    isPlaying: isPlaying,
+    setParty: setParty
   });
   var DEF_BPM = 90;
   var BPM = {
@@ -222,6 +223,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var asyncFuncs = [];
   var currentTimeout;
   var _sCount = 0;
+  var _party = false;
   function _initMusicMajorScale() {
     var baseNotes = {
       1: 'C',
@@ -1145,11 +1147,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     osc.start(now);
     osc.stop(now + duration + 0.9);
   }
+  function _randomBackground() {
+    return '#' + (0x1000000 + Math.floor(Math.random() * 0x1000000)).toString(16).slice(1);
+  }
   function _delay() {
     var ms = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEF_MSEC;
     var myCount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
     if (_sCount == myCount) {
       return new Promise(function (resolve) {
+        _party && (document.body.style.backgroundColor = _randomBackground());
         clearTimeout(currentTimeout);
         currentTimeout = setTimeout(resolve, ms);
       });
@@ -1870,5 +1876,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function isPlaying() {
     return _isPlaying;
+  }
+  function setParty() {
+    _party = !_party;
+    _party ? oops('🤸 Feel the beat, move your feet 🤸', 'title') : oops('💃 Take it slow, enjoy the glow 🕺', 'title');
   }
 })(typeof window !== "undefined" ? window : void 0);
