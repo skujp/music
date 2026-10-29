@@ -494,6 +494,7 @@ function initEvents() {
                         bass.stopSequencer();
                 }
                 oops(`⌛ ${entry.title || 'Untitled Song'}`, 'title', {d1: 50, d2: 500});
+                playBtn.click();
             }
         });
 
