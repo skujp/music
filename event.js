@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "12.3.4";
+    // VERSION = "12.3.5";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded, program exit';
@@ -490,7 +490,10 @@ function initEvents() {
                 sheetMusic.style.height = sheetMusic.scrollHeight + 'px';
                 sheetMusic.dispatchEvent(new Event('input', { bubbles: true }));
                 sheetMusic.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                oops(`⌛ ${entry.title || 'Untitled Song'}`, 'title');
+                if (bass.isPlaying()) {
+                        bass.stopSequencer();
+                }
+                oops(`⌛ ${entry.title || 'Untitled Song'}`, 'title', {d1: 50, d2: 500});
             }
         });
 

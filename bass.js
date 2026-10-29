@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "12.3.4";
+const VERSION = "12.3.5";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -51,6 +51,9 @@ const BPM = {
         DEF_MSEC = DEF_DURATION * 1000;
     }
 }
+const DELAY_0 = 10;
+const DELAY_1 = 300;
+const DELAY_2 = 3000;
 const BAR = "|";
 const DBL_BAR = "||";
 const REP_START = "|:";
@@ -660,7 +663,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     const tokens = sheetMusic.trim().split(SPACE);
     const length = tokens.length;
     if (length > 0 && !tokens[length-1].endsWith(BAR)) {
-        error.msg = `[SHEET MUSIC ERROR] ending must be |, ||, :|, or :||`;
+        error.msg = `[SHEET MUSIC ERROR] ending is | || :| or :||`;
         return;
     }
     var index = 0;
@@ -1574,13 +1577,13 @@ async function playSequencer(sequencerObj) {
   let n = sequencer.length;
   let timeout = 0; 
   let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));     
-  oops('🤟', 'info');
+  oops('🤟', 'info', {d0:1});
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC, myCount);
-  oops('✌️', 'info');
+  oops('✌️', 'info', {d0:1});
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC, myCount); 
-  oops('☝️', 'info');
+  oops('☝️', 'info', {d0:1});
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC, myCount);   
   while (_isPlaying && myCount == _sCount && timeout < MAX_TIMEOUT) {
@@ -1677,7 +1680,7 @@ function setInstrument(inst) {
         return problem;
     }
 }
-function oops(message, type = 'info', show=true) {
+function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
     if (typeof(global) !== "object" || global !== window) {
         const problem = `[OOPS ERROR] oops function: browser-only feature.`;
         error.msg = problem;
@@ -1694,13 +1697,13 @@ function oops(message, type = 'info', show=true) {
     oopsContainer.appendChild(oopsEl);
     setTimeout(function() {
         oopsEl.classList.add('oops-show');
-    }, 10);
+    }, d0);
     setTimeout(function() {
         oopsEl.classList.remove('oops-show');
         setTimeout(function() {
             oopsEl.remove();
-        }, 300);
-    }, 3000);
+        }, d1);
+    }, d2);
 }
 function stopSequencer() {
     _sCount = 0;
@@ -1714,7 +1717,7 @@ function setTempo(bpm) {
         return problem;
     }
     if (!Number.isInteger(convert) || convert < MIN_TEMPO || convert > MAX_TEMPO) {
-        const problem = `[TEMPO ERROR] bpm must be a whole number between ${MIN_TEMPO} and ${MAX_TEMPO}`;
+        const problem = `[TEMPO ERROR] bpm is a whole number between ${MIN_TEMPO} and ${MAX_TEMPO}`;
         error.msg = problem;
         return problem;
     }
@@ -1926,4 +1929,5 @@ function aftermath() {
 function isPlaying() {
     return _isPlaying;
 }
+
 })(typeof window !== "undefined" ? window : this);

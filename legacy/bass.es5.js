@@ -62,7 +62,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (global) {
-  var VERSION = "12.3.4";
+  var VERSION = "12.3.5";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -138,6 +138,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       DEF_MSEC = DEF_DURATION * 1000;
     }
   };
+  var DELAY_0 = 10;
+  var DELAY_1 = 300;
+  var DELAY_2 = 3000;
   var BAR = "|";
   var DBL_BAR = "||";
   var REP_START = "|:";
@@ -405,7 +408,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var tokens = sheetMusic.trim().split(SPACE);
     var length = tokens.length;
     if (length > 0 && !tokens[length - 1].endsWith(BAR)) {
-      error.msg = "[SHEET MUSIC ERROR] ending must be |, ||, :|, or :||";
+      error.msg = "[SHEET MUSIC ERROR] ending is | || :| or :||";
       return;
     }
     var index = 0;
@@ -1402,17 +1405,23 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             n = sequencer.length;
             timeout = 0;
             tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));
-            oops('🤟', 'info');
+            oops('🤟', 'info', {
+              d0: 1
+            });
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 1;
             return _delay(DEF_MSEC, myCount);
           case 1:
-            oops('✌️', 'info');
+            oops('✌️', 'info', {
+              d0: 1
+            });
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 2;
             return _delay(DEF_MSEC, myCount);
           case 2:
-            oops('☝️', 'info');
+            oops('☝️', 'info', {
+              d0: 1
+            });
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 3;
             return _delay(DEF_MSEC, myCount);
@@ -1594,7 +1603,14 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function oops(message) {
     var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'info';
-    var show = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+    var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+      _ref$d = _ref.d0,
+      d0 = _ref$d === void 0 ? DELAY_0 : _ref$d,
+      _ref$d2 = _ref.d1,
+      d1 = _ref$d2 === void 0 ? DELAY_1 : _ref$d2,
+      _ref$d3 = _ref.d2,
+      d2 = _ref$d3 === void 0 ? DELAY_2 : _ref$d3;
+    var show = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
     if (_typeof(global) !== "object" || global !== window) {
       var problem = "[OOPS ERROR] oops function: browser-only feature.";
       error.msg = problem;
@@ -1611,13 +1627,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     oopsContainer.appendChild(oopsEl);
     setTimeout(function () {
       oopsEl.classList.add('oops-show');
-    }, 10);
+    }, d0);
     setTimeout(function () {
       oopsEl.classList.remove('oops-show');
       setTimeout(function () {
         oopsEl.remove();
-      }, 300);
-    }, 3000);
+      }, d1);
+    }, d2);
   }
   function stopSequencer() {
     _sCount = 0;
@@ -1631,7 +1647,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return problem;
     }
     if (!Number.isInteger(convert) || convert < MIN_TEMPO || convert > MAX_TEMPO) {
-      var _problem = "[TEMPO ERROR] bpm must be a whole number between ".concat(MIN_TEMPO, " and ").concat(MAX_TEMPO);
+      var _problem = "[TEMPO ERROR] bpm is a whole number between ".concat(MIN_TEMPO, " and ").concat(MAX_TEMPO);
       error.msg = _problem;
       return _problem;
     }
