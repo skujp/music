@@ -232,7 +232,7 @@ another of a sheet music AFTER REPEAT. It is written as an open bracket followed
 by a number and a dot. For example, [1. [2. [3. [123. , etc. The next example is
 a section of a sheet music which will skip [1. and jump to [2. after repeat: 4/4
 |: A A A A | [1. B B B B :| [2. C C C C | D D D D | Please note that, the BASS
-system implements positional volta brackets, which include usages beyond common
+system implements novel volta brackets, which include usages beyond common
 music notation. For example,
 Classical:No 2/4 |: A A | [1. B B | C C :| D D | [2. E E || will play
 A A B B C C, then go back to beginning and play A A, then jump to D D, and end
