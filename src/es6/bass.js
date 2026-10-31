@@ -37,7 +37,7 @@ attach(TheBass, {oops,
                  getDuration, getGuitarNote, getVersion, hasComment,
                  getRoadmapStatus, getRoadmap, setRoadmap, 
                  setClassical, getClassical,
-                 aftermath, isPlaying, setParty
+                 aftermath, isPlaying, setParty, setFireworks
                 });    
 const DEF_BPM = 90; 
 const BPM = {                                                           
@@ -132,7 +132,8 @@ var DEF_ROADMAP_VISITED = 1;
 var asyncFuncs = [];                                                    
 var currentTimeout;
 var _sCount = 0;
-var _party = false                                                      
+var _party = 1;                                                         
+var _fws = null;                                                        
 function _initMusicMajorScale() {
     const baseNotes = {1: 'C', 2: 'C#', 3: 'D', 4: 'D#', 5: 'E', 6: 'F', 7: 'F#', 8: 'G', 9: 'G#', 10: 'A', 11: 'A#', 12: 'B'};
     const notes = { ...baseNotes };
@@ -1400,13 +1401,30 @@ function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volum
   osc.start(now);
   osc.stop(now + duration + 0.9);
 }
-function _randomBackground() {
+function _randomColor() {
     return '#' + (0x1000000 + Math.floor(Math.random() * 0x1000000)).toString(16).slice(1);        
+}
+function _startFireworks(fw) {
+    fw.style.display = 'none';    
+    fw.style.left = Math.random() * window.innerWidth + 'px';
+    fw.style.top = Math.random() * window.innerHeight + 'px';  
+    void fw.offsetWidth;
+    fw.style.color = _randomColor();    
+    fw.style.display = 'block';
+}
+function _stopFireworks(fws) {
+    for (let i = 0; i < fws.length; i++) {
+        fws[i].style.display = 'none';
+    }
 }
 function _delay(ms = DEF_MSEC, myCount = -1) {
     if (_sCount == myCount) {
         return new Promise((resolve) => {
-            (_party) && (document.body.style.backgroundColor = _randomBackground());
+            if (_party == 2) {
+                document.body.style.backgroundColor = _randomColor();
+            } else if (_party == 3) {
+                _startFireworks(_fws[Math.floor(Math.random() * _fws.length)]);
+            }
             clearTimeout(currentTimeout);
             currentTimeout = setTimeout(resolve, ms);
         });
@@ -1713,6 +1731,7 @@ function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2}
 function stopSequencer() {
     _sCount = 0;
     _isPlaying = false;
+    _stopFireworks(_fws);
 }
 function setTempo(bpm) {
     const convert = Number(bpm);
@@ -1935,7 +1954,17 @@ function isPlaying() {
     return _isPlaying;
 }
 function setParty() {
-    _party = !_party;
-    _party ? oops('🤸 Feel the beat, move your feet 🤸','title') : oops('💃 Take it slow, enjoy the glow 🕺','title');
+    _party = _party % 3 + 1;
+    if (_party == 2) {
+        oops('📻 Feel the beat, move your feet 🤸','title');
+    } else if (_party == 3) {
+        oops('✨ Flash and flare, hands in the air 🙌','title');
+    } else {
+        oops('💃 Take it slow, enjoy the glow 🕺','title');
+        _stopFireworks(_fws);
+    }
+}
+function setFireworks(fws) {
+    _fws = fws;
 }
 })(typeof window !== "undefined" ? window : this);

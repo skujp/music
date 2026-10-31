@@ -58,8 +58,11 @@
         .string-1,.string-2,.string-3,.string-4,.string-5,.string-6{height:11px}
         .emoticon-font{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial,sans-serif}
         .piano-btn-override{width:100%;height:unset;margin-bottom:15px}
-        .control-btn,.piano-btn,.pagination-btn{transition:all 0.15s ease}
-        .control-btn:active,.pagination-btn:active,.piano-btn:active{transform:scale(0.9)}
+        .control-btn,.piano-btn,.pagination-btn{transition:all 0.15s ease}.control-btn:active,.pagination-btn:active,.piano-btn:active{transform:scale(0.9)}
+        .firework{display:none;position:fixed}.fw-1{top:30%;left:30%}.fw-2{top:20%;left:70%}.fw-3{top:50%;left:50%}
+        .spark{position:absolute;width:4px;height:4px;border-radius:50%;background:currentColor;animation:explode 2s ease-out infinite;animation-delay:inherit}
+        .spark:nth-child(1){--x:0px;--y:-160px}.spark:nth-child(2){--x:120px;--y:-120px}.spark:nth-child(3){--x:160px;--y:0px}.spark:nth-child(4){--x:120px;--y:120px}.spark:nth-child(5){--x:0px;--y:160px}.spark:nth-child(6){--x:-120px;--y:120px}.spark:nth-child(7){--x:-160px;--y:0px}.spark:nth-child(8){--x:-120px;--y:-120px}
+        @keyframes explode{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--x),calc(var(--y) + 50px)) scale(0.2);opacity:0}}
     </style>
 </head>
 <body>
@@ -70,7 +73,7 @@
         <h3>is the musical language</h3>
 
         <textarea class="sheet-area" 
-                placeholder="| Use the BASS notation system to compose your music here |" 
+                placeholder="| Use the BASS notation system to compose music here |" 
                 id="sheetMusic">🎶 Loading...
         </textarea>
 
@@ -176,7 +179,29 @@
                 <li class="song-item">
                 </li>
             </ul>
-        </div> 
+        </div>
+        
+    <div id="fw1" class="firework fw-1">
+        <div class="spark"></div><div class="spark"></div>
+        <div class="spark"></div><div class="spark"></div>
+        <div class="spark"></div><div class="spark"></div>
+        <div class="spark"></div><div class="spark"></div>
+    </div>
+
+    <div id="fw2" class="firework fw-2">
+        <div class="spark"></div><div class="spark"></div>
+        <div class="spark"></div><div class="spark"></div>
+        <div class="spark"></div><div class="spark"></div>
+        <div class="spark"></div><div class="spark"></div>
+    </div>
+
+    <div id="fw3" class="firework fw-3">
+        <div class="spark"></div><div class="spark"></div>
+        <div class="spark"></div><div class="spark"></div>
+        <div class="spark"></div><div class="spark"></div>
+        <div class="spark"></div><div class="spark"></div>
+    </div>
+    
     </main>
 </body>
 </html>

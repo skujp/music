@@ -120,6 +120,10 @@ function initEvents() {
     const SONGLIST = 'songList';
     const PAGE_SIZE = 11;
 
+    const FIREWORK1 = 'fw1';
+    const FIREWORK2 = 'fw2';
+    const FIREWORK3 = 'fw3';
+
     const sheetMusic = document.getElementById(SHEETMUSIC);
     const playBtn = document.getElementById(PLAYBTN);
     const stopBtn = document.getElementById(STOPBTN);
@@ -164,6 +168,10 @@ function initEvents() {
     const bassBoard = document.getElementById(BASSBOARD);
 
     const songList = document.getElementById(SONGLIST);
+
+    const fws  = [document.getElementById(FIREWORK1), document.getElementById(FIREWORK2), document.getElementById(FIREWORK3)];
+    
+    bass.setFireworks(fws);
 
     sheetMusic.spellcheck = false;
     sheetMusic.value = bass.getSampleTestCase();
