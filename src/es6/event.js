@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "13.0.0";
+    // VERSION = "12.4.8";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded, program exit';
