@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "12.4.8";
+    // VERSION = "13.0.0";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded, program exit';
@@ -170,7 +170,7 @@ function initEvents() {
 
     var adjustPtr = gNote1;
 
-    playBtn.addEventListener('click', () => {
+    playBtn.addEventListener('click', function () {
         const sheetContent = sheetMusic.value;
         const sequencer = bass.buildSequencer(sheetContent);        
         if (sequencer) {
@@ -197,7 +197,7 @@ function initEvents() {
         sheetMusic.prevClick = PLAYBTN;
     });
 
-    stopBtn.addEventListener('click', () => {
+    stopBtn.addEventListener('click', function () {
         if (sheetMusic.prevClick == READBTN) {
             if (sheetMusic.value.length >  bass.getMaxSheetLength()) {
                 sheetMusic.value = "";
@@ -216,7 +216,7 @@ function initEvents() {
         sheetMusic.prevClick = STOPBTN;
     });
 
-    readBtn.addEventListener('click', () => {
+    readBtn.addEventListener('click', function () {
         if (sheetMusic.prevClick !== READBTN || sheetMusic.value.length == 0) {
             sheetMusic.value = bass.help();
             sheetMusic.style.height = '300px';
@@ -433,7 +433,7 @@ function initEvents() {
     // + - behave differently depending on which instrument is in use
     rotateBtn.currentIns = PIANO;
     rotateBtn.textContent = PIANOICON;
-    rotateBtn.addEventListener('click', () => {
+    rotateBtn.addEventListener('click', function () {
         if (rotateBtn.currentIns == PIANO) {
             piano.style.display = 'none';
             guitar.style.display = 'flex';
@@ -499,47 +499,47 @@ function initEvents() {
     }   
     var themes = {
         1: { name:  'Medley',
-            apply:  () => {
+            apply:  function () {
                         _body.style.backgroundColor = dice();
                     }
            },
         2: { name:  'Eclipse',
-            apply:  () => {
+            apply:  function () {
                         _document.style.filter = _document.style.filter === 'invert(1)' ? "" : 'invert(1)';
                     }
            },
         3: { name:  'Ambient',
-            apply:  () => {
+            apply:  function () {
                         _document.style.boxShadow = ((roll = dice()) === "" ? "" : `inset 0 0 21px 8px ${roll}`); 
                     }
            },
         4: { name:  'Rumble',
-            apply:  () => {
+            apply:  function () {
                         _container.style.transform = ((roll = dice({fortune: DEGREE})) === "" ? "" : `rotate(${roll}deg)`);
                     }
            },
         5: { name:  'Visionary',
-            apply:  () => {                    
+            apply:  function () {                    
                         _document.style.filter = ((roll = dice({fortune: VISIONARY})) === "" ? "" : `blur(${roll}px)`);
                     }
            },
         6: { name:  'Boombox',
-            apply:  () => {
+            apply:  function () {
                         _container.style.transform = ((roll = dice({fortune: BOOMBOX})) === "" ? "" : `scale(${roll})`);
                     }
            },
         7: { name:  'Magisterial',
-            apply:  () => {
-                        _document.classList.add('fade'); requestAnimationFrame(() => _document.classList.remove('fade'));
+            apply:  function () {
+                        _document.classList.add('fade'); void _document.offsetHeight; requestAnimationFrame(function () { _document.classList.remove('fade') });
                     }
            },
         8: { name:  'Beast',
-            apply:  () => {
+            apply:  function () {
                         _document.style.filter = (roll = dice({fortune: HUE})) === "" ? "" : `hue-rotate(${roll}deg)`;
                     } 
            },
         9: { name:  'Caveman',
-            apply:  () => {
+            apply:  function () {
                         _body.style.backgroundColor = '';
                         _document.style.filter = '';
                         _document.style.boxShadow = '';
@@ -630,7 +630,7 @@ function initEvents() {
         prevBtn.className = 'pagination-btn';
         prevBtn.textContent = 'Prev';
         prevBtn.disabled = currentPage === 1 || filteredEntries.length === 0;
-        prevBtn.addEventListener('click', () => {
+        prevBtn.addEventListener('click', function () {
             if (currentPage > 1) {
                 currentPage -= 1;
                 renderPage();
@@ -641,7 +641,7 @@ function initEvents() {
         nextBtn.className = 'pagination-btn';
         nextBtn.textContent = 'Next';
         nextBtn.disabled = currentPage >= Math.ceil(filteredEntries.length / PAGE_SIZE) || filteredEntries.length === 0;
-        nextBtn.addEventListener('click', () => {
+        nextBtn.addEventListener('click', function () {
             if (currentPage < Math.ceil(filteredEntries.length / PAGE_SIZE)) {
                 currentPage += 1;
                 renderPage();
@@ -652,7 +652,7 @@ function initEvents() {
         pageSpanInfo.className = 'song-item pagination-info';
         pageSpanInfo.textContent = `${currentPage} | ${Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE))}`;
         pageSpanInfo.style.userSelect = 'none';
-        pageSpanInfo.addEventListener('click', () => {
+        pageSpanInfo.addEventListener('click', function () {
             changeTheme();
             if (currentTheme !== totalThemes) {
                 leftSpanTheme.style.display = '';
@@ -672,7 +672,7 @@ function initEvents() {
         } else {
             leftSpanTheme.style.display = '';
         }
-        leftSpanTheme.addEventListener('click', () => {
+        leftSpanTheme.addEventListener('click', function () {
             themes[currentTheme].apply();
         });
 
@@ -685,7 +685,7 @@ function initEvents() {
         } else {
             rightSpanTheme.style.display = '';
         }
-        rightSpanTheme.addEventListener('click', () => {
+        rightSpanTheme.addEventListener('click', function () {
             themes[currentTheme].apply();
         });
 
@@ -940,7 +940,7 @@ function initEvents() {
         if (shouldUpdate) {
             oops("Checking for updates...", "warning");
             clearTimeout(updateTimeout);
-            updateTimeout = setTimeout(() => {
+            updateTimeout = setTimeout(function () {
                 // when both localStorage and cookies are unavailable
                 if (fallbackRequired && !cookiesEnabled) {
                     const url = new URL(window.location.href);                    
@@ -954,7 +954,7 @@ function initEvents() {
         }
     }
 
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'visible') {
             refresher();
         }
