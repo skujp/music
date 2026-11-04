@@ -2,7 +2,7 @@
 
 function initEvents() {
 
-    // VERSION = "12.3.5";
+    // VERSION = "12.4.8";
 
     if (typeof bass === "undefined") {
         let problem = '[ERROR] bass.js is not loaded, program exit';
@@ -63,7 +63,7 @@ function initEvents() {
     function randomQuote(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
     }
-
+    
     const SHEETMUSIC = 'sheetMusic';
     const PLAYBTN = 'playBtn';
     const STOPBTN = 'stopBtn';
@@ -467,6 +467,95 @@ function initEvents() {
         }
     });
 
+    // -------- Theme feature, change themes based on user click ------ //
+    const totalThemes = 9;
+    var currentTheme = totalThemes;
+    var roll = null;
+    const _document  = document.documentElement;
+    const _container = document.getElementsByClassName('container')[0];
+    const _body      = document.body;
+    const PAINT     = "paint";
+    const HUE       = "hue";
+    const DEGREE    = "degree";
+    const VISIONARY = "visionary";
+    const BOOMBOX   = "boombox";
+
+    function dice({fortune = PAINT, teller = 0.123} = {}) {
+        let yo = Math.random();
+        if (yo < teller) {
+            return "";
+        }
+        if (fortune === PAINT) {
+            return '#' + Math.floor(yo * 0x1000000).toString(16).padStart(6, '0');
+        } else if (fortune === HUE) {
+            return yo * 360;
+        } else if (fortune === DEGREE) {
+            return yo * 3 - 1;
+        } else if (fortune === VISIONARY) {
+            return yo * 2;
+        } else if (fortune === BOOMBOX) {
+            return 0.98 + yo * 0.04;
+        }
+    }   
+    var themes = {
+        1: { name:  'Medley',
+            apply:  () => {
+                        _body.style.backgroundColor = dice();
+                    }
+           },
+        2: { name:  'Eclipse',
+            apply:  () => {
+                        _document.style.filter = _document.style.filter === 'invert(1)' ? "" : 'invert(1)';
+                    }
+           },
+        3: { name:  'Ambient',
+            apply:  () => {
+                        _document.style.boxShadow = ((roll = dice()) === "" ? "" : `inset 0 0 21px 8px ${roll}`); 
+                    }
+           },
+        4: { name:  'Rumble',
+            apply:  () => {
+                        _container.style.transform = ((roll = dice({fortune: DEGREE})) === "" ? "" : `rotate(${roll}deg)`);
+                    }
+           },
+        5: { name:  'Visionary',
+            apply:  () => {                    
+                        _document.style.filter = ((roll = dice({fortune: VISIONARY})) === "" ? "" : `blur(${roll}px)`);
+                    }
+           },
+        6: { name:  'Boombox',
+            apply:  () => {
+                        _container.style.transform = ((roll = dice({fortune: BOOMBOX})) === "" ? "" : `scale(${roll})`);
+                    }
+           },
+        7: { name:  'Magisterial',
+            apply:  () => {
+                        _document.classList.add('fade'); requestAnimationFrame(() => _document.classList.remove('fade'));
+                    }
+           },
+        8: { name:  'Beast',
+            apply:  () => {
+                        _document.style.filter = (roll = dice({fortune: HUE})) === "" ? "" : `hue-rotate(${roll}deg)`;
+                    } 
+           },
+        9: { name:  'Caveman',
+            apply:  () => {
+                        _body.style.backgroundColor = '';
+                        _document.style.filter = '';
+                        _document.style.boxShadow = '';
+                        _container.style.transform = '';
+                    }
+           }
+    }
+
+    function changeTheme() {
+        currentTheme = currentTheme % totalThemes + 1;
+        oops(`🎨 Theme: ${themes[currentTheme].name}`,'title',{d1: 80, d2: 800});
+        if (currentTheme == totalThemes) {
+            themes[currentTheme].apply();
+        }
+    }
+
     // ------------  Loading bassboard chart database ---------------- //
 
     let allEntries = [];
@@ -561,14 +650,51 @@ function initEvents() {
 
         const pageSpanInfo = document.createElement('span');
         pageSpanInfo.className = 'song-item pagination-info';
-        pageSpanInfo.textContent = `${currentPage} 🎉 ${Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE))}`;
+        pageSpanInfo.textContent = `${currentPage} | ${Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE))}`;
+        pageSpanInfo.style.userSelect = 'none';
         pageSpanInfo.addEventListener('click', () => {
-            bass.setParty();
+            changeTheme();
+            if (currentTheme !== totalThemes) {
+                leftSpanTheme.style.display = '';
+                rightSpanTheme.style.display = '';
+            } else {
+                leftSpanTheme.style.display = 'none';
+                rightSpanTheme.style.display = 'none';
+            }
+        });
+
+        const leftSpanTheme = document.createElement('span');
+        leftSpanTheme.className = 'song-item pagination-info';
+        leftSpanTheme.textContent = '||||||';
+        leftSpanTheme.style.userSelect = 'none';
+        if (currentTheme == totalThemes) {
+            leftSpanTheme.style.display = 'none';
+        } else {
+            leftSpanTheme.style.display = '';
+        }
+        leftSpanTheme.addEventListener('click', () => {
+            themes[currentTheme].apply();
+        });
+
+        const rightSpanTheme = document.createElement('span');
+        rightSpanTheme.className = 'song-item pagination-info';
+        rightSpanTheme.textContent = '||||||';
+        rightSpanTheme.style.userSelect = 'none';
+        if (currentTheme == totalThemes) {
+            rightSpanTheme.style.display = 'none';
+        } else {
+            rightSpanTheme.style.display = '';
+        }
+        rightSpanTheme.addEventListener('click', () => {
+            themes[currentTheme].apply();
         });
 
         controls.appendChild(prevBtn);
+        controls.appendChild(leftSpanTheme);
         controls.appendChild(pageSpanInfo);
+        controls.appendChild(rightSpanTheme);
         controls.appendChild(nextBtn);
+
         songList.appendChild(controls);
     }
 
@@ -768,6 +894,7 @@ function initEvents() {
     }
 
     const cookiesEnabled = _cookiesEnabled();
+    var updateTimeout = null;
 
     function refresher() {
         const now = Date.now();
@@ -812,7 +939,8 @@ function initEvents() {
 
         if (shouldUpdate) {
             oops("Checking for updates...", "warning");
-            setTimeout(() => {
+            clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(() => {
                 // when both localStorage and cookies are unavailable
                 if (fallbackRequired && !cookiesEnabled) {
                     const url = new URL(window.location.href);                    

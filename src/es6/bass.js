@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "12.3.5";
+const VERSION = "12.4.8";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -37,7 +37,7 @@ attach(TheBass, {oops,
                  getDuration, getGuitarNote, getVersion, hasComment,
                  getRoadmapStatus, getRoadmap, setRoadmap, 
                  setClassical, getClassical,
-                 aftermath, isPlaying, setParty
+                 aftermath, isPlaying
                 });    
 const DEF_BPM = 90; 
 const BPM = {                                                           
@@ -132,7 +132,6 @@ var DEF_ROADMAP_VISITED = 1;
 var asyncFuncs = [];                                                    
 var currentTimeout;
 var _sCount = 0;
-var _party = false                                                      
 function _initMusicMajorScale() {
     const baseNotes = {1: 'C', 2: 'C#', 3: 'D', 4: 'D#', 5: 'E', 6: 'F', 7: 'F#', 8: 'G', 9: 'G#', 10: 'A', 11: 'A#', 12: 'B'};
     const notes = { ...baseNotes };
@@ -486,8 +485,11 @@ instruments for treble clef parts.
 V. BASSBOARD CHART
 
 This section is also separate from the core musical notation system. It serves
-as a demo collection of sheet music where musicians can contribute to. To be
-listed on the chart, please save to .bass file and send it to this email:
+as a demo collection of sheet music where musicians can contribute to. A theme 
+panel |||||| below the chart, accessible via the middle pagination button |, 
+lets them switch visual themes while recording music.
+
+To be listed on the chart, please save to .bass file and send it to this email:
 bassthemusic101 |at| gmail |dot| com. Please note that, certain settings are
 required in order to save to .bass such as Title: Contributor: or URL: (section
 IV). Last, any music (chords, rhythms, melody) is allowed, but lyrics and URLs
@@ -1400,16 +1402,10 @@ function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volum
   osc.start(now);
   osc.stop(now + duration + 0.9);
 }
-function _randomBackground() {
-    return '#' + (0x1000000 + Math.floor(Math.random() * 0x1000000)).toString(16).slice(1);        
-}
 function _delay(ms = DEF_MSEC, myCount = -1) {
     if (_sCount == myCount) {
-        return new Promise((resolve) => {
-            (_party) && (document.body.style.backgroundColor = _randomBackground());
-            clearTimeout(currentTimeout);
-            currentTimeout = setTimeout(resolve, ms);
-        });
+        clearTimeout(currentTimeout);
+        return new Promise((resolve) => { currentTimeout = setTimeout(resolve, ms);});
     } else {
         return Promise.reject(new Error("PLAY_IN_PROGRESS"));
     }
@@ -1933,9 +1929,5 @@ function aftermath() {
 }
 function isPlaying() {
     return _isPlaying;
-}
-function setParty() {
-    _party = !_party;
-    _party ? oops('🤸 Feel the beat, move your feet 🤸','title') : oops('💃 Take it slow, enjoy the glow 🕺','title');
 }
 })(typeof window !== "undefined" ? window : this);
