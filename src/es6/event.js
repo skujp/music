@@ -961,6 +961,7 @@ function initEvents() {
 
     document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'visible') {
+            writeStoredValue(AUTOSAVE, sheetMusic.value);
             refresher();
         }
     });
