@@ -800,7 +800,7 @@ function initEvents() {
 
             if (timePassed < oneDayInMs) {
                 renderEntries(cachedEntries);
-                oops("Rhythm and bass, loading with grace!", 'info');
+                // oops("Rhythm and bass, loading with grace!", 'info');
                 return; 
             }
         }
