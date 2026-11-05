@@ -120,6 +120,8 @@ function initEvents() {
     const SONGLIST = 'songList';
     const PAGE_SIZE = 11;
 
+    const AUTOSAVE = 'autosave';
+
     const sheetMusic = document.getElementById(SHEETMUSIC);
     const playBtn = document.getElementById(PLAYBTN);
     const stopBtn = document.getElementById(STOPBTN);
@@ -166,7 +168,9 @@ function initEvents() {
     const songList = document.getElementById(SONGLIST);
 
     sheetMusic.spellcheck = false;
-    sheetMusic.value = bass.getSampleTestCase();
+
+    const lastsave = readStoredValue(AUTOSAVE);
+    lastsave ? sheetMusic.value = lastsave : sheetMusic.value = bass.getSampleTestCase();
 
     var adjustPtr = gNote1;
 
@@ -194,6 +198,7 @@ function initEvents() {
         } else {
             oops(bass.getErrorMsg(), 'error'); 
         }
+        writeStoredValue(AUTOSAVE, sheetContent);
         sheetMusic.prevClick = PLAYBTN;
     });
 
