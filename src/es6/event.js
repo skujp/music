@@ -231,8 +231,10 @@ function initEvents() {
     });
 
     sheetMusic.addEventListener('focus', function() {
-        this.style.height = 'auto';
-        this.style.height = this.scrollHeight + 'px';
+        if (!sheetMusic.value.startsWith('| Rev')) {
+            this.style.height = 'auto';
+            this.style.height = Math.max(188, this.scrollHeight) + 'px';
+        }
     });
 
     cNote.addEventListener('click', (e) => {e.preventDefault(); e.stopPropagation(); bass.playNote('C',bass.getOctave()+UP1,PED,TREB_VOL)});
