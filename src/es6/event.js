@@ -536,7 +536,7 @@ function initEvents() {
         7: { name:  'Magisterial',
             apply: function() {
                         _document.classList.add('fade');
-                        (!Element.prototype.animate || navigator.userAgent.includes('Firefox')) ? void _document.offsetHeight : null;
+                        navigator.userAgent.startsWith("Mozilla") ? void _document.offsetHeight : null;
                         requestAnimationFrame(function () { _document.classList.remove('fade'); });
                     }
            },
