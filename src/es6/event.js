@@ -472,18 +472,19 @@ function initEvents() {
         }
     });
 
-    // -------- Theme feature, change themes based on user click ------ //
+    // --- Theme panel will be loaded after bassboard chart --- //
     const totalThemes = 9;
-    var currentTheme = totalThemes;
+    var currentTheme  = totalThemes;
     var roll = null;
-    const _document  = document.documentElement;
-    const _container = document.getElementsByClassName('container')[0];
-    const _body      = document.body;
-    const PAINT     = "paint";
-    const HUE       = "hue";
-    const DEGREE    = "degree";
-    const VISIONARY = "visionary";
-    const BOOMBOX   = "boombox";
+    var legacy = '';
+    var _document = null;
+    var _container = null;
+    var _body = null;
+    const PAINT       = "paint";
+    const HUE         = "hue";
+    const DEGREE      = "degree";
+    const VISIONARY   = "visionary";
+    const BOOMBOX     = "boombox";
 
     function dice({fortune = PAINT, teller = 0.123} = {}) {
         let yo = Math.random();
@@ -536,7 +537,7 @@ function initEvents() {
         7: { name:  'Magisterial',
             apply: function() {
                         _document.classList.add('fade');
-                        navigator.userAgent.startsWith("Mozilla") ? void _document.offsetHeight : null;
+                        legacy ? void _document.offsetHeight : null;
                         requestAnimationFrame(function () { _document.classList.remove('fade'); });
                     }
            },
@@ -783,6 +784,13 @@ function initEvents() {
     }
 
     async function loadDatabase() {
+        
+        // 0. UI theme control panel section
+        _document   = document.documentElement;
+        _container  = document.getElementsByClassName('container')[0];
+        _body       = document.body;
+        legacy      = !Element.prototype.animate || navigator.userAgent.includes('Firefox');
+        
         const etagKey = 'bassboard-db-etag';
         const lastModifiedKey = 'bassboard-db-last-modified';
         const cachedDataKey = 'bassboard-db-data';
