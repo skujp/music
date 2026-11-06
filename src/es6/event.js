@@ -476,7 +476,7 @@ function initEvents() {
     const totalThemes = 9;
     var currentTheme  = totalThemes;
     var roll = null;
-    var legacy = '';
+    var legacy = false;
     var _document = null;
     var _container = null;
     var _body = null;
