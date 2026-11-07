@@ -233,7 +233,7 @@ function initEvents() {
     sheetMusic.addEventListener('focus', function() {
         if (!sheetMusic.value.startsWith('| Rev')) {
             this.style.height = 'auto';
-            this.style.height = Math.max(188, this.scrollHeight) + 'px';
+            this.style.height = this.scrollHeight + 'px';
         }
     });
 
