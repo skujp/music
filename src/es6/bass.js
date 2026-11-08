@@ -1,5 +1,5 @@
 (function(global) {
-const VERSION = "12.4.8";
+const VERSION = "12.4.9";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -1370,7 +1370,7 @@ function playChord(chord = FAKE, octave = DEF_OCTAVE, duration = DEF_DURATION) {
 }
 function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volume=MAX_VOL) {
   if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+    audioCtx = new (global.AudioContext || global.webkitAudioContext)({
         latencyHint: 'playback'
     });
     masterGain = audioCtx.createGain(); 
@@ -1532,7 +1532,7 @@ async function _saveSheetMusicToPDF() {
             return;
         }
         cleanedUp = true;
-        window.removeEventListener('focus', handleFocus);
+        global.removeEventListener('focus', handleFocus);
         printWindow.removeEventListener('afterprint', cleanup);
         if (iframe.parentNode) {
             iframe.remove();
@@ -1541,7 +1541,7 @@ async function _saveSheetMusicToPDF() {
     function handleFocus() {
         setTimeout(cleanup, 100);
     }
-    window.addEventListener('focus', handleFocus);
+    global.addEventListener('focus', handleFocus);
     printWindow.addEventListener('afterprint', cleanup);
     await new Promise(requestAnimationFrame);
     printWindow.focus();
