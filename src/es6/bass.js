@@ -1,5 +1,5 @@
-(function(global) {
-const VERSION = "12.4.9";
+(function(boombox) {
+const VERSION = "12.5.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -14,13 +14,13 @@ var DEF_SUPPORT_INST = new Set([DEF_INST, "drum", "guitar", "flute"]);
 var instrument = DEF_INST; 
 var audioCtx = null; 
 var masterGain = null; 
-const _oBass = global.bass;
+const _oBass = boombox.bass;
 const TheBass = {};
-global.bass = TheBass;
+boombox.bass = TheBass;
 function rename() {
     error.msg = 'renaming library';
-    if (global.bass === TheBass) {
-        global.bass = _oBass;
+    if (boombox.bass === TheBass) {
+        boombox.bass = _oBass;
     }
     return TheBass;
 }
@@ -1370,7 +1370,7 @@ function playChord(chord = FAKE, octave = DEF_OCTAVE, duration = DEF_DURATION) {
 }
 function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volume=MAX_VOL) {
   if (!audioCtx) {
-    audioCtx = new (global.AudioContext || global.webkitAudioContext)({
+    audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)({
         latencyHint: 'playback'
     });
     masterGain = audioCtx.createGain(); 
@@ -1436,7 +1436,7 @@ async function _saveSheetMusicToBASS() {
   }
   const jsonString = JSON.stringify(_sheetMusic, null, 2);
   const filename = `${_sheetMusic.title}_by_${_sheetMusic.contributor}.bass`;
-  if (global === window && 'showSaveFilePicker' in global) {
+  if (boombox === window && 'showSaveFilePicker' in boombox) {
     const options = {
         suggestedName: filename,
         types: [{
@@ -1444,7 +1444,7 @@ async function _saveSheetMusicToBASS() {
             accept: { '*/.bass': ['.bass'] }
         }]
     };
-    const handle = await global.showSaveFilePicker(options);
+    const handle = await boombox.showSaveFilePicker(options);
     const writable = await handle.createWritable();
     await writable.write(jsonString);
     await writable.close();
@@ -1532,7 +1532,7 @@ async function _saveSheetMusicToPDF() {
             return;
         }
         cleanedUp = true;
-        global.removeEventListener('focus', handleFocus);
+        boombox.removeEventListener('focus', handleFocus);
         printWindow.removeEventListener('afterprint', cleanup);
         if (iframe.parentNode) {
             iframe.remove();
@@ -1541,7 +1541,7 @@ async function _saveSheetMusicToPDF() {
     function handleFocus() {
         setTimeout(cleanup, 100);
     }
-    global.addEventListener('focus', handleFocus);
+    boombox.addEventListener('focus', handleFocus);
     printWindow.addEventListener('afterprint', cleanup);
     await new Promise(requestAnimationFrame);
     printWindow.focus();
@@ -1658,7 +1658,7 @@ async function playSequencer(sequencerObj) {
     }
 }
 async function setSaveAs(option) {
-    if (typeof(global) !== "object" || global !== window) {
+    if (typeof(boombox) !== "object" || boombox !== window) {
         const problem = `[SAVEAS ERROR] browser-only print support`;
         return problem;
     }
@@ -1682,7 +1682,7 @@ function setInstrument(inst) {
     }
 }
 function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
-    if (typeof(global) !== "object" || global !== window) {
+    if (typeof(boombox) !== "object" || boombox !== window) {
         const problem = `[OOPS ERROR] oops function: browser-only feature.`;
         error.msg = problem;
         alert(problem);

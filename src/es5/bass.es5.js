@@ -31,8 +31,8 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-(function (global) {
-  var VERSION = "12.4.9";
+(function (boombox) {
+  var VERSION = "12.5.0";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -47,13 +47,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var instrument = DEF_INST;
   var audioCtx = null;
   var masterGain = null;
-  var _oBass = global.bass;
+  var _oBass = boombox.bass;
   var TheBass = {};
-  global.bass = TheBass;
+  boombox.bass = TheBass;
   function rename() {
     error.msg = 'renaming library';
-    if (global.bass === TheBass) {
-      global.bass = _oBass;
+    if (boombox.bass === TheBass) {
+      boombox.bass = _oBass;
     }
     return TheBass;
   }
@@ -1085,13 +1085,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     if (!audioCtx) {
       try {
         // Attempt standard initialization with options
-        audioCtx = new (global.AudioContext || global.webkitAudioContext)({
+        audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)({
           latencyHint: 'playback'
         });
       } catch (e) {
         // Fallback specifically for Firefox 45 and older Gecko engines
         if (e instanceof TypeError && e.message.includes('AudioChannel')) {
-          audioCtx = new (global.AudioContext || global.webkitAudioContext)();
+          audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
         } else {
           // Rethrow any other unrelated syntax or initialization errors
           throw e;
@@ -1212,7 +1212,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           case 8:
             jsonString = JSON.stringify(_sheetMusic, null, 2);
             filename = "".concat(_sheetMusic.title, "_by_").concat(_sheetMusic.contributor, ".bass");
-            if (!(global === window && 'showSaveFilePicker' in global)) {
+            if (!(boombox === window && 'showSaveFilePicker' in boombox)) {
               _context.n = 13;
               break;
             }
@@ -1226,7 +1226,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
               }]
             };
             _context.n = 9;
-            return global.showSaveFilePicker(options);
+            return boombox.showSaveFilePicker(options);
           case 9:
             handle = _context.v;
             _context.n = 10;
@@ -1297,7 +1297,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
                 return;
               }
               cleanedUp = true;
-              global.removeEventListener('focus', handleFocus);
+              boombox.removeEventListener('focus', handleFocus);
               printWindow.removeEventListener('afterprint', cleanup);
               if (iframe.parentNode) {
                 iframe.remove();
@@ -1323,7 +1323,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           case 1:
             printWindow = iframe.contentWindow;
             cleanedUp = false;
-            global.addEventListener('focus', handleFocus);
+            boombox.addEventListener('focus', handleFocus);
             printWindow.addEventListener('afterprint', cleanup);
             _context2.n = 2;
             return new Promise(requestAnimationFrame);
@@ -1539,7 +1539,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.n) {
           case 0:
-            if (!(_typeof(global) !== "object" || global !== window)) {
+            if (!(_typeof(boombox) !== "object" || boombox !== window)) {
               _context4.n = 1;
               break;
             }
@@ -1592,7 +1592,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       _ref$d3 = _ref.d2,
       d2 = _ref$d3 === void 0 ? DELAY_2 : _ref$d3;
     var show = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
-    if (_typeof(global) !== "object" || global !== window) {
+    if (_typeof(boombox) !== "object" || boombox !== window) {
       var problem = "[OOPS ERROR] oops function: browser-only feature.";
       error.msg = problem;
       alert(problem);
