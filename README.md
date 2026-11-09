@@ -19,7 +19,7 @@ Installation (choose one)
 <script src="bass.js"></script>
 ```
 
-2) NPM: install `bass-sequencer` library, then include the following in your node RELP...
+2) NPM: install `bass-sequencer` library, then include the following in your node REPL...
 
 ```javascript
 const bass = await import("bass-sequencer");
