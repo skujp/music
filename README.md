@@ -1,4 +1,4 @@
-bass.js (<!--version-->v12.5.0<!--/version-->)
+bass.js (<!--version-->v12.5.1<!--/version-->)
 =======
 
 A music sequencer library, written in javascript.
@@ -10,16 +10,16 @@ Demo
 
 https://skujp.github.io/music
 
-Installation Options (2)
+Installation (choose one)
 ------------------------
 
-1) Via Browser: download `bass.js` from this repository, then include the following in your html document...
+1) Browser: download `bass.js` from this repository, then include the following in your html document...
 
 ```html
 <script src="bass.js"></script>
 ```
 
-2) Via NPM: install `bass-sequencer` library, then include the following in your node RELP...
+2) NPM: install `bass-sequencer` library, then include the following in your node RELP...
 
 ```javascript
 const bass = await import("bass-sequencer");

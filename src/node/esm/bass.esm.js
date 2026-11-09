@@ -10,14 +10,14 @@ export {
     playNote, playChord, playSequencer, stopSequencer,
     setTempo, setOctave, getOctave, getTempo,
     getSampleTestCase, getMaxSheetLength,
-    setSaveAs, setSustain, getSustain,
+    setSaveAs, setSustain, getSustain, setKey,
     getInstrument, setInstrument,
     getDuration, getGuitarNote, getVersion, hasComment,
     getRoadmapStatus, getRoadmap, setRoadmap,
     setClassical, getClassical,
     aftermath, isPlaying
 };
-const VERSION = "12.5.0";
+const VERSION = "12.5.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -50,7 +50,7 @@ attach(TheBass, {oops,
                  playNote, playChord, playSequencer, stopSequencer, 
                  setTempo, setOctave, getOctave, getTempo, 
                  getSampleTestCase, getMaxSheetLength,
-                 setSaveAs, setSustain, getSustain, 
+                 setSaveAs, setSustain, getSustain, setKey,
                  getInstrument, setInstrument,
                  getDuration, getGuitarNote, getVersion, hasComment,
                  getRoadmapStatus, getRoadmap, setRoadmap, 
@@ -91,6 +91,7 @@ const BTB_REP = ":|:";
 const DBL_BTB_REP = ":||:";                                             
 const SKIP_NUM = /\[(\d+)\./;                                           
 const TIME_SIG = /^(\d+)\/(1|2|4|8|16|32|64|128|256|512|1024)$/;        
+const KEY = /^([A-G])(?:#|b|m|#m|bm|[HM]m|#[HM]m|b[HM]m)?$/;            
 const AUX = /^\(([^)]+)\)$/;                                            
 const CMT_START = "<-";                                                 
 const CMT_END   = "->";                                                 
@@ -134,9 +135,9 @@ var DEF_MSEC = DEF_DURATION * 1000;
 var MAX_SECTION_REP = 51;                                               
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var BASSBOARD_DB_FIELD = new Set(["Contributor", "Title"]);              
-var CTRL_FUNCS = /^(Title|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
+var CTRL_FUNCS = /^(Title|Key|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
 var SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name]);  
-var SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]); 
+var SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name, setKey.name]); 
 var ASYNC_0  = new Set([setSaveAs.name]);
 var _isPlaying = false;
 var validArgs = new WeakSet();                                          
@@ -219,7 +220,29 @@ of beats. For example, the following bar contains 3 beats: | / / / |, this bar
 contains 0 beat: | | Please note that, this Bar refers to time measure, not to
 be mistaken with single Bar symbol | or double Bar symbol || (section III).
 
-6. Opening Section
+6. Musical Key
+In Western classical music , a musical key (or Key) is a group of notes centered
+around a main note called the tonic. For example, in the key of C major, the 
+notes are: C D E F G A B, where C is the tonic. The music tends to start, end, 
+or feel resolved on this tonic note. There are 2 modes for a musical key: major
+or minor. Major keys often sound bright, happy, or uplifting such as C major, 
+G major. Minor keys often sound darker, sadder, or more emotional such as 
+A minor, E minor. A musical key determines the key signature (the sharps or 
+flats shown in sheet music). For examples, in the key of G major, the key 
+signature contains one sharp (F#). In the key of D minor, the key signature 
+contains one flat (Bb). Every major key has a relative minor key, and they share
+the same key signature. For examples, C major - A minor (0 sharps, 0 flats), 
+G major - E minor (1 sharp: F#) , F major - D minor (1 flat: Bb). Each minor key
+has three common scale forms: natural minor (the basic form), harmonic minor 
+(raises the 7th note), melodic minor (raises the 6th and 7th notes when 
+ascending). For examples, A natural minor: A B C D E F G; A harmonic minor: 
+A B C D E F G#; A melodic minor (ascending): A B C D E F# G#. In the BASS
+system, setting a musical key at the beginning of a sheet music is optional but 
+recommended. For examples, Key:C, Key:C#m, Key:CbHm, Key:CbMm to indicate the 
+sheet music is played in C major, C sharp natural minor, C flat harmonic minor, 
+or C flat melodic minor (section IV).  
+
+7. Opening Section
 An opening section begins the sheet music. It may or may not have a leading
 tone. If it has a leading tone, the number of opening beats can not go over the
 numerator beats of time signature. For example, A A | D / D / | Amaj7 / Amaj7 /
@@ -227,10 +250,10 @@ numerator beats of time signature. For example, A A | D / D / | Amaj7 / Amaj7 /
 leading tone, an opening section usually starts with a | or |: or ||: or even
 a double Bar || symbol although a double Bar is more commonly used to end the 
 music or divide different time signature sections in a sheet music 
-(section II.9). Last, in the BASS system, if a sheet music has a leading tone, 
+(section II.10). Last, in the BASS system, if a sheet music has a leading tone, 
 its beginning is counted from the onset of that leading tone.
 
-7. Repeat Section
+8. Repeat Section
 A repeat section (or loop) is a section which is played again and again. The
 loop usually looks like this |: :| or ||: :|| or a loop back from beginning such
 as | :| and | :|| In some cases, it can use back to back loop :|: or :||:
@@ -243,7 +266,7 @@ For example, 2/4 | C D | F G :| A B :| G G || will go back to the beginning
 three times in total, resulted in ( C D F G ) ( C D F G ) ( A B )
 ( C D F G A B ) ( C D F G A B ) ( G G ).
 
-8. Branching Section
+9. Branching Section
 A branching section (or Volta Bracket) is used to skip from one section to
 another of a sheet music AFTER REPEAT. It is written as an open bracket followed
 by a number and a dot. For example, [1. [2. [3. [123. , etc. The next example is
@@ -256,7 +279,7 @@ A A B B C C, then go back to beginning and play A A, then jump to D D, and end
 with E E. Notice that it does not jump to [2. like standard common musical
 notation and this is expected in the BASS system, allowing more leeway for
 musicians. This usage only works when 'Classical:No' setting is set at the
-beginning of the sheet music (section II.10). Another example,
+beginning of the sheet music (section II.11). Another example,
 3/4 | C C C |: D D D | A A A | [40. D D D :| [20. F F F :| [30. B B B ||
 After the 1st repeat, it will skip [40. bar to the next bar [20. After the 2nd
 repeat, it will skip [40. bar and [20. bar to the next bar [30. Please note
@@ -274,7 +297,7 @@ section for the clarity of the sheet music. For example, instead of having this
 2/4 | D E | [1. F G :| [300. A A ||, it is more common to do this:
 2/4 | D E | [1. F G :| [2. A A ||.
 
-9. Ending Section
+10. Ending Section
 A sheet music must end with either a single Bar | or a double Bar || symbol. If
 it ends with a || symbol, the system will stop playing (no loop back).
 Otherwise, the system by default will keep looping back from the beginning even
@@ -282,17 +305,17 @@ without the musician's intervention. Please note that, if it ends with :| or :||
 symbol, it will loop back according to sheet music direction before the default 
 system loop back begins. For the case of :|| symbol, it will stop eventually.
 
-10. Classical Rule
+11. Classical Rule
 By default, the BASS system implements several classical rule checks to make
 sure the sheet music adhere to common classical standard. For example: if there 
-is a leading tone in the sheet music (section II.6), this rule will be applied: 
+is a leading tone in the sheet music (section II.7), this rule will be applied: 
 'The number of opening beats and ending beats must equal the numerator beats in 
 time signature'. Another example is: in a repeat section, volta brackets should 
 be adjacent. Or one more example: the opening section can not begin with a 
 double Bar || However, musicians can bypass all these classical rule checks by 
 adding setting 'Classical:No' at the beginning of the sheet music (section IV).
 
-11. Tempo
+12. Tempo
 Tempo is the speed or pace at which a piece of music is played. It is the number
 of beats per minutes (bpm) set up before playing the sheet music. In the BASS
 system, by default it is set to ${DEF_BPM}, assuming quarter note is in time 
@@ -300,7 +323,7 @@ signature (4/4). Musicians can change tempo manually. Please note that, the
 actual final sheet music speed will be adjusted based on time signature 
 (section II.4).
 
-12. Octave
+13. Octave
 An octave is the distance between two musical notes that share the same name
 (like two different C notes). It is exactly eight steps apart on a common
 musical scale. In the BASS system, octave ranges can be from 0 to 8 where 0 is
@@ -309,12 +332,12 @@ to the concept of middle C in a piano. Musicians can change it manually by
 adding system setting 'Octave:<number>' at the beginning of the sheet music 
 (section IV).
 
-13. Space
+14. Space
 Every musical symbol must be separated by a blank space. The recommended space
 is 1 blank character between two musical symbols. For example, one blank space
 between two opening notes in this sheet music 2/4 D D | F F |.
 
-14. Rhythm Slash /
+15. Rhythm Slash /
 In the BASS system, a rhythm slash / (or BM) represents one beat in a bar.
 By default, it plays by repeating a previous chord. For example, 3/4 | A B / |
 will play A B B. To turn off the default play, musicians can set Sustain:Yes
@@ -323,11 +346,11 @@ Sustain:Yes 3/4 | A B / | will play A B only and silent on the last chord /.
 Please note that this rhythm slash / symbol should not be mistaken with / in
 a slash chord (section II.2).
 
-15. Duplicate %
+16. Duplicate %
 A duplicate symbol % means to repeat playing the previous bar (time measure). 
 For example, 3/4 | A B C | % || will play A B C A B C.
 
-16. Section Marker (#)
+17. Section Marker (#)
 A group of bars can be marked with a section marker such as (A) (B) (C), etc.
 Inside the parenthesis, it must be a single uppercase letter from A to Z. Once a
 section marker is defined, it can be used later in the sheet music to repeat
@@ -352,7 +375,7 @@ will play the last bar 9 times in total because of the multiplier (3x), whereas
 Please note that, (Zx2) also works with branching section, preserving the
 branching behavior, whereas (Z*2) will ignore branching behavior.
 
-17. Commented Section
+18. Commented Section
 Commented section (or Vi-De) is a special marked section NOT to be played in
 a sheet music. The commented opening symbol (Vi) is <- and the closing (De) is
 -> They are usually set after the opening section of a sheet music (section
@@ -362,7 +385,7 @@ only specific parts of the sheet music. Please note that, in some cases playback
 does not echo any sound due to the commented sheet music containing only
 sustained chords. For example, | <- D D D D | -> / / / / ||.
 
-18. Roadmap Symbols
+19. Roadmap Symbols
 In a sheet music, there are special symbols ('roadmap symbols') which designate
 to change the music direction such as:
 (D.C.) : Go back to the beginning
@@ -472,6 +495,7 @@ SaveAs:BASS to save as .bass file
 Sustain:Yes to stop playing previous chord when seeing / symbol
 Sustain:No to repeat playing previous chord when seeing / symbol (default)
 Title:<name> for example, Title:My_awesome_melody, required for .bass
+Key:<name> for example, Key:E means E major, Key:EMm means E melodic minor
 Artist:<name> for example, Artist:The_BASS
 Musician:<name> for example, Musician:BeatBox
 Composer:<name> for example, Composer:RHYTHM
@@ -1695,6 +1719,13 @@ function setInstrument(inst) {
     let lc_inst = inst.toLowerCase();
     if (!DEF_SUPPORT_INST.has(lc_inst)) {
         const problem = `[SET INSTRUMENT ERROR] instrument ${inst} currently not supported`;
+        error.msg = problem;
+        return problem;
+    }
+}
+function setKey(key) {
+    if (!key.match(KEY)) {
+        const problem = `[KEY ERROR] Format: Key, m, Hm, Mm (major, natural, harmonic, melodic)`;
         error.msg = problem;
         return problem;
     }
