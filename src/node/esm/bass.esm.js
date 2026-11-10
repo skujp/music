@@ -1,10 +1,28 @@
-import { AudioContext } from 'node-web-audio-api';
 const boombox = {};
 const window = null;
 const alert = console.log;
-boombox.AudioContext = AudioContext;
+async function getAudioContext() {
+  try {
+    const { AudioContext } = await import('node-web-audio-api');
+    return AudioContext;
+  } catch (err) {
+    console.log(`
+        Welcome to bass-sequencer. In Node.js, playback support is not included
+        by default. After creating a sequencer with buildSequencer, you'll need
+        an audio backend to use playSequencer. You can implement your own backend
+        or use an existing solution.
+
+        By default, playSequencer uses the browser's AudioContext. For Node.js,
+        install and use the node-web-audio-api package:
+
+        npm install node-web-audio-api
+    `);
+    return;
+  }
+}
+boombox.AudioContext = await getAudioContext();
 export {
-    rename, help, getErrorMsg, getChordNotes, buildSequencer,
+    help, getErrorMsg, getChordNotes, buildSequencer,
 
     oops,
     playNote, playChord, playSequencer, stopSequencer,
@@ -32,31 +50,6 @@ var DEF_SUPPORT_INST = new Set([DEF_INST, "drum", "guitar", "flute"]);
 var instrument = DEF_INST; 
 var audioCtx = null; 
 var masterGain = null; 
-const _oBass = boombox.bass;
-const TheBass = {};
-boombox.bass = TheBass;
-function rename() {
-    error.msg = 'renaming library';
-    if (boombox.bass === TheBass) {
-        boombox.bass = _oBass;
-    }
-    return TheBass;
-}
-function attach(libObject, functionObj) {
-    Object.assign(libObject, functionObj);
-}
-attach(TheBass, {rename, help, getErrorMsg, getChordNotes, buildSequencer});  
-attach(TheBass, {oops, 
-                 playNote, playChord, playSequencer, stopSequencer, 
-                 setTempo, setOctave, getOctave, getTempo, 
-                 getSampleTestCase, getMaxSheetLength,
-                 setSaveAs, setSustain, getSustain, setKey,
-                 getInstrument, setInstrument,
-                 getDuration, getGuitarNote, getVersion, hasComment,
-                 getRoadmapStatus, getRoadmap, setRoadmap, 
-                 setClassical, getClassical,
-                 aftermath, isPlaying
-                });    
 const DEF_BPM = 90; 
 const BPM = {                                                           
     _val: DEF_BPM,                                                           
