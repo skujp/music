@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "12.5.1";
+const VERSION = "12.5.2";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -39,6 +39,31 @@ attach(TheBass, {oops,
                  setClassical, getClassical,
                  aftermath, isPlaying
                 });    
+function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
+    if (typeof(boombox) !== "object" || boombox !== window) {
+        const problem = `[OOPS ERROR] oops function: browser-only feature.`;
+        error.msg = problem;
+        alert(problem);
+        return problem;
+    }
+    if (!show) {
+        return;
+    }
+    const oopsContainer = document.getElementById('oopsContainer') || _createOopsContainer();
+    const oopsEl = document.createElement('div');
+    oopsEl.className = `oops oops-${type}`;
+    oopsEl.textContent = message;
+    oopsContainer.appendChild(oopsEl);
+    setTimeout(function() {
+        oopsEl.classList.add('oops-show');
+    }, d0);
+    setTimeout(function() {
+        oopsEl.classList.remove('oops-show');
+        setTimeout(function() {
+            oopsEl.remove();
+        }, d1);
+    }, d2);
+}
 const DEF_BPM = 90; 
 const BPM = {                                                           
     _val: DEF_BPM,                                                           
@@ -73,7 +98,8 @@ const BTB_REP = ":|:";
 const DBL_BTB_REP = ":||:";                                             
 const SKIP_NUM = /\[(\d+)\./;                                           
 const TIME_SIG = /^(\d+)\/(1|2|4|8|16|32|64|128|256|512|1024)$/;        
-const KEY = /^([A-G])(?:#|b|m|#m|bm|[HM]m|#[HM]m|b[HM]m)?$/;            
+const MUS_CHORD = /^([A-G])(#|b)?(m|maj|min|dim|aug|sus|maug)?(add|maj)?(\d*)?((b)(\d+))?(\/([A-G])(#|b)?)?\s*$/;
+const MUS_KEY = /^(([A-G])(#|b)?(m|[HM]m|)?)(~>(([A-G])(#|b)?(m|[HM]m|)?))?$/;
 const AUX = /^\(([^)]+)\)$/;                                            
 const CMT_START = "<-";                                                 
 const CMT_END   = "->";                                                 
@@ -118,8 +144,8 @@ var MAX_SECTION_REP = 51;
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var BASSBOARD_DB_FIELD = new Set(["Contributor", "Title"]);              
 var CTRL_FUNCS = /^(Title|Key|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
-var SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name]);  
-var SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name, setKey.name]); 
+var SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name, setKey.name]);  
+var SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]); 
 var ASYNC_0  = new Set([setSaveAs.name]);
 var _isPlaying = false;
 var validArgs = new WeakSet();                                          
@@ -133,6 +159,7 @@ var DEF_ROADMAP_VISITED = 1;
 var asyncFuncs = [];                                                    
 var currentTimeout;
 var _sCount = 0;
+var transpose = null;
 function _initMusicMajorScale() {
     const baseNotes = {1: 'C', 2: 'C#', 3: 'D', 4: 'D#', 5: 'E', 6: 'F', 7: 'F#', 8: 'G', 9: 'G#', 10: 'A', 11: 'A#', 12: 'B'};
     const notes = { ...baseNotes };
@@ -222,7 +249,9 @@ A B C D E F G#; A melodic minor (ascending): A B C D E F# G#. In the BASS
 system, setting a musical key at the beginning of a sheet music is optional but 
 recommended. For examples, Key:C, Key:C#m, Key:CbHm, Key:CbMm to indicate the 
 sheet music is played in C major, C sharp natural minor, C flat harmonic minor, 
-or C flat melodic minor (section IV).  
+or C flat melodic minor. To transpose a sheet music from one key to another, use
+~> symbol. For example, Key:C~>B | D E F G || to convert the music sheet from C 
+major to B major (section IV).    
 
 7. Opening Section
 An opening section begins the sheet music. It may or may not have a leading
@@ -477,7 +506,7 @@ SaveAs:BASS to save as .bass file
 Sustain:Yes to stop playing previous chord when seeing / symbol
 Sustain:No to repeat playing previous chord when seeing / symbol (default)
 Title:<name> for example, Title:My_awesome_melody, required for .bass
-Key:<name> for example, Key:E means E major, Key:EMm means E melodic minor
+Key:<name> for example, Key:E, or Key:EMm~>Bm transpose E melodic to B minor
 Artist:<name> for example, Artist:The_BASS
 Musician:<name> for example, Musician:BeatBox
 Composer:<name> for example, Composer:RHYTHM
@@ -559,8 +588,7 @@ function getChordNotes(chord=FAKE) {
     if (chord === BM) {
         return BM;
     }
-    const chordRegex = /^([A-G])(#|b)?(m|maj|min|dim|aug|sus|maug)?(add|maj)?(\d*)?((b)(\d+))?(\/([A-G])(#|b)?)?\s*$/;
-    const match = chord.match(chordRegex);
+    const match = chord.match(MUS_CHORD);
     if (!match) {
         error.msg = `invalid chord: ${chord}`;
         return; 
@@ -638,12 +666,44 @@ function getChordNotes(chord=FAKE) {
         ebassNoteNumber = notes[ebassRoot];
     }
     const chordNotes = new Set();
-    chordNotes.add(rootNoteNumber);
-    if (thirdNoteNumber) chordNotes.add(thirdNoteNumber);
-    if (fifthNoteNumber) chordNotes.add(fifthNoteNumber);
-    if (sixthNoteNumber) chordNotes.add(sixthNoteNumber);
-    if (seventhNoteNumber) chordNotes.add(seventhNoteNumber);
-    if (ninthNoteNumber) chordNotes.add(ninthNoteNumber);
+    if (!transpose) {
+        chordNotes.add(rootNoteNumber);
+        if (thirdNoteNumber) chordNotes.add(thirdNoteNumber);
+        if (fifthNoteNumber) chordNotes.add(fifthNoteNumber);
+        if (sixthNoteNumber) chordNotes.add(sixthNoteNumber);
+        if (seventhNoteNumber) chordNotes.add(seventhNoteNumber);
+        if (ninthNoteNumber) chordNotes.add(ninthNoteNumber);
+    } else { 
+        let t0 = transpose[0];
+        let t3 = transpose[1];
+        let t6 = transpose[2];
+        let t7 = transpose[3]; 
+        rootNoteNumber = (rootNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+        chordNotes.add(rootNoteNumber);
+        if (thirdNoteNumber) {
+            thirdNoteNumber = (thirdNoteNumber + t0 + t3) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+            chordNotes.add(thirdNoteNumber);
+        }
+        if (fifthNoteNumber) { 
+            fifthNoteNumber = (fifthNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+            chordNotes.add(fifthNoteNumber);
+        }
+        if (sixthNoteNumber) {
+            sixthNoteNumber = (sixthNoteNumber + t0 + t6) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+            chordNotes.add(sixthNoteNumber);
+        }
+        if (seventhNoteNumber) {
+            seventhNoteNumber = (seventhNoteNumber + t0 + t7) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+            chordNotes.add(seventhNoteNumber);
+        }
+        if (ninthNoteNumber) {
+            ninthNoteNumber = (ninthNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+            chordNotes.add(ninthNoteNumber);
+        }
+        if (ebassNoteNumber) {
+            ebassNoteNumber = (ebassNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+        }
+    }
     const noteNames = [];
     for (let noteNumber of chordNotes) {
         let nn = notes[noteNumber];
@@ -674,6 +734,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     DEF_OCTAVE = 4;
     asyncFuncs = [];
     _isPlaying = false;
+    transpose = null;
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
         error.msg = `[SHEET MUSIC ERROR] length exceeds limit`;
         return;
@@ -1394,9 +1455,7 @@ function playChord(chord = FAKE, octave = DEF_OCTAVE, duration = DEF_DURATION) {
 }
 function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volume=MAX_VOL) {
   if (!audioCtx) {
-    audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)({
-        latencyHint: 'playback'
-    });
+    audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
     masterGain = audioCtx.createGain(); 
     masterGain.gain.value = 0.22; 
     masterGain.connect(audioCtx.destination);
@@ -1697,7 +1756,7 @@ async function setSaveAs(option) {
 function getInstrument() {
     return instrument;
 }
-function setInstrument(inst) {
+function setInstrument(inst=DEF_INST) {
     let lc_inst = inst.toLowerCase();
     if (!DEF_SUPPORT_INST.has(lc_inst)) {
         const problem = `[SET INSTRUMENT ERROR] instrument ${inst} currently not supported`;
@@ -1705,37 +1764,75 @@ function setInstrument(inst) {
         return problem;
     }
 }
-function setKey(key) {
-    if (!key.match(KEY)) {
-        const problem = `[KEY ERROR] Format: Key, m, Hm, Mm (major, natural, harmonic, melodic)`;
+function setKey(key=EMPTY) {
+    const match = key.match(MUS_KEY);
+    if (!match) {
+        const problem = `[KEY ERROR] format: A (Major), Am (Minor), AHm (Harmonic Min), AMm (Melodic Minor), A~>B (Transpose)`;
         error.msg = problem;
         return problem;
     }
-}
-function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
-    if (typeof(boombox) !== "object" || boombox !== window) {
-        const problem = `[OOPS ERROR] oops function: browser-only feature.`;
-        error.msg = problem;
-        alert(problem);
-        return problem;
-    }
-    if (!show) {
+    const k1 = match[2] + (match[3] || '');
+    const q1 = match[4] || '';
+    const k2 = match[7] + (match[8] || '');
+    const q2 = match[9] || '';
+    if (k2 === "undefined") {
         return;
     }
-    const oopsContainer = document.getElementById('oopsContainer') || _createOopsContainer();
-    const oopsEl = document.createElement('div');
-    oopsEl.className = `oops oops-${type}`;
-    oopsEl.textContent = message;
-    oopsContainer.appendChild(oopsEl);
-    setTimeout(function() {
-        oopsEl.classList.add('oops-show');
-    }, d0);
-    setTimeout(function() {
-        oopsEl.classList.remove('oops-show');
-        setTimeout(function() {
-            oopsEl.remove();
-        }, d1);
-    }, d2);
+    if (notes[k1] === undefined) {
+        error.msg = `invalid key: ${k1}`;
+        return null;
+    }
+    if (notes[k2] === undefined) {
+        error.msg = `invalid key: ${k2}`;
+        return null;
+    }
+    let semitones = notes[k2] - notes[k1] + OCTAVE_LENGTH;
+    let third_note_semitone = 0;
+    let sixth_note_semitone = 0;
+    let seventh_note_semitone = 0;
+    if (q1 === "" && q2 === "") {                 
+        ;
+    } else if (q1 !== "" && q2 !== "") {          
+        ;
+               if (q1 === "m" && q2 === "Hm")  {  
+                    seventh_note_semitone += 1;
+        } else if (q1 === "m" && q2 === "Mm")  {  
+                    sixth_note_semitone += 1;
+                    seventh_note_semitone += 1;
+        } else if (q1 === "Hm" && q2 === "m")  {  
+                    seventh_note_semitone -= 1;
+        } else if (q1 === "Hm" && q2 === "Mm") {  
+                    sixth_note_semitone += 1;
+        } else if (q1 === "Mm" && q2 === "m")  {  
+                    sixth_note_semitone -= 1;
+                    seventh_note_semitone -=1;
+        } else if (q1 === "Mm" && q2 === "Hm") {  
+                    sixth_note_semitone -= 1;
+        }
+    } else if (q1 === "") {                 
+        if (q2 === "m") {                   
+            third_note_semitone -= 1;
+            sixth_note_semitone -= 1;
+            seventh_note_semitone -= 1;
+        } else if (q2 === "Hm") {           
+            third_note_semitone -= 1;
+            sixth_note_semitone -= 1;
+        } else if (q2 === "Mm") {           
+            third_note_semitone -= 1;
+        }
+    } else if (q2 === "") {                 
+        if (q1 === "m") {                   
+            third_note_semitone += 1;
+            sixth_note_semitone += 1;
+            seventh_note_semitone += 1;
+        } else if (q1 === "Hm") {           
+            third_note_semitone += 1;
+            sixth_note_semitone += 1;
+        } else if (q1 === "Mm") {           
+            third_note_semitone += 1;
+        }
+    }
+    transpose = [semitones, third_note_semitone + OCTAVE_LENGTH, sixth_note_semitone + OCTAVE_LENGTH, seventh_note_semitone + OCTAVE_LENGTH];
 }
 function stopSequencer() {
     _sCount = 0;
@@ -1744,7 +1841,7 @@ function stopSequencer() {
 function setTempo(bpm) {
     const convert = Number(bpm);
     if (Number.isNaN(convert)) {
-        const problem = `[SET TEMPO ERROR] conversion failed: "${bpm}" is not a valid number`;
+        const problem = `[SET TEMPO ERROR] conversion failed: "${bpm}" is invalid`;
         error.msg = problem;
         return problem;
     }
@@ -1758,7 +1855,7 @@ function setTempo(bpm) {
 function setOctave(oct) {
     const convert = Number(oct);
     if (Number.isNaN(convert)) {
-        const problem = `[SET OCTAVE ERROR] conversion failed: "${oct}" is not a valid number`;
+        const problem = `[SET OCTAVE ERROR] conversion failed: "${oct}" is invalid`;
         error.msg = problem;
         return problem;
     }
