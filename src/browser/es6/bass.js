@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "12.5.2";
+const VERSION = "12.5.3";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -159,7 +159,7 @@ var DEF_ROADMAP_VISITED = 1;
 var asyncFuncs = [];                                                    
 var currentTimeout;
 var _sCount = 0;
-var transpose = null;
+var transpose = [0,0,0,0];
 function _initMusicMajorScale() {
     const baseNotes = {1: 'C', 2: 'C#', 3: 'D', 4: 'D#', 5: 'E', 6: 'F', 7: 'F#', 8: 'G', 9: 'G#', 10: 'A', 11: 'A#', 12: 'B'};
     const notes = { ...baseNotes };
@@ -209,27 +209,7 @@ A sheet music is a written or printed guide for musicians. In the BASS system, a
 chord (NOT note) is the basic unit of a sheet music. For example, 4/4 | C C C C
 || means to play chord C Major four times (NOT single C note four times).
 
-4. Time Signature
-A time signature is a musical notation symbol made of two stacked numbers
-telling about the rhythm of a song such as: 4/4, 3/4, 6/8, etc. Time signature
-is usually written in the beginning of a sheet music. For example, 3/4 | A B C |
-D E / |. If the sheet music does not start with a time signature, by default the
-time signature is 4/4. For example, | F D A C | B A B A |. Please note that,
-time signature in the BASS system has more varieties than common sheet music.
-For example, the numerator part represents the number of beats in a bar. The
-denominator part is a power of two, representing a fraction of a whole note for
-adjusting the actual sheet music speed. For example, 8/16 means there are 8
-beats in a bar, and the actual music speed will be adjusted based on the 16th
-note. This is to accommodate the treble clef parts and other instruments. So do
-not be surprised if you see a time signature such as 123/256 in the BASS system.
-
-5. Time Measure
-Time Measure (or Bar) is a small container of time that holds a specific number
-of beats. For example, the following bar contains 3 beats: | / / / |, this bar
-contains 0 beat: | | Please note that, this Bar refers to time measure, not to
-be mistaken with single Bar symbol | or double Bar symbol || (section III).
-
-6. Musical Key
+4. Musical Key
 In Western classical music , a musical key (or Key) is a group of notes centered
 around a main note called the tonic. For example, in the key of C major, the 
 notes are: C D E F G A B, where C is the tonic. The music tends to start, end, 
@@ -251,8 +231,29 @@ recommended. For examples, Key:C, Key:C#m, Key:CbHm, Key:CbMm to indicate the
 sheet music is played in C major, C sharp natural minor, C flat harmonic minor, 
 or C flat melodic minor. To transpose a sheet music from one key to another, use
 ~> symbol. For example, Key:C~>B | D E F G || to convert the music sheet from C 
-major to B major (section IV).    
+major to B major (section IV). Please note that, if no key is shown, assume it
+is C major.
 
+5. Time Signature
+A time signature is a musical notation symbol made of two stacked numbers
+telling about the rhythm of a song such as: 4/4, 3/4, 6/8, etc. Time signature
+is usually written in the beginning of a sheet music. For example, 3/4 | A B C |
+D E / |. If the sheet music does not start with a time signature, by default the
+time signature is 4/4. For example, | F D A C | B A B A |. Please note that,
+time signature in the BASS system has more varieties than common sheet music.
+For example, the numerator part represents the number of beats in a bar. The
+denominator part is a power of two, representing a fraction of a whole note for
+adjusting the actual sheet music speed. For example, 8/16 means there are 8
+beats in a bar, and the actual music speed will be adjusted based on the 16th
+note. This is to accommodate the treble clef parts and other instruments. So do
+not be surprised if you see a time signature such as 123/256 in the BASS system.
+
+6. Time Measure
+Time Measure (or Bar) is a small container of time that holds a specific number
+of beats. For example, the following bar contains 3 beats: | / / / |, this bar
+contains 0 beat: | | Please note that, this Bar refers to time measure, not to
+be mistaken with single Bar symbol | or double Bar symbol || (section III).
+    
 7. Opening Section
 An opening section begins the sheet music. It may or may not have a leading
 tone. If it has a leading tone, the number of opening beats can not go over the
@@ -332,7 +333,7 @@ of beats per minutes (bpm) set up before playing the sheet music. In the BASS
 system, by default it is set to ${DEF_BPM}, assuming quarter note is in time 
 signature (4/4). Musicians can change tempo manually. Please note that, the 
 actual final sheet music speed will be adjusted based on time signature 
-(section II.4).
+(section II.5).
 
 13. Octave
 An octave is the distance between two musical notes that share the same name
@@ -429,6 +430,9 @@ play A A A A, ending there at (FINE).
 
 III. THE CHORD-BASED NOTATION SYSTEM
 
+Key:
+. m Hm Mm ~>
+
 Time Signature:
 3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 6/16 32/64 8/128
 123/512 ...
@@ -482,6 +486,7 @@ Annotation:
 
 ||||||
 Remark:
+. means any note A-G with an optional # or b
 ... means et cetera
 # means any uppercase letter A-Z
 <number> means any whole number
@@ -666,43 +671,31 @@ function getChordNotes(chord=FAKE) {
         ebassNoteNumber = notes[ebassRoot];
     }
     const chordNotes = new Set();
-    if (!transpose) {
-        chordNotes.add(rootNoteNumber);
-        if (thirdNoteNumber) chordNotes.add(thirdNoteNumber);
-        if (fifthNoteNumber) chordNotes.add(fifthNoteNumber);
-        if (sixthNoteNumber) chordNotes.add(sixthNoteNumber);
-        if (seventhNoteNumber) chordNotes.add(seventhNoteNumber);
-        if (ninthNoteNumber) chordNotes.add(ninthNoteNumber);
-    } else { 
-        let t0 = transpose[0];
-        let t3 = transpose[1];
-        let t6 = transpose[2];
-        let t7 = transpose[3]; 
-        rootNoteNumber = (rootNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
-        chordNotes.add(rootNoteNumber);
-        if (thirdNoteNumber) {
-            thirdNoteNumber = (thirdNoteNumber + t0 + t3) % OCTAVE_LENGTH || OCTAVE_LENGTH;
-            chordNotes.add(thirdNoteNumber);
-        }
-        if (fifthNoteNumber) { 
-            fifthNoteNumber = (fifthNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
-            chordNotes.add(fifthNoteNumber);
-        }
-        if (sixthNoteNumber) {
-            sixthNoteNumber = (sixthNoteNumber + t0 + t6) % OCTAVE_LENGTH || OCTAVE_LENGTH;
-            chordNotes.add(sixthNoteNumber);
-        }
-        if (seventhNoteNumber) {
-            seventhNoteNumber = (seventhNoteNumber + t0 + t7) % OCTAVE_LENGTH || OCTAVE_LENGTH;
-            chordNotes.add(seventhNoteNumber);
-        }
-        if (ninthNoteNumber) {
-            ninthNoteNumber = (ninthNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
-            chordNotes.add(ninthNoteNumber);
-        }
-        if (ebassNoteNumber) {
-            ebassNoteNumber = (ebassNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
-        }
+    const t0 = transpose[0];
+    const t3 = transpose[1];
+    const t6 = transpose[2];
+    const t7 = transpose[3]; 
+    rootNoteNumber = (rootNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+    chordNotes.add(rootNoteNumber);
+    if (thirdNoteNumber) {
+        thirdNoteNumber = (thirdNoteNumber + t0 + t3) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+        chordNotes.add(thirdNoteNumber);
+    }
+    if (fifthNoteNumber) { 
+        fifthNoteNumber = (fifthNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+        chordNotes.add(fifthNoteNumber);
+    }
+    if (sixthNoteNumber) {
+        sixthNoteNumber = (sixthNoteNumber + t0 + t6) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+        chordNotes.add(sixthNoteNumber);
+    }
+    if (seventhNoteNumber) {
+        seventhNoteNumber = (seventhNoteNumber + t0 + t7) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+        chordNotes.add(seventhNoteNumber);
+    }
+    if (ninthNoteNumber) {
+        ninthNoteNumber = (ninthNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+        chordNotes.add(ninthNoteNumber);
     }
     const noteNames = [];
     for (let noteNumber of chordNotes) {
@@ -714,6 +707,7 @@ function getChordNotes(chord=FAKE) {
         noteNames.push(nn);
     }
     if (ebassNoteNumber) {
+        ebassNoteNumber = (ebassNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
         let base = notes[ebassNoteNumber];
         if (base === undefined) {
             error.msg = `invalid bass note number: ${ebassNoteNumber}`;
@@ -734,7 +728,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     DEF_OCTAVE = 4;
     asyncFuncs = [];
     _isPlaying = false;
-    transpose = null;
+    transpose = [0,0,0,0];
     if (sheetMusic.length > MAX_SHEET_LENGTH) {
         error.msg = `[SHEET MUSIC ERROR] length exceeds limit`;
         return;
@@ -1767,7 +1761,7 @@ function setInstrument(inst=DEF_INST) {
 function setKey(key=EMPTY) {
     const match = key.match(MUS_KEY);
     if (!match) {
-        const problem = `[KEY ERROR] format: A (Major), Am (Minor), AHm (Harmonic Min), AMm (Melodic Minor), A~>B (Transpose)`;
+        const problem = `[KEY ERROR] format: A (Major), Am (Minor), AHm (Harmonic Minor), AMm (Melodic Minor), A~>B (Transpose)`;
         error.msg = problem;
         return problem;
     }
