@@ -38,7 +38,7 @@ export {
 function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
     console.log(message);
 }
-const VERSION = "12.5.3";
+const VERSION = "12.5.4";
 const error = {      
     _msg: EMPTY,
     get msg() {

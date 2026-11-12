@@ -1,4 +1,4 @@
-bass.js (<!--version-->v12.5.3<!--/version-->)
+bass.js (<!--version-->v12.5.4<!--/version-->)
 =======
 
 A music sequencer library, written in javascript.
@@ -19,13 +19,13 @@ Installation (choose one)
 <script src="bass.js"></script>
 ```
 
-(2) NPM: Install the latest ```bass-sequencer``` package, then import it in your Node REPL:
+(2) NPM: Install the latest ```bass-sequencer``` package (minimal) and import it in the Node REPL:
 
 ```javascript
 const bass = await import("bass-sequencer");
 ```
 
-(3) Install the latest ```bass-sequencer``` or ```bass``` release from github via npm, then follow Method 2.
+(3) Install the latest ```bass-sequencer``` package (full) release from github via npm, then follow Method (2).
 
 Usage
 -----

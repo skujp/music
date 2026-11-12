@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "12.5.3";
+const VERSION = "12.5.4";
 const error = {      
     _msg: EMPTY,
     get msg() {
