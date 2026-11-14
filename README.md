@@ -1,4 +1,4 @@
-bass.js (<!--version-->v12.5.4<!--/version-->)
+bass.js (<!--version-->v13.0.0<!--/version-->)
 =======
 
 A music sequencer library, written in javascript.
@@ -13,24 +13,57 @@ https://skujp.github.io/music
 Installation (choose one)
 ------------------------
 
-(1) Browser: download the latest minified ```bass.js``` from github repository and include it in your HTML:
+**1. Browser (Full)**
 
+Download the latest minified ```bass.js``` from the GitHub repository and include it in your page:
 ```html
 <script src="bass.js"></script>
 ```
 
-(2) NPM: Install the latest ```bass-sequencer``` package (minimal) and import it in the Node REPL:
+**2. NPM (Minimal)**
 
-```javascript
-const bass = await import("bass-sequencer");
+Install:
+
+```shell
+npm install bass-sequencer 
 ```
 
-(3) Install the latest ```bass-sequencer``` package (full) release from github via npm, then follow Method (2).
+Then use either:
+
+*CommonJS*
+```javascript
+const bass = require('bass-sequencer');
+```
+
+*ESM*
+```javascript
+const { default: bass } = await import('bass-sequencer');
+```
+
+**3. GitHub Release (Full)**
+
+Download and install the latest bass-sequencer **.tgz** release from GitHub via npm, then use it as shown in Option 2.
+
+**4. Command Line Interface (Full)**
+
+Download and extract the latest CLI release from GitHub, then run:
+
+*Windows*
+
+```shell
+.\bass.exe  
+```
+
+*macOS/Linux*
+
+```shell
+./bass
+```
 
 Usage
 -----
 
-You can now access ```bass``` from the console.
+You can now access ```bass``` from the console (*except CLI*).
 
 To generate a sequencer...
 
@@ -80,7 +113,7 @@ console.log('',bass.help());
 Advanced 
 --------
 
-To rename the library (browser-only)...
+To rename the library (*browser-only*)...
 
 ```javascript
 var the_bass = bass.rename();

@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "12.5.4";
+const VERSION = "13.0.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -763,7 +763,7 @@ function buildSequencer(sheetMusic = EMPTY) {
         }
         let arg = match[3];
         let setFunc = 'set' + func;
-        if (typeof this[setFunc] !== 'function') {
+        if (typeof boombox.bass[setFunc] !== 'function') {
             if (BASSBOARD_DB_FIELD.has(func)) {
                 arg = arg.split('_').join(' '); 
                 func = func.toLowerCase(); 
@@ -777,7 +777,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             continue;
         }
         if (SYNC_0.has(setFunc)) {    
-            let status = this[setFunc](arg);  
+            let status = boombox.bass[setFunc](arg);  
             if (status !== undefined) {    
                 return;
             }
@@ -1428,7 +1428,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     }
     _sheetMusic.content = sheetMusic;
     for (let [func, arg] of syncFuncs) {
-        let result = this[func](arg);
+        let result = boombox.bass[func](arg);
         if (result !== undefined) {
             error.msg = result;
             return;
@@ -2031,7 +2031,7 @@ function getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
 function aftermath() {
     let asyncInvoke = false;
     for (let [func, arg] of asyncFuncs) {
-        let result = this[func](arg);
+        let result = boombox.bass[func](arg);
         result.then(function(data) {
             if (data) {
                 oops(`${data}`,'warning');

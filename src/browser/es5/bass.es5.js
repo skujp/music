@@ -33,7 +33,7 @@ function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" !=
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 (function (boombox) {
-  var VERSION = "12.5.4";
+  var VERSION = "13.0.0";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -456,7 +456,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       }
       var arg = match[3];
       var setFunc = 'set' + func;
-      if (typeof this[setFunc] !== 'function') {
+      if (typeof boombox.bass[setFunc] !== 'function') {
         if (BASSBOARD_DB_FIELD.has(func)) {
           arg = arg.split('_').join(' ');
           func = func.toLowerCase();
@@ -470,7 +470,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         continue;
       }
       if (SYNC_0.has(setFunc)) {
-        var status = this[setFunc](arg);
+        var status = boombox.bass[setFunc](arg);
         if (status !== undefined) {
           return;
         }
@@ -1114,7 +1114,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       var _syncFuncs$_i = _slicedToArray(_syncFuncs[_i4], 2),
         _func = _syncFuncs$_i[0],
         _arg = _syncFuncs$_i[1];
-      var _result = this[_func](_arg);
+      var _result = boombox.bass[_func](_arg);
       if (_result !== undefined) {
         error.msg = _result;
         return;
@@ -1911,7 +1911,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         var _step3$value = _slicedToArray(_step3.value, 2),
           func = _step3$value[0],
           arg = _step3$value[1];
-        var result = this[func](arg);
+        var result = boombox.bass[func](arg);
         result.then(function (data) {
           if (data) {
             oops("".concat(data), 'warning');

@@ -1,44 +1,49 @@
 const boombox = {};
 const window = null;
 const alert = console.log;
-async function getAudioContext() {
+const welcome = 
+`
+Welcome to bass-sequencer. In Node.js, playback support is not included
+by default. After creating a sequencer with buildSequencer, you'll need
+an audio backend to use playSequencer. You can implement your own backend
+or use an existing solution.
+
+By default, playSequencer uses the browser's AudioContext. For Node.js,
+install and use the node-web-audio-api package:
+
+npm install node-web-audio-api
+`
+function getAudioContext() {
   try {
-    const { AudioContext } = await import('node-web-audio-api');
+    const { AudioContext } = require('node-web-audio-api');
     return AudioContext;
-  } catch (err) {
-    console.log(`
-        Welcome to bass-sequencer. In Node.js, playback support is not included
-        by default. After creating a sequencer with buildSequencer, you'll need
-        an audio backend to use playSequencer. You can implement your own backend
-        or use an existing solution.
-
-        By default, playSequencer uses the browser's AudioContext. For Node.js,
-        install and use the node-web-audio-api package:
-
-        npm install node-web-audio-api
-    `);
+  } catch (e) {
+    console.log(welcome);
     return;
   }
 }
-boombox.AudioContext = await getAudioContext();
-export {
-    help, getErrorMsg, getChordNotes, buildSequencer,
-
-    oops,
-    playNote, playChord, playSequencer, stopSequencer,
-    setTempo, setOctave, getOctave, getTempo,
-    getSampleTestCase, getMaxSheetLength,
-    setSaveAs, setSustain, getSustain, setKey,
-    getInstrument, setInstrument,
-    getDuration, getGuitarNote, getVersion, hasComment,
-    getRoadmapStatus, getRoadmap, setRoadmap,
-    setClassical, getClassical,
-    aftermath, isPlaying
-};
+boombox.AudioContext = getAudioContext();
+boombox.bass = {};
+function attach(libObject, functionObj) {
+    Object.assign(libObject, functionObj);
+}
+attach(boombox.bass, {help, getErrorMsg, getChordNotes, buildSequencer});  
+attach(boombox.bass, {oops, 
+                      playNote, playChord, playSequencer, stopSequencer, 
+                      setTempo, setOctave, getOctave, getTempo, 
+                      getSampleTestCase, getMaxSheetLength,
+                      setSaveAs, setSustain, getSustain, setKey,
+                      getInstrument, setInstrument,
+                      getDuration, getGuitarNote, getVersion, hasComment,
+                      getRoadmapStatus, getRoadmap, setRoadmap, 
+                      setClassical, getClassical,
+                      aftermath, isPlaying
+                     });    
+module.exports = boombox.bass;
 function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
     console.log(message);
 }
-const VERSION = "12.5.4";
+const VERSION = "13.0.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -752,7 +757,7 @@ function buildSequencer(sheetMusic = EMPTY) {
         }
         let arg = match[3];
         let setFunc = 'set' + func;
-        if (typeof this[setFunc] !== 'function') {
+        if (typeof boombox.bass[setFunc] !== 'function') {
             if (BASSBOARD_DB_FIELD.has(func)) {
                 arg = arg.split('_').join(' '); 
                 func = func.toLowerCase(); 
@@ -766,7 +771,7 @@ function buildSequencer(sheetMusic = EMPTY) {
             continue;
         }
         if (SYNC_0.has(setFunc)) {    
-            let status = this[setFunc](arg);  
+            let status = boombox.bass[setFunc](arg);  
             if (status !== undefined) {    
                 return;
             }
@@ -1417,7 +1422,7 @@ function buildSequencer(sheetMusic = EMPTY) {
     }
     _sheetMusic.content = sheetMusic;
     for (let [func, arg] of syncFuncs) {
-        let result = this[func](arg);
+        let result = boombox.bass[func](arg);
         if (result !== undefined) {
             error.msg = result;
             return;
@@ -2020,7 +2025,7 @@ function getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i) {
 function aftermath() {
     let asyncInvoke = false;
     for (let [func, arg] of asyncFuncs) {
-        let result = this[func](arg);
+        let result = boombox.bass[func](arg);
         result.then(function(data) {
             if (data) {
                 oops(`${data}`,'warning');
