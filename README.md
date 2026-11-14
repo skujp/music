@@ -42,7 +42,7 @@ const { default: bass } = await import('bass-sequencer');
 
 **3. GitHub Release (Full)**
 
-Download and install the latest bass-sequencer **.tgz** release from GitHub via npm, then use it as shown in Option 2.
+Download the latest *.tgz* release from GitHub, install via npm, then use as in Option 2.
 
 **4. Command Line Interface (Full)**
 
