@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "13.0.0";
+const VERSION = "14.0.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -98,7 +98,8 @@ const BTB_REP = ":|:";
 const DBL_BTB_REP = ":||:";                                             
 const SKIP_NUM = /\[(\d+)\./;                                           
 const TIME_SIG = /^(\d+)\/(1|2|4|8|16|32|64|128|256|512|1024)$/;        
-const MUS_CHORD = /^([A-G])(#|b)?(m|maj|min|dim|aug|sus|maug)?(add|maj)?(\d*)?((b)(\d+))?(\/([A-G])(#|b)?)?\s*$/;
+const MUS_CHORD = /^([A-G])(#|b)?(m|maj|min|dim|aug|sus|maug)?(add|maj)?(\d*)?((b)(\d+))?(\/([A-Ga-g])(#|b)?)?$/;
+const MUS_NOTE  = /^([a-g])(#|b)?(\/([a-gA-G])(#|b)?)?$/;
 const MUS_KEY = /^(([A-G])(#|b)?(m|[HM]m|)?)(~>(([A-G])(#|b)?(m|[HM]m|)?))?$/;
 const AUX = /^\(([^)]+)\)$/;                                            
 const CMT_START = "<-";                                                 
@@ -205,9 +206,16 @@ Cdim7 (C Fully Diminished), Csus2 (C Suspended 2), Csus4 (C Suspended 4), Cadd9
 (C with E in the bass), Cmaug (C Minor Augmented).
 
 3. Sheet Music
-A sheet music is a written or printed guide for musicians. In the BASS system, a
-chord (NOT note) is the basic unit of a sheet music. For example, 4/4 | C C C C
-|| means to play chord C Major four times (NOT single C note four times).
+A sheet music is a written or printed guide for musicians. In the BASS system, 
+a single NOTE is written in lowercase letter 'a' to 'g' with optional sharp '#'
+or flat 'b' symbols. For example 3/4 | a bb c# | means to play note 'lah', 
+'si flat', and 'doh sharp'. A CHORD is written in uppercase letter 'A' to 'G' 
+with optional sharp '#' or flat 'b' symbols. For example, 4/4 | D Ebm F#7 Gdim | 
+means to play chord D major, E flat minor, F sharp seven, and G diminished 
+(section III). The bass note after slash symbol / can either be lowercase or
+uppercase. For example, A/b or A/B both refers to chord A major with a 'B' in 
+the bass. For clarity, lowercase is recommended for single notes and uppercase 
+for chords. In the BASS system, a chord is the default unit.
 
 4. Musical Key
 In Western classical music , a musical key (or Key) is a group of notes centered
@@ -431,7 +439,7 @@ play A A A A, ending there at (FINE).
 III. THE CHORD-BASED NOTATION SYSTEM
 
 Key:
-. m Hm Mm ~>
+! m Hm Mm ~>
 
 Time Signature:
 3/4 4/4 6/8 2/2 2/4 12/8 5/4 7/8 9/8 11/8 13/8 15/16 7/4 3/8 6/16 32/64 8/128
@@ -470,6 +478,9 @@ Duplicate:
 Chord:
 m aug dim maj7 7 m7 mmaj7 m7b5 7b5 dim7 sus sus2 sus4 add9 5 maj9 6 9 / maug
 
+Note:
+. /
+
 Section Marker:
 (#) (#x<number>) (#*<number>)
 
@@ -486,7 +497,8 @@ Annotation:
 
 ||||||
 Remark:
-. means any note A-G with an optional # or b
+! means any uppercase letter A-G with an optional # or b
+. means any lowercase letter a-g with an optional # or b
 ... means et cetera
 # means any uppercase letter A-Z
 <number> means any whole number
@@ -593,6 +605,30 @@ function getChordNotes(chord=FAKE) {
     if (chord === BM) {
         return BM;
     }
+    const match_s = chord.match(MUS_NOTE);
+    if (match_s) {
+        let root = match_s[1].toUpperCase() + (match_s[2] || ''); 
+        let ebass = match_s[3] || '';
+        let ebassRoot = (match_s[4] ? match_s[4].toUpperCase() : '') + (match_s[5] || ''); 
+        let rootNoteNumber = notes[root];
+        let ebassNoteNumber = null;
+        const t0 = transpose[0];
+        rootNoteNumber = (rootNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+        const chordNotes = new Set();
+        chordNotes.add(rootNoteNumber);
+        const noteNames = [];
+        for (let noteNumber of chordNotes) {
+            let nn = notes[noteNumber];
+            noteNames.push(nn);
+        }
+        if (ebass) {
+            ebassNoteNumber = notes[ebassRoot];
+            ebassNoteNumber = (ebassNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
+            let base = notes[ebassNoteNumber];
+            return [noteNames, base];
+        }
+        return [noteNames, null];
+    }
     const match = chord.match(MUS_CHORD);
     if (!match) {
         error.msg = `invalid chord: ${chord}`;
@@ -605,12 +641,8 @@ function getChordNotes(chord=FAKE) {
     const eflat = match[6] || '';
     const eflatNumber = match[8] || '';
     const ebass = match[9] || '';
-    const ebassRoot = (match[10] + (match[11] || '')) || '';
+    const ebassRoot = (match[10] ? match[10].toUpperCase() : '') + (match[11] || '');  
     var rootNoteNumber = notes[root];
-    if (rootNoteNumber === undefined) {
-        error.msg = `invalid root for chord: ${chord}`;
-        return null; 
-    }
     var thirdNoteNumber = (rootNoteNumber + 4) % OCTAVE_LENGTH || OCTAVE_LENGTH;
     var fifthNoteNumber = (rootNoteNumber + 7) % OCTAVE_LENGTH || OCTAVE_LENGTH;
     var sixthNoteNumber = null;
@@ -700,19 +732,11 @@ function getChordNotes(chord=FAKE) {
     const noteNames = [];
     for (let noteNumber of chordNotes) {
         let nn = notes[noteNumber];
-        if (nn === undefined) {
-            error.msg = `invalid note number: ${noteNumber}`;
-            return null; 
-        }
         noteNames.push(nn);
     }
     if (ebassNoteNumber) {
         ebassNoteNumber = (ebassNoteNumber + t0) % OCTAVE_LENGTH || OCTAVE_LENGTH;
         let base = notes[ebassNoteNumber];
-        if (base === undefined) {
-            error.msg = `invalid bass note number: ${ebassNoteNumber}`;
-            return null;
-        }
         return [noteNames, base];
     } 
     return [noteNames, null]; 
