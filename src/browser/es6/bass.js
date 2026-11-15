@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "14.0.0";
+const VERSION = "14.0.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -1473,7 +1473,9 @@ function playChord(chord = FAKE, octave = DEF_OCTAVE, duration = DEF_DURATION) {
 }
 function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volume=MAX_VOL) {
   if (!audioCtx) {
-    audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
+    const AudioContextClass = boombox.AudioContext || boombox.webkitAudioContext;
+    const isLinux = typeof process !== 'undefined' && process.platform === 'linux';
+    audioCtx = isLinux ? new AudioContextClass({ latencyHint: 'playback' }) : new AudioContextClass();
     masterGain = audioCtx.createGain(); 
     masterGain.gain.value = 0.22; 
     masterGain.connect(audioCtx.destination);

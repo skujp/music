@@ -1,6 +1,5 @@
 const boombox = {};
 const window = null;
-const alert = console.log;
 const welcome = 
 `
 Welcome to bass-sequencer. In Node.js, playback support is not included
@@ -17,7 +16,7 @@ async function getAudioContext() {
   try {
     const { AudioContext } = await import('node-web-audio-api');
     return AudioContext;
-  } catch (e) {
+  } catch {
     console.log(welcome);
     return;
   }
@@ -43,7 +42,7 @@ export default boombox.bass;
 function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
     console.log(message);
 }
-const VERSION = "14.0.0";
+const VERSION = "14.0.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -1467,7 +1466,9 @@ function playChord(chord = FAKE, octave = DEF_OCTAVE, duration = DEF_DURATION) {
 }
 function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volume=MAX_VOL) {
   if (!audioCtx) {
-    audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
+    const AudioContextClass = boombox.AudioContext || boombox.webkitAudioContext;
+    const isLinux = typeof process !== 'undefined' && process.platform === 'linux';
+    audioCtx = isLinux ? new AudioContextClass({ latencyHint: 'playback' }) : new AudioContextClass();
     masterGain = audioCtx.createGain(); 
     masterGain.gain.value = 0.22; 
     masterGain.connect(audioCtx.destination);

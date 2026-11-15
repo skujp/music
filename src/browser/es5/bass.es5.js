@@ -33,7 +33,7 @@ function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" !=
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 (function (boombox) {
-  var VERSION = "14.0.0";
+  var VERSION = "14.0.1";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -1165,7 +1165,11 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     var duration = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : DEF_DURATION;
     var volume = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : MAX_VOL;
     if (!audioCtx) {
-      audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
+      var AudioContextClass = boombox.AudioContext || boombox.webkitAudioContext;
+      var isLinux = typeof process !== 'undefined' && process.platform === 'linux';
+      audioCtx = isLinux ? new AudioContextClass({
+        latencyHint: 'playback'
+      }) : new AudioContextClass();
       masterGain = audioCtx.createGain();
       masterGain.gain.value = 0.22;
       masterGain.connect(audioCtx.destination);
