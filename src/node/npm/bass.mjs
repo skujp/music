@@ -1,5 +1,4 @@
 const boombox = {};
-const window = null;
 const welcome = 
 `
 Welcome to bass-sequencer. In Node.js, playback support is not included
@@ -39,10 +38,7 @@ attach(boombox.bass, {oops,
                       aftermath, isPlaying
                      });    
 export default boombox.bass;
-function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
-    console.log(message);
-}
-const VERSION = "14.0.1";
+const VERSION = "14.0.2";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -57,6 +53,38 @@ var DEF_SUPPORT_INST = new Set([DEF_INST, "drum", "guitar", "flute"]);
 var instrument = DEF_INST; 
 var audioCtx = null; 
 var masterGain = null; 
+function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
+    if (!isBoomboxOnBrowser) {
+        if (isNode) {
+            console.log(message);
+        } else {
+            const problem = `[OOPS ERROR] boombox on browser or node only`;
+            error.msg = problem;
+            alert(problem);
+        }
+        return;
+    }
+    if (!show) {
+        return;
+    }
+    const oopsContainer = document.getElementById('oopsContainer') || _createOopsContainer();
+    const oopsEl = document.createElement('div');
+    oopsEl.className = `oops oops-${type}`;
+    oopsEl.textContent = message;
+    oopsContainer.appendChild(oopsEl);
+    setTimeout(function() {
+        oopsEl.classList.add('oops-show');
+    }, d0);
+    setTimeout(function() {
+        oopsEl.classList.remove('oops-show');
+        setTimeout(function() {
+            oopsEl.remove();
+        }, d1);
+    }, d2);
+}
+const isNode = typeof process !== 'undefined'; 
+const isNodeOnLinux = isNode && process.platform === 'linux';
+const isBoomboxOnBrowser = typeof window !== 'undefined' && boombox === window; 
 const DEF_BPM = 90; 
 const BPM = {                                                           
     _val: DEF_BPM,                                                           
@@ -1467,8 +1495,7 @@ function playChord(chord = FAKE, octave = DEF_OCTAVE, duration = DEF_DURATION) {
 function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volume=MAX_VOL) {
   if (!audioCtx) {
     const AudioContextClass = boombox.AudioContext || boombox.webkitAudioContext;
-    const isLinux = typeof process !== 'undefined' && process.platform === 'linux';
-    audioCtx = isLinux ? new AudioContextClass({ latencyHint: 'playback' }) : new AudioContextClass();
+    audioCtx = isNodeOnLinux ? new AudioContextClass({ latencyHint: 'playback' }) : new AudioContextClass();
     masterGain = audioCtx.createGain(); 
     masterGain.gain.value = 0.22; 
     masterGain.connect(audioCtx.destination);
@@ -1532,7 +1559,7 @@ async function _saveSheetMusicToBASS() {
   }
   const jsonString = JSON.stringify(_sheetMusic, null, 2);
   const filename = `${_sheetMusic.title}_by_${_sheetMusic.contributor}.bass`;
-  if (boombox === window && 'showSaveFilePicker' in boombox) {
+  if (isBoomboxOnBrowser && 'showSaveFilePicker' in boombox) {
     const options = {
         suggestedName: filename,
         types: [{
@@ -1544,6 +1571,7 @@ async function _saveSheetMusicToBASS() {
     const writable = await handle.createWritable();
     await writable.write(jsonString);
     await writable.close();
+    oops(`🌟 Legend archived`,'info',{d1: 80, d2: 800});
     return;
   } else {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -1674,13 +1702,13 @@ async function playSequencer(sequencerObj) {
   let n = sequencer.length;
   let timeout = 0; 
   let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));     
-  oops('🤟', 'info', {d0:1});
+  oops('🤟|||', 'info', {d0:1});
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC, myCount);
-  oops('✌️', 'info', {d0:1});
+  oops('✌️||', 'info', {d0:1});
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC, myCount); 
-  oops('☝️', 'info', {d0:1});
+  oops('☝️|', 'info', {d0:1});
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC, myCount);   
   while (_isPlaying && myCount == _sCount && timeout < MAX_TIMEOUT) {
