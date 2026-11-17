@@ -33,7 +33,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (boombox) {
-  var VERSION = "14.0.2";
+  var VERSION = "14.0.3";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -108,14 +108,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       _ref$d3 = _ref.d2,
       d2 = _ref$d3 === void 0 ? DELAY_2 : _ref$d3;
     var show = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
-    if (!isBoomboxOnBrowser) {
-      if (isNode) {
-        console.log(message);
-      } else {
-        var problem = "[OOPS ERROR] boombox on browser or node only";
-        error.msg = problem;
-        alert(problem);
-      }
+    if (!isBoomboxOnWindow) {
+      console.log(message);
       return;
     }
     if (!show) {
@@ -136,9 +130,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       }, d1);
     }, d2);
   }
-  var isNode = typeof process !== 'undefined';
-  var isNodeOnLinux = isNode && process.platform === 'linux';
-  var isBoomboxOnBrowser = typeof window !== 'undefined' && boombox === window;
+  var isBoomboxOnWindow = typeof window !== 'undefined' && boombox === window;
   var DEF_BPM = 90;
   var BPM = {
     _val: DEF_BPM,
@@ -1172,10 +1164,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var duration = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : DEF_DURATION;
     var volume = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : MAX_VOL;
     if (!audioCtx) {
-      var AudioContextClass = boombox.AudioContext || boombox.webkitAudioContext;
-      audioCtx = isNodeOnLinux ? new AudioContextClass({
-        latencyHint: 'playback'
-      }) : new AudioContextClass();
+      audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
       masterGain = audioCtx.createGain();
       masterGain.gain.value = 0.22;
       masterGain.connect(audioCtx.destination);
@@ -1291,7 +1280,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           case 8:
             jsonString = JSON.stringify(_sheetMusic, null, 2);
             filename = "".concat(_sheetMusic.title, "_by_").concat(_sheetMusic.contributor, ".bass");
-            if (!(isBoomboxOnBrowser && 'showSaveFilePicker' in boombox)) {
+            if (!(isBoomboxOnWindow && 'showSaveFilePicker' in boombox)) {
               _context.n = 13;
               break;
             }
@@ -1318,7 +1307,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             _context.n = 12;
             return writable.close();
           case 12:
-            oops("\uD83C\uDF1F Legend archived", 'info', {
+            oops("\uD83C\uDF1F Legend archived", 'success', {
               d1: 80,
               d2: 800
             });
@@ -1469,21 +1458,21 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             n = sequencer.length;
             timeout = 0;
             tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));
-            oops('🤟|||', 'info', {
+            oops('🤟', 'info', {
               d0: 1
             });
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 1;
             return _delay(DEF_MSEC, myCount);
           case 1:
-            oops('✌️||', 'info', {
+            oops('✌️', 'info', {
               d0: 1
             });
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
             _context3.n = 2;
             return _delay(DEF_MSEC, myCount);
           case 2:
-            oops('☝️|', 'info', {
+            oops('☝️', 'info', {
               d0: 1
             });
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
