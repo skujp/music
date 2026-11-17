@@ -33,7 +33,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (boombox) {
-  var VERSION = "14.0.3";
+  var VERSION = "14.0.4";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -1611,7 +1611,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.n) {
           case 0:
-            if (!(_typeof(boombox) !== "object" || boombox !== window)) {
+            if (isBoomboxOnWindow) {
               _context4.n = 1;
               break;
             }

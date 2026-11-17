@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "14.0.3";
+const VERSION = "14.0.4";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -1759,7 +1759,7 @@ async function playSequencer(sequencerObj) {
     }
 }
 async function setSaveAs(option) {
-    if (typeof(boombox) !== "object" || boombox !== window) {
+    if (!isBoomboxOnWindow) {
         const problem = `[SAVEAS ERROR] browser-only print support`;
         return problem;
     }
