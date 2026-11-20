@@ -54,7 +54,13 @@ Download and extract the latest B3 shell release from GitHub, then run:
 .\b3.exe  
 ```
 
-*macOS/Linux*
+*macOS*
+
+```shell
+./b3
+```
+
+*Linux*
 
 ```shell
 ./b3
