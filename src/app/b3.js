@@ -203,7 +203,7 @@ Examples:
 
 Note:
   Use ./${shellName} or .\\${shellName}.exe if needed.
-  No arguments starts the ${shellName} shell.
+  No arguments start the ${shellName} shell.
   Press ${T_CTRL_C} to stop.`
 switch (command) {
   case "-p":
