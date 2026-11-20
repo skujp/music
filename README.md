@@ -15,7 +15,7 @@ Installation (choose one)
 
 **1. Browser (Full)**
 
-Download the latest minified ```bass.js``` from the GitHub repository and include it in your page:
+Download the latest minified ```bass.js``` from Github and include it in your html file:
 ```html
 <script src="bass.js"></script>
 ```
@@ -42,7 +42,13 @@ const { default: bass } = await import('bass-sequencer');
 
 **3. GitHub Release (Full)**
 
-Download the latest package *.tgz* release from GitHub, install via npm, then use as in Option 2.
+Download the latest *.tgz* release from GitHub and install it:
+
+```shell
+npm install bass-sequencer-X.Y.Z.tgz 
+```
+
+Then follow Option 2.
 
 **4. The B3 Bass Boombox Shell (Full)**
 
