@@ -26,7 +26,7 @@ function attach(libObject, functionObj) {
     Object.assign(libObject, functionObj);
 }
 attach(boombox.bass, {help, getErrorMsg, getChordNotes, buildSequencer});  
-attach(boombox.bass, {oops, 
+attach(boombox.bass, {oops,
                       playNote, playChord, playSequencer, stopSequencer, 
                       setTempo, setOctave, getOctave, getTempo, 
                       getSampleTestCase, getMaxSheetLength,
@@ -38,7 +38,7 @@ attach(boombox.bass, {oops,
                       aftermath, isPlaying
                      });    
 export default boombox.bass;
-const VERSION = "14.0.4";
+const VERSION = "14.1.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -1485,30 +1485,18 @@ function playChord(chord = FAKE, octave = DEF_OCTAVE, duration = DEF_DURATION) {
     _playSequencerChord(notes, octave, duration);
 }
 function playNote(note = FAKE, octave = DEF_OCTAVE, duration=DEF_DURATION, volume=MAX_VOL) {
-  if (!audioCtx) {
-    audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
-    masterGain = audioCtx.createGain(); 
-    masterGain.gain.value = 0.22; 
-    masterGain.connect(audioCtx.destination);
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = 'triangle'; 
   osc.frequency.value = _freq(note, octave);
   osc.connect(gain);
   gain.connect(masterGain);
-  const now = audioCtx.currentTime || 0;
-  const attackTime = 0.01;
-  const minimumVolume = MIN_VOL; 
-  const attackVolume = volume;
-  const sustainVolume = (volume > 0.3) ? 0.7 : minimumVolume;  
-  gain.gain.value = minimumVolume;
-  gain.gain.exponentialRampToValueAtTime(attackVolume, now + attackTime);
+  const now = audioCtx.currentTime;
+  const sustainVolume = (volume > 0.3) ? 0.7 : MIN_VOL;  
+  gain.gain.value = MIN_VOL;
+  gain.gain.exponentialRampToValueAtTime(volume, now + 0.01);
   gain.gain.setValueAtTime(sustainVolume, now + (duration || 0.01));
-  gain.gain.exponentialRampToValueAtTime(minimumVolume, now + duration + 0.8);
+  gain.gain.exponentialRampToValueAtTime(MIN_VOL, now + duration + 0.8);
   osc.addEventListener('ended', function() {
     osc.disconnect();
     gain.disconnect();
@@ -1669,7 +1657,19 @@ function _createOopsContainer() {
     document.body.appendChild(container);
     return container;
 }
+async function _ensureAudioReady() {
+  if (!audioCtx || audioCtx.state === 'closed') {
+    audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
+    masterGain = audioCtx.createGain(); 
+    masterGain.gain.value = 0.22; 
+    masterGain.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') {
+    await audioCtx.resume();
+  }
+}
 async function playSequencer(sequencerObj) {
+  await _ensureAudioReady();
   _sCount += 1;
   const myCount = _sCount;   
   _isPlaying = true;
