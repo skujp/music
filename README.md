@@ -190,10 +190,18 @@ Works for ES6-compatible browsers.
 
 For legacy browsers, use bass.es5.js.
 
-Developer
----------
+Development
+-----------
 
 See `src`.
+
+Frontend: option 1.
+
+Backend: option 2.
+
+Packaging: option 3.
+
+Testing: option 4.
 
 Contact
 -------
