@@ -42,28 +42,28 @@ const { default: bass } = await import('bass-sequencer');
 
 **3. GitHub Release (Full)**
 
-Download the latest *.tgz* release from GitHub, install via npm, then use as in Option 2.
+Download the latest package *.tgz* release from GitHub, install via npm, then use as in Option 2.
 
-**4. Command Line Interface (Full)**
+**4. The B3 Bass Boombox Shell (Full)**
 
-Download and extract the latest CLI release from GitHub, then run:
+Download and extract the latest B3 shell release from GitHub, then run:
 
 *Windows*
 
 ```shell
-.\bass.exe  
+.\b3.exe  
 ```
 
 *macOS/Linux*
 
 ```shell
-./bass
+./b3
 ```
 
 Usage
 -----
 
-You can now access ```bass``` from the console (*except CLI*).
+You can now access ```bass``` from the console (*except shell option*).
 
 To generate a sequencer...
 
