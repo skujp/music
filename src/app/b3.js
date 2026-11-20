@@ -45,6 +45,8 @@ function repl(i=0) {
 
   if (i == 0) {
     console.log(welcomeMsg);
+  } else if (i == 250) {
+    i = 1;
   }
 
   const rl = readline.createInterface({
