@@ -1,6 +1,6 @@
-const b3 = require('bass-sequencer');
+const bass = require('bass-sequencer');
 const { AudioContext } = require('node-web-audio-api');
-b3.initAudio(AudioContext);
+bass.ssup(AudioContext);
 
 const readline = require("readline");
 const fs = require("fs");
@@ -35,7 +35,7 @@ const helpMsg =
 
 const welcomeMsg =
 `
-  Welcome to ${shellName.toUpperCase()} Shell v${b3.getVersion()}, the Bass Boom Box for musicians.  
+  Welcome to ${shellName.toUpperCase()} Shell v${bass.getVersion()}, the Bass Boom Box for musicians.  
   Type "${T_HELP}" for more information.
 `
 
@@ -76,14 +76,14 @@ function repl(i=0) {
         const filename = line.slice(5).trim();
         const sheetMusic = fs.readFileSync(filename, "utf8");
         console.log(sheetMusic);
-        const s = b3.buildSequencer(sheetMusic);
+        const s = bass.buildSequencer(sheetMusic);
         if (!s) {
-          console.log(b3.getErrorMsg());
+          console.log(bass.getErrorMsg());
         } else {
           history.push(sheetMusic);
-          b3.playSequencer(s).then(() => {rl.prompt();}).catch((e)=> {
-            if (b3.isPlaying()) {
-              b3.stopSequencer();
+          bass.playSequencer(s).then(() => {rl.prompt();}).catch((e)=> {
+            if (bass.isPlaying()) {
+              bass.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
               // console.error(`[SYSTEM ERROR][1] ${e.message}`);
@@ -91,9 +91,9 @@ function repl(i=0) {
           });
         }
       } else if (line === `${T_READ}`) {
-        console.log("",b3.help());
+        console.log("",bass.help());
       } else if (line === `${T_STOP}`) {
-        b3.stopSequencer();
+        bass.stopSequencer();
       } else if (line === `${T_EMPTY}`) {
         ;
       } else if (line === `${T_EXIT}`) {
@@ -105,14 +105,14 @@ function repl(i=0) {
         fs.writeFileSync(filename, history.join("\n\n"), "utf8");
         console.log(`Session saved to ${filename}`);
       } else {
-        const s = b3.buildSequencer(line);
+        const s = bass.buildSequencer(line);
         if (!s) {
-          console.log(b3.getErrorMsg());
+          console.log(bass.getErrorMsg());
         } else {
           history.push(line);
-          b3.playSequencer(s).then(() => {rl.prompt();}).catch((e)=> {
-            if (b3.isPlaying()) {
-              b3.stopSequencer();
+          bass.playSequencer(s).then(() => {rl.prompt();}).catch((e)=> {
+            if (bass.isPlaying()) {
+              bass.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
               // console.error(`[SYSTEM ERROR][2] ${e.message}`);
@@ -130,14 +130,14 @@ function repl(i=0) {
     if (editorMode) {
       editorMode = false;
       const source = editorBuffer.join("\n");
-      const s = b3.buildSequencer(source);
+      const s = bass.buildSequencer(source);
       if (!s) {
-        console.log(b3.getErrorMsg());
+        console.log(bass.getErrorMsg());
       } else {
         history.push(source);
-        b3.playSequencer(s).then(() => {rl.prompt();}).catch((e)=> {
-          if (b3.isPlaying()) {
-            b3.stopSequencer();
+        bass.playSequencer(s).then(() => {rl.prompt();}).catch((e)=> {
+          if (bass.isPlaying()) {
+            bass.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
             // console.error(`[SYSTEM ERROR][3] ${e.message}`);
@@ -162,8 +162,8 @@ function repl(i=0) {
       rl.prompt();
       return;
     }
-    if (b3.isPlaying()) {
-        b3.stopSequencer();
+    if (bass.isPlaying()) {
+        bass.stopSequencer();
         sigIntCount = 0;
     } else {
       sigIntCount += 1;
@@ -215,14 +215,14 @@ switch (command) {
   case "--play":
     try {
         const sheetMusic = (args?.length > 0 ? args.join(" ") : readStdin()) ?? "";        
-        const s = b3.buildSequencer(sheetMusic);
+        const s = bass.buildSequencer(sheetMusic);
         if (!s) {
-            console.log(b3.getErrorMsg());
+            console.log(bass.getErrorMsg());
             process.exit(1);
         }
-        b3.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
-          if (b3.isPlaying()) {
-            b3.stopSequencer();
+        bass.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
+          if (bass.isPlaying()) {
+            bass.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
             // console.error(`[SYSTEM ERROR][4] ${e.message}`);
@@ -235,7 +235,7 @@ switch (command) {
     break;
   case "-r":
   case "--read":
-    console.log('',b3.help());
+    console.log('',bass.help());
     break;
   case "-h":
   case "--help":
@@ -243,7 +243,7 @@ switch (command) {
     break;
   case "-v":
   case "--version":
-    console.log(`v${b3.getVersion()}`);
+    console.log(`v${bass.getVersion()}`);
     break;
   case undefined:
     repl(0);
@@ -251,13 +251,13 @@ switch (command) {
   default:
     try {
       const sheetMusic = fs.readFileSync(command, "utf8");
-      const s = b3.buildSequencer(sheetMusic);
+      const s = bass.buildSequencer(sheetMusic);
       if (!s) {
-        console.log(b3.getErrorMsg());
+        console.log(bass.getErrorMsg());
       } else {
-        b3.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
-          if (b3.isPlaying()) {
-            b3.stopSequencer();
+        bass.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
+          if (bass.isPlaying()) {
+            bass.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
             // console.error(`[SYSTEM ERROR][5] ${e.message}`);
