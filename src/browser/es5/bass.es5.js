@@ -33,7 +33,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (boombox) {
-  var VERSION = "14.1.1";
+  var VERSION = "14.1.2";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -46,7 +46,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var DEF_INST = "piano";
   var DEF_SUPPORT_INST = new Set([DEF_INST, "drum", "guitar", "flute"]);
   var instrument = DEF_INST;
-  var audioCtx = null;
+  var audioCtx = {};
   var masterGain = null;
   var _oBass = boombox.bass;
   var TheBass = {};
@@ -70,7 +70,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   });
   attach(TheBass, {
     oops: oops,
-    initAudio: initAudio,
+    ssup: ssup,
+    og: og,
     playNote: playNote,
     playChord: playChord,
     playSequencer: playSequencer,
@@ -132,6 +133,37 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     }, d2);
   }
   var isBoomboxOnWindow = typeof window !== 'undefined' && boombox === window;
+  var isOG = false;
+  function og() {
+    var musician = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    isOG = musician;
+  }
+  function ssup() {
+    var audi = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    if (audi) {
+      boombox.AudioContext = audi;
+    }
+    if (isBoomboxOnWindow) {
+      audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.22;
+      masterGain.connect(audioCtx.destination);
+    } else {
+      if (typeof boombox.AudioContext !== 'undefined') {
+        if (!isOG) {
+          audioCtx = new boombox.AudioContext();
+        } else {
+          audioCtx = new boombox.AudioContext({
+            latencyHint: 'playback'
+          });
+        }
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.22;
+        masterGain.connect(audioCtx.destination);
+      }
+    }
+  }
+  ssup();
   var DEF_BPM = 90;
   var BPM = {
     _val: DEF_BPM,
@@ -1405,33 +1437,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     document.body.appendChild(container);
     return container;
   }
-  function initAudio() {
-    var engine = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-    var driver = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-    if (engine) {
-      boombox.AudioContext = engine;
-    }
-    if (isBoomboxOnWindow) {
-      audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
-      masterGain = audioCtx.createGain();
-      masterGain.gain.value = 0.22;
-      masterGain.connect(audioCtx.destination);
-    } else {
-      if (typeof boombox.AudioContext !== 'undefined') {
-        if (driver === 'alsa') {
-          audioCtx = new boombox.AudioContext({
-            latencyHint: 'playback'
-          });
-        } else {
-          audioCtx = new boombox.AudioContext();
-        }
-        masterGain = audioCtx.createGain();
-        masterGain.gain.value = 0.22;
-        masterGain.connect(audioCtx.destination);
-      }
-    }
-  }
-  initAudio(null, '');
   function playSequencer(_x) {
     return _playSequencer.apply(this, arguments);
   }

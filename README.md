@@ -1,4 +1,4 @@
-bass.js (<!--version-->v14.1.1<!--/version-->)
+bass.js (<!--version-->v14.1.2<!--/version-->)
 =======
 
 A music sequencer library, written in javascript.
@@ -11,24 +11,25 @@ Demo
 https://skujp.github.io/music
 
 Installation (choose one)
-------------------------
+-------------------------
 
 **1. Browser (Full)**
 
-Download the latest minified ```bass.js``` from Github and include it in your html file:
+Download the latest minified ```bass.js``` from Github and include in your html...
+
 ```html
 <script src="bass.js"></script>
 ```
 
 **2. NPM (Minimal)**
 
-Install:
+Install...
 
 ```shell
 npm install bass-sequencer 
 ```
 
-Then use either:
+Then use either...
 
 *CommonJS*
 ```javascript
@@ -42,7 +43,7 @@ const { default: bass } = await import('bass-sequencer');
 
 **3. The B3 Bass Boombox Shell (Full)**
 
-Download and extract the latest B3 shell release from GitHub, then run:
+Download and extract the latest B3 shell release from GitHub, then run...
 
 *Windows*
 
@@ -98,17 +99,6 @@ bass.playSequencer(sequencer);
 
    If sheet music has an end, returns undefined promise, otherwises it plays in a loop.  
 */
-```
-
-**Note:** For *option 2*, install and initialize `node-web-audio-api` before using *playSequencer*...
-
-```shell
-npm install node-web-audio-api
-```
-
-```javascript
-const { AudioContext } = require('node-web-audio-api');
-bass.initAudio(AudioContext);
 ```
 
 To stop playing the sequencer...
@@ -194,6 +184,29 @@ bass.playNote(noteName, octave, duration, volume);
 
 	Example: bass.playNote('Gb') or bass.playNote('Gb', 4, 1, 1);
 */
+```
+
+Notes
+-----
+
+For *option 2* playback support,
+
+Install `node-web-audio-api`...
+
+```shell
+npm install node-web-audio-api
+```
+
+Initialize `AudioContext`...
+
+```javascript
+const { AudioContext } = require('node-web-audio-api');
+```
+
+Connect it to ```bass```...
+
+```javascript
+bass.ssup(AudioContext);
 ```
 
 Compatibility

@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "14.1.1";
+const VERSION = "14.1.2";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -12,7 +12,7 @@ const error = {
 var DEF_INST = "piano";
 var DEF_SUPPORT_INST = new Set([DEF_INST, "drum", "guitar", "flute"]);
 var instrument = DEF_INST; 
-var audioCtx = null; 
+var audioCtx = {}; 
 var masterGain = null; 
 const _oBass = boombox.bass;
 const TheBass = {};
@@ -28,7 +28,7 @@ function attach(libObject, functionObj) {
     Object.assign(libObject, functionObj);
 }
 attach(TheBass, {rename, help, getErrorMsg, getChordNotes, buildSequencer});  
-attach(TheBass, {oops, initAudio,
+attach(TheBass, {oops, ssup, og,
                  playNote, playChord, playSequencer, stopSequencer, 
                  setTempo, setOctave, getOctave, getTempo, 
                  getSampleTestCase, getMaxSheetLength,
@@ -63,6 +63,33 @@ function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2}
     }, d2);
 }
 const isBoomboxOnWindow = typeof window !== 'undefined' && boombox === window; 
+var   isOG = false;
+function og(musician = false) {
+    isOG = musician;
+}
+async function ssup(audi = null) {
+    if (audi) {
+        boombox.AudioContext = audi;
+    }
+    if (isBoomboxOnWindow) {
+        audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
+        masterGain = audioCtx.createGain(); 
+        masterGain.gain.value = 0.22; 
+        masterGain.connect(audioCtx.destination);
+    } else {
+        if (typeof boombox.AudioContext !== 'undefined') {
+            if (!isOG) {
+                audioCtx = new boombox.AudioContext();
+            } else {
+                audioCtx = new boombox.AudioContext({ latencyHint: 'playback' });
+            }
+            masterGain = audioCtx.createGain(); 
+            masterGain.gain.value = 0.22; 
+            masterGain.connect(audioCtx.destination);
+        }
+    }
+}
+ssup().then(()=>{}).catch((exp)=>{isBoomboxOnWindow && oops(`[Audio Init Error] ${exp}`, 'error')});
 const DEF_BPM = 90; 
 const BPM = {                                                           
     _val: DEF_BPM,                                                           
@@ -1643,29 +1670,6 @@ function _createOopsContainer() {
     document.body.appendChild(container);
     return container;
 }
-function initAudio(engine = null, driver = '') {
-    if (engine) {
-        boombox.AudioContext = engine;
-    }
-    if (isBoomboxOnWindow) {
-        audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
-        masterGain = audioCtx.createGain(); 
-        masterGain.gain.value = 0.22; 
-        masterGain.connect(audioCtx.destination);
-    } else {
-        if (typeof boombox.AudioContext !== 'undefined') {
-            if (driver === 'alsa') {
-                audioCtx = new boombox.AudioContext({ latencyHint: 'playback' });
-            } else {
-                audioCtx = new boombox.AudioContext();
-            }
-            masterGain = audioCtx.createGain(); 
-            masterGain.gain.value = 0.22; 
-            masterGain.connect(audioCtx.destination);
-        }
-    }
-}
-initAudio(null,'');
 async function playSequencer(sequencerObj) {
   if (audioCtx.state !== 'running') {
     await audioCtx.resume();
