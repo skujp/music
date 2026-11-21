@@ -100,9 +100,7 @@ bass.playSequencer(sequencer);
 */
 ```
 
-*Note*
-
-For *option 2*, install and initialize `node-web-audio-api` before using `playSequencer`...
+**Note:** For *option 2*, install and initialize `node-web-audio-api` before using *playSequencer*...
 
 ```shell
 npm install node-web-audio-api
