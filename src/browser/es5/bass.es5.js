@@ -33,7 +33,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (boombox) {
-  var VERSION = "14.1.0";
+  var VERSION = "14.1.1";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -70,6 +70,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   });
   attach(TheBass, {
     oops: oops,
+    initAudio: initAudio,
     playNote: playNote,
     playChord: playChord,
     playSequencer: playSequencer,
@@ -1404,44 +1405,48 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     document.body.appendChild(container);
     return container;
   }
-  function _ensureAudioReady() {
-    return _ensureAudioReady2.apply(this, arguments);
+  function initAudio() {
+    var engine = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var driver = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+    if (engine) {
+      boombox.AudioContext = engine;
+    }
+    if (isBoomboxOnWindow) {
+      audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.22;
+      masterGain.connect(audioCtx.destination);
+    } else {
+      if (typeof boombox.AudioContext !== 'undefined') {
+        if (driver === 'alsa') {
+          audioCtx = new boombox.AudioContext({
+            latencyHint: 'playback'
+          });
+        } else {
+          audioCtx = new boombox.AudioContext();
+        }
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.22;
+        masterGain.connect(audioCtx.destination);
+      }
+    }
   }
-  function _ensureAudioReady2() {
-    _ensureAudioReady2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+  initAudio(null, '');
+  function playSequencer(_x) {
+    return _playSequencer.apply(this, arguments);
+  }
+  function _playSequencer() {
+    _playSequencer = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(sequencerObj) {
+      var myCount, sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank, _sequencerObj, _sequencerObj$, problem, i, n, timeout, tempRepeatCount, j, len, tempRoadmapVisited, tempRank, f, _f;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
-            if (!audioCtx || audioCtx.state === 'closed') {
-              audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
-              masterGain = audioCtx.createGain();
-              masterGain.gain.value = 0.22;
-              masterGain.connect(audioCtx.destination);
-            }
-            if (!(audioCtx.state === 'suspended')) {
+            if (!(audioCtx.state !== 'running')) {
               _context3.n = 1;
               break;
             }
             _context3.n = 1;
             return audioCtx.resume();
-          case 1:
-            return _context3.a(2);
-        }
-      }, _callee3);
-    }));
-    return _ensureAudioReady2.apply(this, arguments);
-  }
-  function playSequencer(_x) {
-    return _playSequencer.apply(this, arguments);
-  }
-  function _playSequencer() {
-    _playSequencer = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(sequencerObj) {
-      var myCount, sequencer, loopBackIndex, repeatCount, end, voltaMap, voltaArr, roadmap, roadmapVisited, roadmapRank, _sequencerObj, _sequencerObj$, problem, i, n, timeout, tempRepeatCount, j, len, tempRoadmapVisited, tempRank, f, _f;
-      return _regenerator().w(function (_context4) {
-        while (1) switch (_context4.n) {
-          case 0:
-            _context4.n = 1;
-            return _ensureAudioReady();
           case 1:
             _sCount += 1;
             myCount = _sCount;
@@ -1480,25 +1485,25 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
               d0: 1
             });
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
-            _context4.n = 2;
+            _context3.n = 2;
             return _delay(DEF_MSEC, myCount);
           case 2:
             oops('✌️', 'info', {
               d0: 1
             });
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
-            _context4.n = 3;
+            _context3.n = 3;
             return _delay(DEF_MSEC, myCount);
           case 3:
             oops('☝️', 'info', {
               d0: 1
             });
             playNote(FAKE, MIN_OCTAVE, STACKATO_LEGATO, MIN_VOL);
-            _context4.n = 4;
+            _context3.n = 4;
             return _delay(DEF_MSEC, myCount);
           case 4:
             if (!(_isPlaying && myCount == _sCount && timeout < MAX_TIMEOUT)) {
-              _context4.n = 19;
+              _context3.n = 19;
               break;
             }
             timeout += 1;
@@ -1510,54 +1515,54 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             tempRank = _toConsumableArray(roadmapRank);
           case 5:
             if (!(_isPlaying && myCount == _sCount && i < n)) {
-              _context4.n = 16;
+              _context3.n = 16;
               break;
             }
             if (!(i in roadmap)) {
-              _context4.n = 7;
+              _context3.n = 7;
               break;
             }
             f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
             if (!(f >= 0)) {
-              _context4.n = 6;
+              _context3.n = 6;
               break;
             }
             i = f;
-            return _context4.a(3, 5);
+            return _context3.a(3, 5);
           case 6:
             if (!(f == -8 || f == -3)) {
-              _context4.n = 7;
+              _context3.n = 7;
               break;
             }
             oops(getErrorMsg(), 'error');
-            return _context4.a(2);
+            return _context3.a(2);
           case 7:
             if (!(i in voltaMap)) {
-              _context4.n = 11;
+              _context3.n = 11;
               break;
             }
             if (voltaArr[voltaMap[i]][0]) {
-              _context4.n = 9;
+              _context3.n = 9;
               break;
             }
             _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
-            _context4.n = 8;
+            _context3.n = 8;
             return _delay(DEF_MSEC, myCount);
           case 8:
             voltaArr[voltaMap[i]][0] = true;
             i += 1;
-            _context4.n = 10;
+            _context3.n = 10;
             break;
           case 9:
             while (i < n && i in voltaMap && voltaArr[voltaMap[i]][0]) {
               i = voltaArr[voltaMap[i]][2];
             }
           case 10:
-            _context4.n = 13;
+            _context3.n = 13;
             break;
           case 11:
             _playSequencerChord(sequencer[i], DEF_OCTAVE, STACKATO_LEGATO);
-            _context4.n = 12;
+            _context3.n = 12;
             return _delay(DEF_MSEC, myCount);
           case 12:
             if (i in loopBackIndex) {
@@ -1575,48 +1580,48 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             }
           case 13:
             if (!(i === n && n in roadmap)) {
-              _context4.n = 15;
+              _context3.n = 15;
               break;
             }
             _f = getRoadmap(sequencer, roadmap, roadmapVisited, roadmapRank, i);
             if (!(_f >= 0)) {
-              _context4.n = 14;
+              _context3.n = 14;
               break;
             }
             i = _f;
-            return _context4.a(3, 5);
+            return _context3.a(3, 5);
           case 14:
             if (!(_f == -8 || _f == -3)) {
-              _context4.n = 15;
+              _context3.n = 15;
               break;
             }
             oops(getErrorMsg(), 'error');
-            return _context4.a(2);
+            return _context3.a(2);
           case 15:
-            _context4.n = 5;
+            _context3.n = 5;
             break;
           case 16:
             if (!_isPlaying) {
-              _context4.n = 18;
+              _context3.n = 18;
               break;
             }
             if (!(end && (!(n - 1 in repeatCount) || repeatCount[n - 1] == 0))) {
-              _context4.n = 17;
+              _context3.n = 17;
               break;
             }
             oops('♪♫👏Whoohoo👏♫♪', 'info');
-            return _context4.a(2);
+            return _context3.a(2);
           case 17:
             roadmapRank = tempRank;
             roadmapVisited = tempRoadmapVisited;
             oops('📣Encore More🧢', 'info');
           case 18:
-            _context4.n = 4;
+            _context3.n = 4;
             break;
           case 19:
-            return _context4.a(2);
+            return _context3.a(2);
         }
-      }, _callee4);
+      }, _callee3);
     }));
     return _playSequencer.apply(this, arguments);
   }
@@ -1624,40 +1629,40 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     return _setSaveAs.apply(this, arguments);
   }
   function _setSaveAs() {
-    _setSaveAs = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(option) {
+    _setSaveAs = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(option) {
       var _problem5, problem;
-      return _regenerator().w(function (_context5) {
-        while (1) switch (_context5.n) {
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.n) {
           case 0:
             if (isBoomboxOnWindow) {
-              _context5.n = 1;
+              _context4.n = 1;
               break;
             }
             _problem5 = "[SAVEAS ERROR] browser-only print support";
-            return _context5.a(2, _problem5);
+            return _context4.a(2, _problem5);
           case 1:
             if (!(option == "PDF")) {
-              _context5.n = 3;
+              _context4.n = 3;
               break;
             }
-            _context5.n = 2;
+            _context4.n = 2;
             return _saveSheetMusicToPDF();
           case 2:
-            return _context5.a(2, _context5.v);
+            return _context4.a(2, _context4.v);
           case 3:
             if (!(option == "BASS")) {
-              _context5.n = 5;
+              _context4.n = 5;
               break;
             }
-            _context5.n = 4;
+            _context4.n = 4;
             return _saveSheetMusicToBASS();
           case 4:
-            return _context5.a(2, _context5.v);
+            return _context4.a(2, _context4.v);
           case 5:
             problem = "please use SaveAs:PDF or SaveAs:BASS";
-            return _context5.a(2, problem);
+            return _context4.a(2, problem);
         }
-      }, _callee5);
+      }, _callee4);
     }));
     return _setSaveAs.apply(this, arguments);
   }

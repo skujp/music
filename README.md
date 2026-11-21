@@ -1,4 +1,4 @@
-bass.js (<!--version-->v14.1.0<!--/version-->)
+bass.js (<!--version-->v14.1.1<!--/version-->)
 =======
 
 A music sequencer library, written in javascript.
@@ -40,17 +40,7 @@ const bass = require('bass-sequencer');
 const { default: bass } = await import('bass-sequencer');
 ```
 
-**3. GitHub Release (Full)**
-
-Download the latest *.tgz* release from GitHub and install it:
-
-```shell
-npm install bass-sequencer-X.Y.Z.tgz 
-```
-
-Then follow Option 2.
-
-**4. The B3 Bass Boombox Shell (Full)**
+**3. The B3 Bass Boombox Shell (Full)**
 
 Download and extract the latest B3 shell release from GitHub, then run:
 
@@ -108,6 +98,19 @@ bass.playSequencer(sequencer);
 
    If sheet music has an end, returns undefined promise, otherwises it plays in a loop.  
 */
+```
+
+*Note*
+
+For *option 2*, install and initialize `node-web-audio-api` before using `playSequencer`...
+
+```shell
+npm install node-web-audio-api
+```
+
+```javascript
+const { AudioContext } = require('node-web-audio-api');
+bass.initAudio(AudioContext);
 ```
 
 To stop playing the sequencer...
@@ -200,7 +203,7 @@ Compatibility
 
 Works for ES6-compatible browsers.
 
-For legacy browsers, use bass.es5.js.
+For legacy browsers, use `bass.es5.js`.
 
 Development
 -----------
@@ -211,9 +214,9 @@ Frontend: option 1.
 
 Backend: option 2.
 
-Packaging: option 3.
+Package: option 3.
 
-Testing: option 4.
+Test 'em all!
 
 Contact
 -------

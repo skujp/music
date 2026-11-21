@@ -1,4 +1,7 @@
 const b3 = require('bass-sequencer');
+const { AudioContext } = require('node-web-audio-api');
+b3.initAudioContext(AudioContext);
+
 const readline = require("readline");
 const fs = require("fs");
 
@@ -45,7 +48,7 @@ function repl(i=0) {
 
   if (i == 0) {
     console.log(welcomeMsg);
-  } else if (i == 250) {
+  } else if (i == 2500) {
     i = 1;
   }
 
@@ -83,7 +86,7 @@ function repl(i=0) {
               b3.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
-              console.error(`[SYSTEM ERROR][1] ${e.message}`);
+              // console.error(`[SYSTEM ERROR][1] ${e.message}`);
             }
           });
         }
@@ -112,7 +115,7 @@ function repl(i=0) {
               b3.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
-              console.error(`[SYSTEM ERROR][2] ${e.message}`);
+              // console.error(`[SYSTEM ERROR][2] ${e.message}`);
             }
           });
         }
@@ -137,7 +140,7 @@ function repl(i=0) {
             b3.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
-            console.error(`[SYSTEM ERROR][3] ${e.message}`);
+            // console.error(`[SYSTEM ERROR][3] ${e.message}`);
           }
         });
       }
@@ -222,7 +225,7 @@ switch (command) {
             b3.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
-            console.error(`[SYSTEM ERROR][4] ${e.message}`);
+            // console.error(`[SYSTEM ERROR][4] ${e.message}`);
           }
         });
     } catch (e) {
@@ -257,7 +260,7 @@ switch (command) {
             b3.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
-            console.error(`[SYSTEM ERROR][5] ${e.message}`);
+            // console.error(`[SYSTEM ERROR][5] ${e.message}`);
           }
         });
       }

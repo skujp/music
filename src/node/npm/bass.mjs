@@ -1,32 +1,10 @@
 const boombox = {};
-const welcome = 
-`
-Welcome to bass-sequencer. In Node.js, playback support is not included
-by default. After creating a sequencer with buildSequencer, you'll need
-an audio backend to use playSequencer. You can implement your own backend
-or use an existing solution.
-
-By default, playSequencer uses the browser's AudioContext. For Node.js,
-install and use the node-web-audio-api package:
-
-npm install node-web-audio-api
-`
-async function getAudioContext() {
-  try {
-    const { AudioContext } = await import('node-web-audio-api');
-    return AudioContext;
-  } catch {
-    console.log(welcome);
-    return;
-  }
-}
-boombox.AudioContext = await getAudioContext();
 boombox.bass = {};
 function attach(libObject, functionObj) {
     Object.assign(libObject, functionObj);
 }
 attach(boombox.bass, {help, getErrorMsg, getChordNotes, buildSequencer});  
-attach(boombox.bass, {oops,
+attach(boombox.bass, {oops, initAudio,
                       playNote, playChord, playSequencer, stopSequencer, 
                       setTempo, setOctave, getOctave, getTempo, 
                       getSampleTestCase, getMaxSheetLength,
@@ -38,7 +16,7 @@ attach(boombox.bass, {oops,
                       aftermath, isPlaying
                      });    
 export default boombox.bass;
-const VERSION = "14.1.0";
+const VERSION = "14.1.1";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -1657,19 +1635,33 @@ function _createOopsContainer() {
     document.body.appendChild(container);
     return container;
 }
-async function _ensureAudioReady() {
-  if (!audioCtx || audioCtx.state === 'closed') {
-    audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
-    masterGain = audioCtx.createGain(); 
-    masterGain.gain.value = 0.22; 
-    masterGain.connect(audioCtx.destination);
-  }
-  if (audioCtx.state === 'suspended') {
+function initAudio(engine = null, driver = '') {
+    if (engine) {
+        boombox.AudioContext = engine;
+    }
+    if (isBoomboxOnWindow) {
+        audioCtx = new (boombox.AudioContext || boombox.webkitAudioContext)();
+        masterGain = audioCtx.createGain(); 
+        masterGain.gain.value = 0.22; 
+        masterGain.connect(audioCtx.destination);
+    } else {
+        if (typeof boombox.AudioContext !== 'undefined') {
+            if (driver === 'alsa') {
+                audioCtx = new boombox.AudioContext({ latencyHint: 'playback' });
+            } else {
+                audioCtx = new boombox.AudioContext();
+            }
+            masterGain = audioCtx.createGain(); 
+            masterGain.gain.value = 0.22; 
+            masterGain.connect(audioCtx.destination);
+        }
+    }
+}
+initAudio(null,'');
+async function playSequencer(sequencerObj) {
+  if (audioCtx.state !== 'running') {
     await audioCtx.resume();
   }
-}
-async function playSequencer(sequencerObj) {
-  await _ensureAudioReady();
   _sCount += 1;
   const myCount = _sCount;   
   _isPlaying = true;
