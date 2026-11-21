@@ -1,6 +1,6 @@
 const b3 = require('bass-sequencer');
 const { AudioContext } = require('node-web-audio-api');
-b3.initAudioContext(AudioContext);
+b3.initAudio(AudioContext);
 
 const readline = require("readline");
 const fs = require("fs");
