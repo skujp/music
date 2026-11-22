@@ -214,12 +214,12 @@ bass.ssup(AudioContext);
 
 /*	
 	bass.js:
-
+	
 		Returns a Promise for a custom audio object connected to bass
-
-    	Resolves with undefined on success
-
-    	Rejects with an error on failure
+		
+		Resolves with undefined on success
+		
+		Rejects with an error on failure
 
 	bass.es5.js:
 
@@ -228,8 +228,8 @@ bass.ssup(AudioContext);
 		Raise exception on failure
 
 	Both:
-
-    	On failure, use bass.ssup(AudioContext, true)
+	
+		On failure, use bass.ssup(AudioContext, true)
 */
 
 ```
