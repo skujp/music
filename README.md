@@ -203,7 +203,7 @@ Initialize `AudioContext`...
 const { AudioContext } = require('node-web-audio-api');
 
 /*
-	Import AudioContext object
+	Imports AudioContext object
 */
 ```
 
