@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "14.1.2";
+const VERSION = "14.1.3";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -12,7 +12,7 @@ const error = {
 var DEF_INST = "piano";
 var DEF_SUPPORT_INST = new Set([DEF_INST, "drum", "guitar", "flute"]);
 var instrument = DEF_INST; 
-var audioCtx = {}; 
+var audioCtx = null; 
 var masterGain = null; 
 const _oBass = boombox.bass;
 const TheBass = {};
@@ -28,7 +28,7 @@ function attach(libObject, functionObj) {
     Object.assign(libObject, functionObj);
 }
 attach(TheBass, {rename, help, getErrorMsg, getChordNotes, buildSequencer});  
-attach(TheBass, {oops, ssup, og,
+attach(TheBass, {oops, ssup,
                  playNote, playChord, playSequencer, stopSequencer, 
                  setTempo, setOctave, getOctave, getTempo, 
                  getSampleTestCase, getMaxSheetLength,
@@ -63,11 +63,7 @@ function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2}
     }, d2);
 }
 const isBoomboxOnWindow = typeof window !== 'undefined' && boombox === window; 
-var   isOG = false;
-function og(musician = false) {
-    isOG = musician;
-}
-async function ssup(audi = null) {
+async function ssup(audi = null, og = false) {
     if (audi) {
         boombox.AudioContext = audi;
     }
@@ -78,7 +74,7 @@ async function ssup(audi = null) {
         masterGain.connect(audioCtx.destination);
     } else {
         if (typeof boombox.AudioContext !== 'undefined') {
-            if (!isOG) {
+            if (!og) {
                 audioCtx = new boombox.AudioContext();
             } else {
                 audioCtx = new boombox.AudioContext({ latencyHint: 'playback' });
@@ -89,7 +85,7 @@ async function ssup(audi = null) {
         }
     }
 }
-ssup().then(()=>{}).catch((exp)=>{isBoomboxOnWindow && oops(`[Audio Init Error] ${exp}`, 'error')});
+ssup().then(()=>{}).catch((exp)=>{isBoomboxOnWindow && oops(`[Audio Setup Error] ${exp}`, 'error')});
 const DEF_BPM = 90; 
 const BPM = {                                                           
     _val: DEF_BPM,                                                           
@@ -1671,9 +1667,6 @@ function _createOopsContainer() {
     return container;
 }
 async function playSequencer(sequencerObj) {
-  if (audioCtx.state !== 'running') {
-    await audioCtx.resume();
-  }
   _sCount += 1;
   const myCount = _sCount;   
   _isPlaying = true;
@@ -1697,6 +1690,9 @@ async function playSequencer(sequencerObj) {
   let n = sequencer.length;
   let timeout = 0; 
   let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));     
+  if (audioCtx && audioCtx.state !== 'running') {
+    await audioCtx.resume();
+  }
   oops('🤟', 'info', {d0:1});
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC, myCount);

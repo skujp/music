@@ -33,7 +33,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 (function (boombox) {
-  var VERSION = "14.1.2";
+  var VERSION = "14.1.3";
   var error = {
     _msg: EMPTY,
     get msg() {
@@ -46,7 +46,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var DEF_INST = "piano";
   var DEF_SUPPORT_INST = new Set([DEF_INST, "drum", "guitar", "flute"]);
   var instrument = DEF_INST;
-  var audioCtx = {};
+  var audioCtx = null;
   var masterGain = null;
   var _oBass = boombox.bass;
   var TheBass = {};
@@ -71,7 +71,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   attach(TheBass, {
     oops: oops,
     ssup: ssup,
-    og: og,
     playNote: playNote,
     playChord: playChord,
     playSequencer: playSequencer,
@@ -133,13 +132,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     }, d2);
   }
   var isBoomboxOnWindow = typeof window !== 'undefined' && boombox === window;
-  var isOG = false;
-  function og() {
-    var musician = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    isOG = musician;
-  }
   function ssup() {
     var audi = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var og = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     if (audi) {
       boombox.AudioContext = audi;
     }
@@ -150,7 +145,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       masterGain.connect(audioCtx.destination);
     } else {
       if (typeof boombox.AudioContext !== 'undefined') {
-        if (!isOG) {
+        if (!og) {
           audioCtx = new boombox.AudioContext();
         } else {
           audioCtx = new boombox.AudioContext({
@@ -1446,13 +1441,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
-            if (!(audioCtx.state !== 'running')) {
-              _context3.n = 1;
-              break;
-            }
-            _context3.n = 1;
-            return audioCtx.resume();
-          case 1:
             _sCount += 1;
             myCount = _sCount;
             _isPlaying = true;
@@ -1486,6 +1474,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             n = sequencer.length;
             timeout = 0;
             tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));
+            if (!(audioCtx && audioCtx.state !== 'running')) {
+              _context3.n = 1;
+              break;
+            }
+            _context3.n = 1;
+            return audioCtx.resume();
+          case 1:
             oops('🤟', 'info', {
               d0: 1
             });
