@@ -1,9 +1,10 @@
 const bass = require('bass-sequencer');
 const { AudioContext } = require('node-web-audio-api');
-bass.ssup(AudioContext);
-
 const readline = require("readline");
 const fs = require("fs");
+const { readFileSync } = require('node:fs');
+const chardet = require('chardet');
+const iconv = require('iconv-lite');
 
 const shellName = 'b3';
 
@@ -18,9 +19,8 @@ const T_EDITOR = '.editor';
 const T_CTRL_C = 'Ctrl+C';
 const T_CTRL_D = 'Ctrl+D';
 
-
 const helpMsg =
-`
+` 
   ${T_READ}   Read the bass musical notation guide
   ${T_STOP}   Stop playback
   ${T_EXIT}   Exit the REPL
@@ -34,15 +34,68 @@ const helpMsg =
 `
 
 const welcomeMsg =
-`
+`  
   Welcome to ${shellName.toUpperCase()} Shell v${bass.getVersion()}, the Bass Boom Box for musicians.  
   Type "${T_HELP}" for more information.
 `
 
-let editorMode = false;
-let editorBuffer = [];
-let sigIntCount = 0;
-let history = [];
+const cliMsg = 
+` 
+  Usage:
+    ${shellName} [options] [file] [params]
+
+  Options:
+    -p --play "<sheetmusic>"
+    -r --read
+    -v --version
+    -h --help
+
+  Examples:
+    ${shellName} -p "| A B C D ||"
+    ${shellName} music.txt
+    ${shellName}
+
+  Note:
+    Use ./${shellName} or .\\${shellName}.exe if needed.
+    No arguments start the ${shellName.toUpperCase()} Shell.
+    Press ${T_CTRL_C} to stop.
+`
+
+var editorMode = false;
+var editorBuffer = [];
+var sigIntCount = 0;
+var history = [];
+
+function readAnyTextFileSync(filePath) {
+  const buffer = readFileSync(filePath);
+
+  if (buffer.length === 0) return '';
+
+  try {
+    const utf8Text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+    return utf8Text.replace(/^\uFEFF/, '');
+  } catch {
+    ;
+  }
+
+  const detected = chardet.detect(buffer);
+  const encoding = detected && iconv.encodingExists(detected) ? detected : 'win1252';
+  const text = iconv.decode(buffer, encoding);
+
+  return text.replace(/^\uFEFF/, '');
+}
+
+function readStdin() {
+    if (process.stdin.isTTY) {
+        return null;
+    }
+    try {
+        return fs.readFileSync(0, "utf-8").trim();
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
+}
 
 function repl(i=0) {
 
@@ -74,8 +127,6 @@ function repl(i=0) {
         return;
       } else if (line.startsWith(`${T_LOAD} `)) {
         const filename = line.slice(5).trim();
-        // const sheetMusic = fs.readFileSync(filename, "utf8").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
-        // const sheetMusic = await readAnyTextFile(filename);
         const sheetMusic = readAnyTextFileSync(filename);
         console.log(sheetMusic);
         const s = bass.buildSequencer(sheetMusic);
@@ -160,7 +211,6 @@ function repl(i=0) {
       editorMode = false;
       editorBuffer = [];
       console.log("\n// Canceled editor mode");
-      // rl.setPrompt("? ");
       rl.prompt();
       return;
     }
@@ -179,144 +229,72 @@ function repl(i=0) {
 
 }
 
-// command line interface 
+async function flyingShell() {
 
-// async way of reading file
+  await bass.ssup(AudioContext);
 
-// const chardet = require('chardet');
-// const iconv = require('iconv-lite');
-
-// export async function readAnyTextFile(filePath) {
-//   const buffer = await readFile(filePath);
-//   if (buffer.length === 0) return '';
-//   try {
-//     const utf8Text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
-//     return utf8Text.replace(/^\uFEFF/, '');
-//   } catch {
-//   }
-//   const detected = chardet.detect(buffer);
-//   const encoding = detected && iconv.encodingExists(detected) ? detected : 'win1252';
-//   const text = iconv.decode(buffer, encoding);
-//   return text.replace(/^\uFEFF/, '');
-// }
-
-
-// synchronous way
-const { readFileSync } = require('node:fs');
-const chardet = require('chardet');
-const iconv = require('iconv-lite');
-
-function readAnyTextFileSync(filePath) {
-  const buffer = readFileSync(filePath);
-
-  if (buffer.length === 0) return '';
-
-  // 1. Try strict UTF-8 first
-  try {
-    const utf8Text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
-    return utf8Text.replace(/^\uFEFF/, '');
-  } catch {
-    // Not valid UTF-8, move to auto-detection
-  }
-
-  // 2. Detect encoding and decode
-  const detected = chardet.detect(buffer);
-  const encoding = detected && iconv.encodingExists(detected) ? detected : 'win1252';
-  const text = iconv.decode(buffer, encoding);
-
-  return text.replace(/^\uFEFF/, '');
-}
-
-function readStdin() {
-    if (process.stdin.isTTY) {
-        return null;
-    }
-    try {
-        return fs.readFileSync(0, "utf-8").trim();
-    } catch (e) {
-        console.error(e);
-        return null;
-    }
-}
-const [, , command, ...args] = process.argv;
-const CLI_MESSAGE = 
-`Usage:
-  ${shellName} [options] [file] [params]
-
-Options:
-  -p --play "<sheetmusic>"
-  -r --read
-  -v --version
-  -h --help
-
-Examples:
-  ${shellName} -p "| A B C D ||"
-  ${shellName} music.txt
-  ${shellName}
-
-Note:
-  Use ./${shellName} or .\\${shellName}.exe if needed.
-  No arguments start the ${shellName.toUpperCase()} Shell.
-  Press ${T_CTRL_C} to stop.`
-switch (command) {
-  case "-p":
-  case "--play":
-    try {
-        const sheetMusic = (args?.length > 0 ? args.join(" ") : readStdin()) ?? "";        
+  switch (command) {
+    case "-p":
+    case "--play":
+      try {
+          const sheetMusic = (args?.length > 0 ? args.join(" ") : readStdin()) ?? "";        
+          const s = bass.buildSequencer(sheetMusic);
+          if (!s) {
+              console.log(bass.getErrorMsg());
+              process.exit(1);
+          }
+          bass.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
+            if (bass.isPlaying()) {
+              bass.stopSequencer();
+            }
+            if (e.message !== 'PLAY_IN_PROGRESS') {
+              console.error(`[SYSTEM ERROR][4] ${e.message}`);
+            }
+          });
+      } catch (e) {
+          console.error(e);
+          process.exit(2);
+      }
+      break;
+    case "-r":
+    case "--read":
+      console.log('',bass.help());
+      process.exit(0);
+    case "-h":
+    case "--help":
+      console.log(cliMsg);
+      process.exit(0);
+    case "-v":
+    case "--version":
+      console.log(`v${bass.getVersion()}`);
+      process.exit(0);
+    case undefined:
+      repl(0);
+      break;
+    default:
+      try {
+        const sheetMusic = readAnyTextFileSync(command);
         const s = bass.buildSequencer(sheetMusic);
         if (!s) {
-            console.log(bass.getErrorMsg());
-            process.exit(1);
+          console.log(bass.getErrorMsg());
+          process.exit(3);
+        } else {
+          bass.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
+            if (bass.isPlaying()) {
+              bass.stopSequencer();
+            }
+            if (e.message !== 'PLAY_IN_PROGRESS') {
+              console.error(`[SYSTEM ERROR][5] ${e.message}`);
+            }
+          });
         }
-        bass.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
-          if (bass.isPlaying()) {
-            bass.stopSequencer();
-          }
-          if (e.message !== 'PLAY_IN_PROGRESS') {
-            console.error(`[SYSTEM ERROR][4] ${e.message}`);
-          }
-        });
-    } catch (e) {
+      } catch (e) {
         console.error(e);
-        process.exit(2);
-    }
-    break;
-  case "-r":
-  case "--read":
-    console.log('',bass.help());
-    process.exit(0);
-  case "-h":
-  case "--help":
-    console.log(CLI_MESSAGE);
-    process.exit(0);
-  case "-v":
-  case "--version":
-    console.log(`v${bass.getVersion()}`);
-    process.exit(0);
-  case undefined:
-    repl(0);
-    break;
-  default:
-    try {
-      // const sheetMusic = fs.readFileSync(command, "utf8").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
-      // const sheetMusic = await readAnyTextFile(command);
-      const sheetMusic = readAnyTextFileSync(command);
-      const s = bass.buildSequencer(sheetMusic);
-      if (!s) {
-        console.log(bass.getErrorMsg());
-        process.exit(3);
-      } else {
-        bass.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
-          if (bass.isPlaying()) {
-            bass.stopSequencer();
-          }
-          if (e.message !== 'PLAY_IN_PROGRESS') {
-            console.error(`[SYSTEM ERROR][5] ${e.message}`);
-          }
-        });
-      }
-    } catch (e) {
-      console.error(e);
-      process.exit(4);
-    }    
+        process.exit(4);
+      }    
+  }
 }
+
+const [, , command, ...args] = process.argv;
+
+flyingShell();
