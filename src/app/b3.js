@@ -60,7 +60,7 @@ function repl(i=0) {
 
   rl.prompt();
 
-  rl.on("line", (line) => {
+  rl.on("line", async (line) => {
     if (editorMode) {
       editorBuffer.push(line);
       return;
@@ -74,7 +74,9 @@ function repl(i=0) {
         return;
       } else if (line.startsWith(`${T_LOAD} `)) {
         const filename = line.slice(5).trim();
-        const sheetMusic = fs.readFileSync(filename, "utf8");
+        // const sheetMusic = fs.readFileSync(filename, "utf8").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
+        // const sheetMusic = await readAnyTextFile(filename);
+        const sheetMusic = readAnyTextFileSync(filename);
         console.log(sheetMusic);
         const s = bass.buildSequencer(sheetMusic);
         if (!s) {
@@ -86,7 +88,7 @@ function repl(i=0) {
               bass.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
-              // console.error(`[SYSTEM ERROR][1] ${e.message}`);
+              console.error(`[SYSTEM ERROR][1] ${e.message}`);
             }
           });
         }
@@ -115,7 +117,7 @@ function repl(i=0) {
               bass.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
-              // console.error(`[SYSTEM ERROR][2] ${e.message}`);
+              console.error(`[SYSTEM ERROR][2] ${e.message}`);
             }
           });
         }
@@ -140,7 +142,7 @@ function repl(i=0) {
             bass.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
-            // console.error(`[SYSTEM ERROR][3] ${e.message}`);
+            console.error(`[SYSTEM ERROR][3] ${e.message}`);
           }
         });
       }
@@ -178,6 +180,52 @@ function repl(i=0) {
 }
 
 // command line interface 
+
+// async way of reading file
+
+// const chardet = require('chardet');
+// const iconv = require('iconv-lite');
+
+// export async function readAnyTextFile(filePath) {
+//   const buffer = await readFile(filePath);
+//   if (buffer.length === 0) return '';
+//   try {
+//     const utf8Text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+//     return utf8Text.replace(/^\uFEFF/, '');
+//   } catch {
+//   }
+//   const detected = chardet.detect(buffer);
+//   const encoding = detected && iconv.encodingExists(detected) ? detected : 'win1252';
+//   const text = iconv.decode(buffer, encoding);
+//   return text.replace(/^\uFEFF/, '');
+// }
+
+
+// synchronous way
+const { readFileSync } = require('node:fs');
+const chardet = require('chardet');
+const iconv = require('iconv-lite');
+
+function readAnyTextFileSync(filePath) {
+  const buffer = readFileSync(filePath);
+
+  if (buffer.length === 0) return '';
+
+  // 1. Try strict UTF-8 first
+  try {
+    const utf8Text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+    return utf8Text.replace(/^\uFEFF/, '');
+  } catch {
+    // Not valid UTF-8, move to auto-detection
+  }
+
+  // 2. Detect encoding and decode
+  const detected = chardet.detect(buffer);
+  const encoding = detected && iconv.encodingExists(detected) ? detected : 'win1252';
+  const text = iconv.decode(buffer, encoding);
+
+  return text.replace(/^\uFEFF/, '');
+}
 
 function readStdin() {
     if (process.stdin.isTTY) {
@@ -225,7 +273,7 @@ switch (command) {
             bass.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
-            // console.error(`[SYSTEM ERROR][4] ${e.message}`);
+            console.error(`[SYSTEM ERROR][4] ${e.message}`);
           }
         });
     } catch (e) {
@@ -236,36 +284,39 @@ switch (command) {
   case "-r":
   case "--read":
     console.log('',bass.help());
-    break;
+    process.exit(0);
   case "-h":
   case "--help":
     console.log(CLI_MESSAGE);
-    break;
+    process.exit(0);
   case "-v":
   case "--version":
     console.log(`v${bass.getVersion()}`);
-    break;
+    process.exit(0);
   case undefined:
     repl(0);
     break;
   default:
     try {
-      const sheetMusic = fs.readFileSync(command, "utf8");
+      // const sheetMusic = fs.readFileSync(command, "utf8").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
+      // const sheetMusic = await readAnyTextFile(command);
+      const sheetMusic = readAnyTextFileSync(command);
       const s = bass.buildSequencer(sheetMusic);
       if (!s) {
         console.log(bass.getErrorMsg());
+        process.exit(3);
       } else {
         bass.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
           if (bass.isPlaying()) {
             bass.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
-            // console.error(`[SYSTEM ERROR][5] ${e.message}`);
+            console.error(`[SYSTEM ERROR][5] ${e.message}`);
           }
         });
       }
     } catch (e) {
       console.error(e);
-      process.exit(3);
+      process.exit(4);
     }    
 }
