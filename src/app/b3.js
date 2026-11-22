@@ -55,7 +55,7 @@ const cliMsg =
     ${shellName} music.txt
     ${shellName}
 
-  Note:
+  Notes:
     Use ./${shellName} or .\\${shellName}.exe if needed.
     No arguments start the ${shellName.toUpperCase()} Shell.
     Press ${T_CTRL_C} to stop.
@@ -86,9 +86,8 @@ function readAnyTextFileSync(filePath) {
 }
 
 function readStdin() {
-    if (process.stdin.isTTY) {
-        return null;
-    }
+    if (process.stdin.isTTY) { return null; }
+
     try {
         return fs.readFileSync(0, "utf-8").trim();
     } catch (e) {
@@ -113,7 +112,7 @@ function repl(i=0) {
 
   rl.prompt();
 
-  rl.on("line", async (line) => {
+  rl.on("line", (line) => {
     if (editorMode) {
       editorBuffer.push(line);
       return;
@@ -139,7 +138,7 @@ function repl(i=0) {
               bass.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
-              console.error(`[SYSTEM ERROR][1] ${e.message}`);
+              console.error(`[1] ${e.message}`);
             }
           });
         }
@@ -168,7 +167,7 @@ function repl(i=0) {
               bass.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
-              console.error(`[SYSTEM ERROR][2] ${e.message}`);
+              console.error(`[2] ${e.message}`);
             }
           });
         }
@@ -193,7 +192,7 @@ function repl(i=0) {
             bass.stopSequencer();
           }
           if (e.message !== 'PLAY_IN_PROGRESS') {
-            console.error(`[SYSTEM ERROR][3] ${e.message}`);
+            console.error(`[3] ${e.message}`);
           }
         });
       }
@@ -226,17 +225,17 @@ function repl(i=0) {
       }
     }
   });
-
 }
 
-async function flyingShell() {
+async function BassBoomBox() {
 
-  await bass.ssup(AudioContext);
+  await bass.ssup(AudioContext, process.platform === 'linux'); 
 
   switch (command) {
     case "-p":
     case "--play":
       try {
+          process.on('SIGINT',() => {process.exit(-1)});
           const sheetMusic = (args?.length > 0 ? args.join(" ") : readStdin()) ?? "";        
           const s = bass.buildSequencer(sheetMusic);
           if (!s) {
@@ -248,7 +247,7 @@ async function flyingShell() {
               bass.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
-              console.error(`[SYSTEM ERROR][4] ${e.message}`);
+              console.error(`[4] ${e.message}`);
             }
           });
       } catch (e) {
@@ -273,6 +272,7 @@ async function flyingShell() {
       break;
     default:
       try {
+        process.on('SIGINT',() => {process.exit(-2)});
         const sheetMusic = readAnyTextFileSync(command);
         const s = bass.buildSequencer(sheetMusic);
         if (!s) {
@@ -284,7 +284,7 @@ async function flyingShell() {
               bass.stopSequencer();
             }
             if (e.message !== 'PLAY_IN_PROGRESS') {
-              console.error(`[SYSTEM ERROR][5] ${e.message}`);
+              console.error(`[5] ${e.message}`);
             }
           });
         }
@@ -297,4 +297,4 @@ async function flyingShell() {
 
 const [, , command, ...args] = process.argv;
 
-flyingShell();
+BassBoomBox().then(() => {}).catch((e) => {console.error(e); process.exit(5);});
