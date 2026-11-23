@@ -229,7 +229,7 @@ function repl(i=0) {
 
 async function BassBoomBox() {
 
-  await bass.ssup(AudioContext, process.platform === 'linux'); 
+  bass.ssup(AudioContext, process.platform === 'linux').then(()=>{}).catch((e)=>{console.error(`[Audio Setup Error] ${e}`)}); 
 
   switch (command) {
     case "-p":
