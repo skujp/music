@@ -65,6 +65,8 @@ var editorMode = false;
 var editorBuffer = [];
 var sigIntCount = 0;
 var history = [];
+const [, , command, ...args] = process.argv;
+
 
 function readAnyTextFileSync(filePath) {
   const buffer = readFileSync(filePath);
@@ -294,7 +296,5 @@ async function BassBoomBox() {
       }    
   }
 }
-
-const [, , command, ...args] = process.argv;
 
 BassBoomBox().then(() => {}).catch((e) => {console.error(e); process.exit(5);});
