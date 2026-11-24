@@ -1,5 +1,5 @@
 (function(boombox) {
-const VERSION = "14.1.3";
+const VERSION = "14.2.0";
 const error = {      
     _msg: EMPTY,
     get msg() {
@@ -36,7 +36,7 @@ attach(TheBass, {oops, ssup,
                  getInstrument, setInstrument,
                  getDuration, getGuitarNote, getVersion, hasComment,
                  getRoadmapStatus, getRoadmap, setRoadmap, 
-                 setClassical, getClassical,
+                 setClassical, getClassical, setEncore,
                  aftermath, isPlaying
                 });    
 function oops(message, type = 'info', {d0 = DELAY_0, d1 = DELAY_1, d2 = DELAY_2} = {}, show=true) {
@@ -156,8 +156,10 @@ var DEF_REP_NUM = 1;
 var DEF_TIME_SIGNATURE = '4/4';                                         
 var CLASSICAL = true;                                                   
 var MAX_VOLTA = 11;                                                     
-var MAX_TIMEOUT = 50;                                                   
-var MAX_REPEAT_MULTIPLIER = MAX_TIMEOUT*3;                              
+var MIN_ENCORE = 1;
+var MMM_ENCORE = 25;                                                    
+var MAX_ENCORE = 50;                                                    
+var MAX_REPEAT_MULTIPLIER = MAX_ENCORE*3;                               
 var OCTAVE_LENGTH = 12;                                                 
 var EMPTY = "";                                                         
 var [beats, beatType] = DEF_TIME_SIGNATURE.split('/').map(Number);      
@@ -166,9 +168,9 @@ var DEF_MSEC = DEF_DURATION * 1000;
 var MAX_SECTION_REP = 51;                                               
 var SMP_TESTCASE = "Title:Rhythmeus\nComposer:Chordius\nPerformer:⌨Qwerty🖱Clicky📲Tappy\n\n3/4 |: F7 / G | % | [1. G D G/D :| [2. Bmaj7 Aaug Fdim ||";      
 var BASSBOARD_DB_FIELD = new Set(["Contributor", "Title"]);              
-var CTRL_FUNCS = /^(Title|Key|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical)(:)(.+)$/;
+var CTRL_FUNCS = /^(Title|Key|Contributor|Artist|Composer|Arranger|Singer|Writer|Author|Musician|Song|Performer|Cover|Remix|Original|Genre|Tempo|Octave|SaveAs|Sustain|URL|Misc|Derivative|Roadmap|Classical|Encore)(:)(.+)$/;
 var SYNC_0 = new Set([setSustain.name, setRoadmap.name, setClassical.name, setKey.name]);  
-var SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name]); 
+var SYNC_1 = new Set([setTempo.name, setOctave.name, setInstrument.name, setEncore.name]); 
 var ASYNC_0  = new Set([setSaveAs.name]);
 var _isPlaying = false;
 var validArgs = new WeakSet();                                          
@@ -341,11 +343,13 @@ section for the clarity of the sheet music. For example, instead of having this
 
 10. Ending Section
 A sheet music must end with either a single Bar | or a double Bar || symbol. If
-it ends with a || symbol, the system will stop playing (no loop back).
-Otherwise, the system by default will keep looping back from the beginning even
-without the musician's intervention. Please note that, if it ends with :| or :||
-symbol, it will loop back according to sheet music direction before the default 
-system loop back begins. For the case of :|| symbol, it will stop eventually.
+it ends with a || symbol, the system will stop playing (no loop back). 
+Otherwise, the system by default will keep looping back from the beginning even 
+without the musician's intervention. The number of times for looping back can be 
+set with Encore:<number> at the beginning of the sheetmusic (section IV). Please
+note that, if the sheetmusic ends with :| or :|| symbol, it will loop back 
+according to the sheetmusic direction before the default system loop back begins.
+For the case of :|| symbol, it will stop eventually.
 
 11. Classical Rule
 By default, the BASS system implements several classical rule checks to make
@@ -567,6 +571,7 @@ Misc:<anything> for example, Misc:anything_separated_by_underscore
 Roadmap:OnRepeat to activate roadmap symbols only after the music is repeated
 Classical:Yes to activate classical rule check (default)
 Classical:No to deactivate classical rule check
+Encore:<number> for example, Encore:1 to repeat playing the music 1 more time
 
 Please note that, when setting Octave:<number> above, it is to set the BASS
 default system octave. It is not the same as the default octave used in other
@@ -1667,6 +1672,10 @@ function _createOopsContainer() {
     return container;
 }
 async function playSequencer(sequencerObj) {
+  if (!audioCtx) {
+    oops("🎤 Sound check... one-two!","warning");
+    return;
+  }
   _sCount += 1;
   const myCount = _sCount;   
   _isPlaying = true;
@@ -1688,9 +1697,8 @@ async function playSequencer(sequencerObj) {
   }
   let i = 0; 
   let n = sequencer.length;
-  let timeout = 0; 
-  let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));     
-  if (audioCtx && audioCtx.state !== 'running') {
+  let timeout = -1; 
+  if (audioCtx.state !== 'running') {
     await audioCtx.resume();
   }
   oops('🤟', 'info', {d0:1});
@@ -1702,12 +1710,13 @@ async function playSequencer(sequencerObj) {
   oops('☝️', 'info', {d0:1});
   playNote(FAKE,MIN_OCTAVE,STACKATO_LEGATO,MIN_VOL); 
   await _delay(DEF_MSEC, myCount);   
-  while (_isPlaying && myCount == _sCount && timeout < MAX_TIMEOUT) {
+  while (_isPlaying && myCount == _sCount && timeout < MMM_ENCORE) {
         timeout += 1;
         i = 0;
         for (let j = 0, len = voltaArr.length; j < len; j++) {             
             voltaArr[j][0] = false;
         }
+        let tempRepeatCount = JSON.parse(JSON.stringify(repeatCount));           
         let tempRoadmapVisited = JSON.parse(JSON.stringify(roadmapVisited));     
         let tempRank = [...roadmapRank];
         while (_isPlaying && myCount == _sCount && i < n) {
@@ -1761,10 +1770,11 @@ async function playSequencer(sequencerObj) {
             }
         }
         if (_isPlaying) {
-            if (end && (!(n-1 in repeatCount) || repeatCount[n-1] == 0)) {
+            if ((end && (!(n-1 in repeatCount) || repeatCount[n-1] == 0)) || (timeout === MMM_ENCORE)) {
                 oops('♪♫👏Whoohoo👏♫♪', 'info');
                 return;
             } else {
+                repeatCount = tempRepeatCount;
                 roadmapRank = tempRank; 
                 roadmapVisited = tempRoadmapVisited; 
                 oops('📣Encore More🧢', 'info');
@@ -1940,6 +1950,20 @@ function setClassical(d) {
         error.msg = problem;
         return problem;
     }
+}
+function setEncore(n) {
+    const convert = Number(n);
+    if (Number.isNaN(convert)) {
+        const problem = `[SET ENCORE ERROR] conversion failed: "${n}" is invalid`;
+        error.msg = problem;
+        return problem;
+    }
+    if (!Number.isInteger(convert) || convert < MIN_ENCORE || convert > MAX_ENCORE) {
+        const problem = `[ENCORE ERROR] encore is a whole number between ${MIN_ENCORE} and ${MAX_ENCORE}`;
+        error.msg = problem;
+        return problem;
+    }
+    MMM_ENCORE = convert;
 }
 function getClassical() {
     return CLASSICAL;

@@ -1,4 +1,4 @@
-bass.js (<!--version-->v14.1.3<!--/version-->)
+bass.js (<!--version-->v14.2.0<!--/version-->)
 =======
 
 A music sequencer library, written in javascript.
@@ -22,6 +22,8 @@ Download the latest minified ```bass.js``` from Github and include in your html.
 ```
 
 **2. NPM (Minimal)**
+
+*See Notes below for an experimental playSequencer()*
 
 Install...
 
