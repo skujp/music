@@ -40,11 +40,6 @@
     "contributor": "Contributor 8"
   },
   {
-    "title": "Song 9",
-    "content": "| D Dmaj D7 Dm ||",
-    "contributor": "Contributor 9"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nKey:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -121,5 +116,11 @@
     "contributor": "orc",
     "url": "https://youtube.com/shorts/oIdqHCDrmh8?feature=share",
     "content": "         Title:Pirates_Of_The_Carribean_Main_Theme\n  Cover:Yes Sustain:Yes Tempo:300 Contributor:orc Key:Dm 6/8\n\n|: (C) D5/D  / D5/D   / / / |    Bb5/Bb / Bb5/Bb / / / \n|      A5/A  / A5/A   / / / |     D5/D  /  D5/D  / / /  |  \n                          (Cx1)\n|      D5/D  /  D5/D  / / / |    Eb5/Eb / Eb5/Eb / / / \n|      G5/G  /  G5/G  / / / |     D5/D  /  D5/D  / / / \n|     Bb5/Bb / Bb5/Bb / / / |     D5/D  /  D5/D  / / / \n|      A5/A  /  A5/A  / / / | [1. A5/A  /  A5/A  / / / :|\n\n   [2. D5/D  /  D5/D  / / / |    Bb5/Bb / Bb5/Bb / / / \n|      D5/D  /  D5/D  / / / |    Bb5/Bb / Bb5/Bb / / / \n|      A5/A       /       G5/G       /     F5/F         /                \n\n|  (E) D5/D  /  D5/D  / / / |     D5/D  /  D5/D  / / / \n|      C5/C  /  C5/C  / / / | (A) C5/C  /  D5/D  / / /   \n|          (Ex1)            |     D5/D  /  D5/D  / / / \n\n|      D5/D  /  D5/D  / / / |     C5/C  /  C5/C  / / / \n|     Bb5/Bb / Bb5/Bb / / / |     A5/A  /  A5/A  / / / \n|     Bb5/Bb / Bb5/Bb / / / |     C5/C  /  C5/C  / / / \n|      D5/D  /  D5/D  / / / |     D5/D  /  D5/D  / / / \n\n|      D5/D  /  D5/D  / / / |     C5/C  /  C5/C  / / /\n|     Bb5/Bb / Bb5/Bb / / / |     A5/A  /  A5/A  / / / \n|  (Z) A5/A  /  A5/A  / / / |          (Zx3)                          \n\n||:    D5/D  /  D5/D  / / / |    Bb5/Bb / Bb5/Bb / / /\n|      F5/F  /  F5/F  / / / |     C5/C  /  C5/C  / / /\n|      G5/G  /  G5/G  / / / |     A5/A  /  A5/A  / / / \n|     Db5/Db / Db5/Db / / / |     D5/D  /  D5/D  / / / :|| "
+  },
+  {
+    "title": "Happy Birthday",
+    "contributor": "folk",
+    "url": "https://youtube.com/shorts/9f2ffw8xS8c?feature=share",
+    "content": "Title:Happy_Birthday\nTempo:150 Sustain:Yes Encore:5 Classical:No Key:C\nContributor:folk\n\n6/8 | C / C / C C     | [1. G / G / G G |   %  :|   \n      (happy_birthday)  (to_you) (happy_birthday)\n      (to_you) (happy)\n\n      [2. C / C / C C |   F / F / F F   |\n     (birthday) (dear)   (_____)  (happy)\n\n          G / G / G / |   \n    (birthday) (to_you)   C / / / / /   |"
   }
 ]
