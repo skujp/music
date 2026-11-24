@@ -231,48 +231,47 @@ function repl(i=0) {
 
 async function BassBoomBox() {
 
-  bass.ssup(AudioContext, process.platform === 'linux').then(()=>{}).catch((e)=>{console.error(`[Audio Setup Error] ${e}`)}); 
+  if (command === undefined) {
 
-  switch (command) {
-    case "-p":
-    case "--play":
+    bass.ssup(AudioContext, process.platform === 'linux').then(()=>{}).catch((e)=>{console.error(`[Audio Setup Error] ${e}`)}); 
+
+    repl(0);
+
+  } else {
+
+    await bass.ssup(AudioContext, process.platform === 'linux').then(()=>{}).catch((e)=>{console.error(`[Audio Setup Error] ${e}`)}); 
+
+    if (command === "-p" || command === "--play") {
       try {
-          process.on('SIGINT',() => {process.exit(-1)});
-          const sheetMusic = (args?.length > 0 ? args.join(" ") : readStdin()) ?? "";        
-          const s = bass.buildSequencer(sheetMusic);
-          if (!s) {
-              console.log(bass.getErrorMsg());
-              process.exit(1);
+        process.on('SIGINT',() => {process.exit(-1)});
+        const sheetMusic = (args?.length > 0 ? args.join(" ") : readStdin()) ?? "";        
+        const s = bass.buildSequencer(sheetMusic);
+        if (!s) {
+            console.log(bass.getErrorMsg());
+            process.exit(1);
+        }
+        bass.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
+          if (bass.isPlaying()) {
+            bass.stopSequencer();
           }
-          bass.playSequencer(s).then(() => {process.exit(0)}).catch((e)=> {
-            if (bass.isPlaying()) {
-              bass.stopSequencer();
-            }
-            if (e.message !== 'PLAY_IN_PROGRESS') {
-              console.error(`[4] ${e.message}`);
-            }
-          });
+          if (e.message !== 'PLAY_IN_PROGRESS') {
+            console.error(`[4] ${e.message}`);
+          }
+        });
       } catch (e) {
           console.error(e);
           process.exit(2);
       }
-      break;
-    case "-r":
-    case "--read":
+    } else if (command === "-r" || command === "--read") {
       console.log('',bass.help());
       process.exit(0);
-    case "-h":
-    case "--help":
+    } else if (command === "-h" || command === "--help") {
       console.log(cliMsg);
       process.exit(0);
-    case "-v":
-    case "--version":
+    } else if (command === "-v" || command === "--version") {
       console.log(`v${bass.getVersion()}`);
       process.exit(0);
-    case undefined:
-      repl(0);
-      break;
-    default:
+    } else {
       try {
         process.on('SIGINT',() => {process.exit(-2)});
         const sheetMusic = readAnyTextFileSync(command);
@@ -294,6 +293,7 @@ async function BassBoomBox() {
         console.error(e);
         process.exit(4);
       }    
+    }
   }
 }
 
