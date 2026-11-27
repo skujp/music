@@ -35,11 +35,6 @@
     "contributor": "Contributor 7"
   },
   {
-    "title": "Song 8",
-    "content": "| C Cdim C7 Cm ||",
-    "contributor": "Contributor 8"
-  },
-  {
     "title": "Let It Be",
     "contributor": "srock",
     "content": "Title:Let_It_Be\nContributor:srock\nTempo:70\nSustain:Yes\nCover:Yes\nKey:Am\n\n | C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  |\n   C C  G G | Am Am F F  | \n   C C  G G |  F Em C / :|\n\n  Am Am F F | G  G  C C  |\n   C C  G G | F  Em C /  |\n\n   C C  G G | Am Am F F  |\n   C C  G G |  F Em C /  ||\n\n   ",
@@ -122,5 +117,11 @@
     "contributor": "folk",
     "url": "https://youtube.com/shorts/9f2ffw8xS8c?feature=share",
     "content": "Title:Happy_Birthday\nTempo:150 Sustain:Yes Encore:5 Classical:No Key:C\nContributor:folk Cover:Yes \n     \n6/8 | C / C / C C | [1. G / G / G G |   %  :|   \n  (happy_birthday)  (to_you) (happy_birthday)\n  (to_you) (happy)\n\n  [2. C / C / C C |     F / F / F F |\n (birthday) (dear)   (_____)  (happy)\n\n      G / G / G / |   \n(birthday) (to_you)     C / / / / / |"
+  },
+  {
+    "title": "Give It To Me",
+    "contributor": "ehop",
+    "url": "https://youtube.com/shorts/9Im_ht96-Xs?feature=share",
+    "content": "Title:Give_It_To_Me\n\nTempo:112 Sustain:Yes Cover:Yes Contributor:ehop Key:AbHm\n\n8/16 | (40x) ab/ab / eb/eb ab/ab a/a eb/eb ab/ab / :||"
   }
 ]
