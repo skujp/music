@@ -263,6 +263,6 @@ Feel free to email me at: (listed in manual section V, demo website).
 
 Or X/Twitter: @bassthemusic101 (The Music 101).
 
-*🎉 B3 Shell is now available on Microsoft Store.*
+*B3 Shell is now available on Microsoft Store.*
 
 [![Download from the Microsoft Store](https://get.microsoft.com/images/en-us%20dark.svg)](https://get.microsoft.com/installer/download/9npgf3jj82xp?referrer=appbadge)
